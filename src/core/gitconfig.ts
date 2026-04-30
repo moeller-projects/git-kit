@@ -19,7 +19,7 @@ function isIncludeHeader(header: string): boolean {
 }
 
 function detectNewline(content: string): '\n' | '\r\n' {
-  return content.includes('\r\n') ? '\r\n' : '\n';
+  return content.match(/\r?\n/)?.[0] === '\r\n' ? '\r\n' : '\n';
 }
 
 function trimTrailingNewlines(content: string): string {

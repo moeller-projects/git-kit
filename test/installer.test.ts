@@ -79,7 +79,7 @@ describe('installer', () => {
       globalThis.Date = RealDate;
     }
 
-    const backupFiles = (await readdir(tempDirectory)).filter((fileName) => fileName.includes('.gitconfig.git-kit-backup-'));
+    const backupFiles = (await readdir(tempDirectory)).filter((filename) => filename.includes('.gitconfig.git-kit-backup-'));
 
     expect(backupFiles).toHaveLength(2);
     expect(new Set(backupFiles).size).toBe(2);
