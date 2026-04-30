@@ -48,14 +48,18 @@ function splitSections(content: string): GitConfigSection[] {
 
 function renderSections(sections: GitConfigSection[], hasTrailingNewline: boolean, newline: '\n' | '\r\n'): string {
   const renderedLines = sections.flatMap((section) => (section.header == null ? [...section.lines] : [section.header, ...section.lines]));
-  while (renderedLines[0] === '') {
-    renderedLines.shift();
-  }
-  while (renderedLines[renderedLines.length - 1] === '') {
-    renderedLines.pop();
+  let startIndex = 0;
+  let endIndex = renderedLines.length;
+
+  while (startIndex < endIndex && renderedLines[startIndex] === '') {
+    startIndex += 1;
   }
 
-  const rendered = renderedLines.join(newline);
+  while (endIndex > startIndex && renderedLines[endIndex - 1] === '') {
+    endIndex -= 1;
+  }
+
+  const rendered = renderedLines.slice(startIndex, endIndex).join(newline);
 
   if (rendered.length === 0) {
     return '';
