@@ -97,7 +97,7 @@ export function renderAliasesMarkdown(entries: Array<{ name: string; command: st
     groupedEntries.set(entry.category, categoryEntries);
   }
 
-  const sections = ['# git-kit aliases', '', 'Generated from `aliases/aliases.yml`.'];
+  const sections = ['# git-kit aliases', '', 'Generated from `aliases/`.'];
 
   for (const category of [...groupedEntries.keys()].sort((left, right) => left.localeCompare(right))) {
     sections.push('', `## ${category}`, '', '| Alias | Command | Description | Risk |', '| --- | --- | --- | --- |');

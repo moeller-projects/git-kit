@@ -1,0 +1,5 @@
+[alias]
+    df = diff
+    dc = diff --cached
+    dw = diff --word-diff
+    ds = diff --stat

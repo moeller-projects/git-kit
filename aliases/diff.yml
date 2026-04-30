@@ -1,0 +1,24 @@
+aliases:
+  df:
+    command: diff
+    description: Show unstaged changes
+    category: diff
+    risk: safe
+
+  dc:
+    command: diff --cached
+    description: Show staged changes
+    category: diff
+    risk: safe
+
+  dw:
+    command: diff --word-diff
+    description: Show word-level diff for unstaged changes
+    category: diff
+    risk: safe
+
+  ds:
+    command: diff --stat
+    description: Show a summary of changed files
+    category: diff
+    risk: safe

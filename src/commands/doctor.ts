@@ -2,7 +2,7 @@ import { access, mkdir, readFile } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
-import { loadAliasesFromFile } from '../core/aliases.js';
+import { loadAliasesFromDirectory } from '../core/aliases.js';
 import { hasIncludePath, renderAliasGitConfig } from '../core/gitconfig.js';
 import { resolveGlobalGitConfigPath } from '../core/gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, getDefaultGlobalGitConfigPath } from '../core/paths.js';
@@ -26,9 +26,9 @@ async function exists(filePath: string): Promise<boolean> {
 export async function doctorCommand(): Promise<DoctorCheck[]> {
   const managedConfigDirectory = getManagedConfigDirectory();
   const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory);
-  const aliasesFilePath = resolvePackagePath('aliases', 'aliases.yml');
+  const aliasesDirectory = resolvePackagePath('aliases');
   const generatedGitConfigPath = resolvePackagePath('generated', 'aliases.gitconfig');
-  const aliases = await loadAliasesFromFile(aliasesFilePath);
+  const aliases = await loadAliasesFromDirectory(aliasesDirectory);
   const issues = validateAliasEntries(aliases);
   const globalGitConfigPath = resolveGlobalGitConfigPath(undefined, managedAliasesPath);
   const checks: DoctorCheck[] = [];

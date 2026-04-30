@@ -1,0 +1,30 @@
+aliases:
+  cob:
+    command: checkout -b
+    description: Create and checkout a new branch
+    category: branch
+    risk: safe
+
+  br:
+    command: branch
+    description: List local branches
+    category: branch
+    risk: safe
+
+  brd:
+    command: branch -d
+    description: Delete a merged branch
+    category: branch
+    risk: medium
+
+  brdf:
+    command: branch -D
+    description: Force-delete a branch regardless of merge status
+    category: branch
+    risk: dangerous
+
+  recent:
+    command: "branch --sort=-committerdate --format=%(refname:short)"
+    description: List branches sorted by most recent commit
+    category: branch
+    risk: safe

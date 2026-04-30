@@ -1,24 +1,47 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { loadAliasesFromFile } from '../core/aliases.js';
+import { loadAliasesFromDirectory, loadAliasesFromFile } from '../core/aliases.js';
 import { renderAliasGitConfig, renderAliasesMarkdown } from '../core/gitconfig.js';
 import { resolvePackagePath } from '../core/paths.js';
 import { ensureAliasEntries } from '../core/validator.js';
 
-export async function generateCommand(): Promise<{ generatedGitConfigPath: string; generatedDocsPath: string }> {
-  const aliasesFilePath = resolvePackagePath('aliases', 'aliases.yml');
-  const generatedGitConfigPath = resolvePackagePath('generated', 'aliases.gitconfig');
-  const generatedDocsPath = resolvePackagePath('docs', 'aliases.md');
+export interface GenerateResult {
+  generatedPaths: string[];
+}
 
-  const aliases = ensureAliasEntries(await loadAliasesFromFile(aliasesFilePath));
+export async function generateCommand(): Promise<GenerateResult> {
+  const aliasesDirectory = resolvePackagePath('aliases');
+  const generatedDirectory = resolvePackagePath('generated');
+  const docsDirectory = resolvePackagePath('docs');
 
-  await mkdir(path.dirname(generatedGitConfigPath), { recursive: true });
-  await mkdir(path.dirname(generatedDocsPath), { recursive: true });
-  await writeFile(generatedGitConfigPath, renderAliasGitConfig(aliases), 'utf8');
-  await writeFile(generatedDocsPath, renderAliasesMarkdown(aliases), 'utf8');
+  await mkdir(generatedDirectory, { recursive: true });
+  await mkdir(docsDirectory, { recursive: true });
 
-  return {
-    generatedGitConfigPath,
-    generatedDocsPath,
-  };
+  const ymlFiles = (await readdir(aliasesDirectory))
+    .filter((f) => f.endsWith('.yml') || f.endsWith('.yaml'))
+    .sort();
+
+  const generatedPaths: string[] = [];
+
+  // Generate one .gitconfig per yml file
+  for (const file of ymlFiles) {
+    const profile = path.basename(file, path.extname(file));
+    const aliases = ensureAliasEntries(await loadAliasesFromFile(path.join(aliasesDirectory, file)));
+    const gitconfigPath = path.join(generatedDirectory, `${profile}.gitconfig`);
+    await writeFile(gitconfigPath, renderAliasGitConfig(aliases), 'utf8');
+    generatedPaths.push(gitconfigPath);
+  }
+
+  // Generate a combined aliases.gitconfig
+  const allAliases = ensureAliasEntries(await loadAliasesFromDirectory(aliasesDirectory));
+  const combinedGitConfigPath = path.join(generatedDirectory, 'aliases.gitconfig');
+  await writeFile(combinedGitConfigPath, renderAliasGitConfig(allAliases), 'utf8');
+  generatedPaths.push(combinedGitConfigPath);
+
+  // Generate combined docs
+  const docsPath = path.join(docsDirectory, 'aliases.md');
+  await writeFile(docsPath, renderAliasesMarkdown(allAliases), 'utf8');
+  generatedPaths.push(docsPath);
+
+  return { generatedPaths };
 }

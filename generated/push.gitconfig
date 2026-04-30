@@ -1,0 +1,4 @@
+[alias]
+    pf = push --force-with-lease
+    f = fetch --all --prune
+    pl = pull --rebase

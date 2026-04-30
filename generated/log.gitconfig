@@ -1,0 +1,7 @@
+[alias]
+    lg = log --oneline --graph --decorate --all
+    ll = log --oneline --decorate -20
+    lp = log --pretty=format:'%C(yellow)%h%Creset %ad %s %C(green)(%an)%Creset%C(auto)%d' --date=short
+    lf = log --oneline --stat
+    who = shortlog -sn --no-merges
+    today = log --since=midnight --oneline

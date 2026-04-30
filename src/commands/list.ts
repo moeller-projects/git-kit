@@ -1,9 +1,9 @@
-import { loadAliasesFromFile, groupAliasesByCategory } from '../core/aliases.js';
+import { loadAliasesFromDirectory, groupAliasesByCategory } from '../core/aliases.js';
 import { resolvePackagePath } from '../core/paths.js';
 import { ensureAliasEntries } from '../core/validator.js';
 
 export async function listCommand(): Promise<string> {
-  const aliases = ensureAliasEntries(await loadAliasesFromFile(resolvePackagePath('aliases', 'aliases.yml')));
+  const aliases = ensureAliasEntries(await loadAliasesFromDirectory(resolvePackagePath('aliases')));
   const groupedAliases = groupAliasesByCategory(aliases);
   const widestAlias = Math.max(0, ...aliases.map((alias) => alias.name.length));
   const lines: string[] = [];

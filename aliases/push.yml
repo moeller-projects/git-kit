@@ -1,0 +1,18 @@
+aliases:
+  pf:
+    command: push --force-with-lease
+    description: Safer force push using force-with-lease
+    category: remote
+    risk: medium
+
+  f:
+    command: fetch --all --prune
+    description: Fetch from all remotes and prune deleted branches
+    category: remote
+    risk: safe
+
+  pl:
+    command: pull --rebase
+    description: Pull with rebase instead of merge
+    category: remote
+    risk: safe

@@ -1,0 +1,24 @@
+aliases:
+  ss:
+    command: stash push -m
+    description: Stash changes with a descriptive message
+    category: stash
+    risk: safe
+
+  sp:
+    command: stash pop
+    description: Apply and remove the latest stash entry
+    category: stash
+    risk: safe
+
+  sl:
+    command: stash list
+    description: List all stash entries
+    category: stash
+    risk: safe
+
+  sd:
+    command: stash drop
+    description: Drop the latest stash entry
+    category: stash
+    risk: medium

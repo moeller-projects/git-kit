@@ -1,0 +1,6 @@
+[alias]
+    cob = checkout -b
+    br = branch
+    brd = branch -d
+    brdf = branch -D
+    recent = branch --sort=-committerdate --format=%(refname:short)

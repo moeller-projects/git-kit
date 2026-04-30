@@ -1,0 +1,30 @@
+aliases:
+  rb:
+    command: rebase
+    description: Rebase the current branch
+    category: rebase
+    risk: medium
+
+  rbi:
+    command: rebase -i
+    description: Start an interactive rebase
+    category: rebase
+    risk: medium
+
+  rbc:
+    command: rebase --continue
+    description: Continue an in-progress rebase
+    category: rebase
+    risk: medium
+
+  rba:
+    command: rebase --abort
+    description: Abort an in-progress rebase
+    category: rebase
+    risk: safe
+
+  cp:
+    command: cherry-pick
+    description: Apply a commit from another branch
+    category: rebase
+    risk: medium

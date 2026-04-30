@@ -1,0 +1,6 @@
+[alias]
+    s = status --short --branch
+    co = checkout
+    unstage = restore --staged
+    discard = restore
+    root = rev-parse --show-toplevel

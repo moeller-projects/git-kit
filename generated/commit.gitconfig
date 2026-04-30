@@ -1,0 +1,5 @@
+[alias]
+    cm = commit -m
+    amend = commit --amend --no-edit
+    fixup = commit --fixup
+    wip = !git add -A && git commit -m 'wip'

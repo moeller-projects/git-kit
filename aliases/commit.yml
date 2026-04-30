@@ -1,0 +1,24 @@
+aliases:
+  cm:
+    command: commit -m
+    description: Commit with message
+    category: commit
+    risk: safe
+
+  amend:
+    command: commit --amend --no-edit
+    description: Amend last commit without editing the message
+    category: commit
+    risk: medium
+
+  fixup:
+    command: commit --fixup
+    description: Create a fixup commit targeting a specific commit
+    category: commit
+    risk: medium
+
+  wip:
+    command: "!git add -A && git commit -m 'wip'"
+    description: Stage all changes and create a WIP commit
+    category: commit
+    risk: medium

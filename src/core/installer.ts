@@ -2,18 +2,20 @@ import { access, copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promis
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import type { AliasEntry } from './aliases.js';
-import { loadAliasesFromFile } from './aliases.js';
+import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
 import { addIncludePath, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath } from './paths.js';
 import { ensureAliasEntries } from './validator.js';
 
 export interface InstallOptions {
   aliasesFilePath?: string;
+  profile?: string;
   managedConfigDirectory?: string;
   globalGitConfigPath?: string;
 }
 
 export interface UninstallOptions {
+  profile?: string;
   managedConfigDirectory?: string;
   globalGitConfigPath?: string;
 }
@@ -90,13 +92,25 @@ async function readAliases(aliasesFilePath: string): Promise<AliasEntry[]> {
   return ensureAliasEntries(aliases);
 }
 
+async function readAliasesFromDirectory(dirPath: string): Promise<AliasEntry[]> {
+  const aliases = await loadAliasesFromDirectory(dirPath);
+  return ensureAliasEntries(aliases);
+}
+
 export async function installAliases(options: InstallOptions = {}): Promise<InstallResult> {
-  const aliasesFilePath = options.aliasesFilePath ?? resolvePackagePath('aliases', 'aliases.yml');
   const managedConfigDirectory = options.managedConfigDirectory ?? getManagedConfigDirectory();
   await ensureWritableDirectory(managedConfigDirectory);
 
-  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory);
-  const aliases = await readAliases(aliasesFilePath);
+  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory, options.profile);
+
+  let aliases: AliasEntry[];
+  if (options.aliasesFilePath != null) {
+    aliases = await readAliases(options.aliasesFilePath);
+  } else if (options.profile != null) {
+    aliases = await readAliases(resolvePackagePath('aliases', `${options.profile}.yml`));
+  } else {
+    aliases = await readAliasesFromDirectory(resolvePackagePath('aliases'));
+  }
   const generatedConfig = renderAliasGitConfig(aliases);
   await writeFile(managedAliasesPath, generatedConfig, 'utf8');
 
@@ -122,7 +136,7 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
 
 export async function uninstallAliases(options: UninstallOptions = {}): Promise<UninstallResult> {
   const managedConfigDirectory = options.managedConfigDirectory ?? getManagedConfigDirectory();
-  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory);
+  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory, options.profile);
   const globalGitConfigPath = options.globalGitConfigPath ?? resolveGlobalGitConfigPath(undefined, managedAliasesPath);
   const globalConfigExists = await fileExists(globalGitConfigPath);
 

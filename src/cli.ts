@@ -16,15 +16,17 @@ async function run(): Promise<void> {
   program
     .command('install')
     .description('Install the managed alias include.')
-    .action(async () => {
-      logger.info(await installCommand());
+    .option('--profile <name>', 'Install only a specific alias profile (e.g. log, stash)')
+    .action(async (options: { profile?: string }) => {
+      logger.info(await installCommand(options.profile));
     });
 
   program
     .command('uninstall')
     .description('Remove the managed alias include.')
-    .action(async () => {
-      logger.info(await uninstallCommand());
+    .option('--profile <name>', 'Uninstall only a specific alias profile')
+    .action(async (options: { profile?: string }) => {
+      logger.info(await uninstallCommand(options.profile));
     });
 
   program
@@ -50,8 +52,9 @@ async function run(): Promise<void> {
     .description('Generate managed alias config and docs.')
     .action(async () => {
       const result = await generateCommand();
-      logger.info(`generated ${result.generatedGitConfigPath}`);
-      logger.info(`generated ${result.generatedDocsPath}`);
+      for (const generatedPath of result.generatedPaths) {
+        logger.info(`generated ${generatedPath}`);
+      }
     });
 
   await program.parseAsync(process.argv);

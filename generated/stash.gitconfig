@@ -1,0 +1,5 @@
+[alias]
+    ss = stash push -m
+    sp = stash pop
+    sl = stash list
+    sd = stash drop
