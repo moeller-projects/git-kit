@@ -1,25 +1,25 @@
 aliases:
   lg:
-    command: log --oneline --graph --decorate --all
-    description: Graphical oneline log of all branches
+    command: log --graph --all --pretty=kit --date=short
+    description: Graphical log of all branches with author and date
     category: log
     risk: safe
 
   ll:
-    command: log --oneline --decorate -20
-    description: Last 20 commits as oneliners
+    command: log --pretty=kit --date=short -20
+    description: Last 20 commits with author and date
     category: log
     risk: safe
 
   lp:
-    command: "log --pretty=format:'%C(yellow)%h%Creset %ad %s %C(green)(%an)%Creset%C(auto)%d' --date=short"
-    description: Pretty oneline log with date and author
+    command: log --pretty=kit --date=short
+    description: Pretty log with date and author
     category: log
     risk: safe
 
   lf:
-    command: log --oneline --stat
-    description: Oneline log with changed file stats
+    command: log --pretty=kit --date=short --stat
+    description: Log with changed file stats and commit details
     category: log
     risk: safe
 
@@ -30,7 +30,7 @@ aliases:
     risk: safe
 
   today:
-    command: log --since=midnight --oneline
+    command: log --since=midnight --pretty=kit --date=short
     description: Show commits made since midnight
     category: log
     risk: safe

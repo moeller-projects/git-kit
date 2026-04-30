@@ -1,14 +1,16 @@
 import { describe, expect, test } from 'bun:test';
-import { addIncludePath, removeIncludePath, renderAliasGitConfig } from '../src/core/gitconfig.js';
+import { addIncludePath, addIncludePathBefore, removeIncludePath, renderAliasGitConfig, KIT_PRETTY_FORMAT_NAME, KIT_PRETTY_FORMAT } from '../src/core/gitconfig.js';
 
 describe('gitconfig helpers', () => {
-  test('renders alias gitconfig', () => {
+  test('renders alias gitconfig with pretty section', () => {
     expect(
       renderAliasGitConfig([
         { name: 's', command: 'status --short --branch' },
         { name: 'co', command: 'checkout' },
       ]),
-    ).toBe(`[alias]\n    s = status --short --branch\n    co = checkout\n`);
+    ).toBe(
+      `[pretty]\n    ${KIT_PRETTY_FORMAT_NAME} = ${KIT_PRETTY_FORMAT}\n\n[alias]\n    s = status --short --branch\n    co = checkout\n`,
+    );
   });
 
   test('inserts include block once', () => {
@@ -47,5 +49,42 @@ describe('gitconfig helpers', () => {
 
     expect(result.changed).toBe(true);
     expect(result.content).toBe('[user]\r\n    name = Example\r\n');
+  });
+
+  describe('addIncludePathBefore', () => {
+    test('inserts new include before the target include', () => {
+      const managedPath = '/config/git-kit/aliases.gitconfig';
+      const extraPath = '/home/user/.gitalias';
+      const content = `[user]\n    name = Example\n\n[include]\n    path = ${managedPath}\n`;
+
+      const result = addIncludePathBefore(content, extraPath, managedPath);
+
+      expect(result.changed).toBe(true);
+      const extraIndex = result.content.indexOf(extraPath);
+      const managedIndex = result.content.indexOf(managedPath);
+      expect(extraIndex).toBeGreaterThan(-1);
+      expect(managedIndex).toBeGreaterThan(extraIndex);
+    });
+
+    test('falls back to appending when target include is not present', () => {
+      const managedPath = '/config/git-kit/aliases.gitconfig';
+      const extraPath = '/home/user/.gitalias';
+      const content = '[user]\n    name = Example\n';
+
+      const result = addIncludePathBefore(content, extraPath, managedPath);
+
+      expect(result.changed).toBe(true);
+      expect(result.content).toContain(extraPath);
+    });
+
+    test('is idempotent when the insert path is already present', () => {
+      const managedPath = '/config/git-kit/aliases.gitconfig';
+      const extraPath = '/home/user/.gitalias';
+      const content = `[include]\n    path = ${extraPath}\n\n[include]\n    path = ${managedPath}\n`;
+
+      const result = addIncludePathBefore(content, extraPath, managedPath);
+
+      expect(result.changed).toBe(false);
+    });
   });
 });

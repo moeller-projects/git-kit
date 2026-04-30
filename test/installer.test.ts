@@ -84,4 +84,47 @@ describe('installer', () => {
     expect(backupFiles).toHaveLength(2);
     expect(new Set(backupFiles).size).toBe(2);
   });
+
+  test('extra config include is added before the managed include', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-extra-'));
+    const aliasesFilePath = path.join(tempDirectory, 'aliases.yml');
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+    const extraGitConfigPath = path.join(tempDirectory, 'custom.gitconfig');
+
+    await writeFile(aliasesFilePath, fixtureAliases, 'utf8');
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+    await writeFile(extraGitConfigPath, '[alias]\n    hello = !echo hello\n', 'utf8');
+
+    await installAliases({ aliasesFilePath, managedConfigDirectory, globalGitConfigPath, extraGitConfigPath });
+
+    const globalConfigContent = await readFile(globalGitConfigPath, 'utf8');
+
+    expect(globalConfigContent).toContain(extraGitConfigPath);
+    expect(globalConfigContent).toContain('aliases.gitconfig');
+
+    // Extra config must appear before managed config so git-kit aliases win
+    const extraIndex = globalConfigContent.indexOf(extraGitConfigPath);
+    const managedIndex = globalConfigContent.indexOf('aliases.gitconfig');
+    expect(extraIndex).toBeLessThan(managedIndex);
+  });
+
+  test('re-installing with extra config is idempotent', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-extra-idem-'));
+    const aliasesFilePath = path.join(tempDirectory, 'aliases.yml');
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+    const extraGitConfigPath = path.join(tempDirectory, 'custom.gitconfig');
+
+    await writeFile(aliasesFilePath, fixtureAliases, 'utf8');
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+    await writeFile(extraGitConfigPath, '[alias]\n    hello = !echo hello\n', 'utf8');
+
+    await installAliases({ aliasesFilePath, managedConfigDirectory, globalGitConfigPath, extraGitConfigPath });
+    await installAliases({ aliasesFilePath, managedConfigDirectory, globalGitConfigPath, extraGitConfigPath });
+
+    const globalConfigContent = await readFile(globalGitConfigPath, 'utf8');
+    const escapedPath = extraGitConfigPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    expect(globalConfigContent.match(new RegExp(escapedPath, 'g'))?.length).toBe(1);
+  });
 });

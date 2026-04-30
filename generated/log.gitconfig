@@ -1,7 +1,10 @@
+[pretty]
+    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
+
 [alias]
-    lg = log --oneline --graph --decorate --all
-    ll = log --oneline --decorate -20
-    lp = log --pretty=format:'%C(yellow)%h%Creset %ad %s %C(green)(%an)%Creset%C(auto)%d' --date=short
-    lf = log --oneline --stat
+    lg = log --graph --all --pretty=kit --date=short
+    ll = log --pretty=kit --date=short -20
+    lp = log --pretty=kit --date=short
+    lf = log --pretty=kit --date=short --stat
     who = shortlog -sn --no-merges
-    today = log --since=midnight --oneline
+    today = log --since=midnight --pretty=kit --date=short

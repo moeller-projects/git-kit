@@ -3,7 +3,7 @@ import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import type { AliasEntry } from './aliases.js';
 import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
-import { addIncludePath, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
+import { addIncludePath, addIncludePathBefore, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, resolveProfilePath } from './paths.js';
 import { loadProfile, loadAliasesForProfile } from './profile.js';
 import { ensureAliasEntries } from './validator.js';
@@ -13,6 +13,7 @@ export interface InstallOptions {
   profile?: string;
   managedConfigDirectory?: string;
   globalGitConfigPath?: string;
+  extraGitConfigPath?: string;
 }
 
 export interface UninstallOptions {
@@ -123,20 +124,36 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
 
   const globalGitConfigPath = options.globalGitConfigPath ?? resolveGlobalGitConfigPath(undefined, managedAliasesPath);
   const globalConfigExists = await fileExists(globalGitConfigPath);
-  const existingGlobalConfig = globalConfigExists ? await readFile(globalGitConfigPath, 'utf8') : '';
-  const updatedGlobalConfig = addIncludePath(existingGlobalConfig, managedAliasesPath);
+  let globalContent = globalConfigExists ? await readFile(globalGitConfigPath, 'utf8') : '';
+  let anyChanged = false;
+
+  // If an extra config path is provided, include it BEFORE the managed aliases so
+  // git-kit aliases take precedence (later includes win in git config).
+  if (options.extraGitConfigPath != null) {
+    const extraResult = addIncludePathBefore(globalContent, options.extraGitConfigPath, managedAliasesPath);
+    if (extraResult.changed) {
+      globalContent = extraResult.content;
+      anyChanged = true;
+    }
+  }
+
+  const managedResult = addIncludePath(globalContent, managedAliasesPath);
+  if (managedResult.changed) {
+    globalContent = managedResult.content;
+    anyChanged = true;
+  }
 
   let backupPath: string | undefined;
-  if (updatedGlobalConfig.changed) {
+  if (anyChanged) {
     await mkdir(path.dirname(globalGitConfigPath), { recursive: true });
     backupPath = await backupIfNeeded(globalGitConfigPath);
-    await writeFile(globalGitConfigPath, updatedGlobalConfig.content, 'utf8');
+    await writeFile(globalGitConfigPath, globalContent, 'utf8');
   }
 
   return {
     managedAliasesPath,
     globalGitConfigPath,
-    includeAdded: updatedGlobalConfig.changed,
+    includeAdded: managedResult.changed,
     backupPath,
   };
 }

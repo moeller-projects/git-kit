@@ -44,12 +44,12 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `lg` | `log --oneline --graph --decorate --all` | Graphical oneline log of all branches | safe |
-| `ll` | `log --oneline --decorate -20` | Last 20 commits as oneliners | safe |
-| `lp` | `log --pretty=format:'%C(yellow)%h%Creset %ad %s %C(green)(%an)%Creset%C(auto)%d' --date=short` | Pretty oneline log with date and author | safe |
-| `lf` | `log --oneline --stat` | Oneline log with changed file stats | safe |
+| `lg` | `log --graph --all --pretty=kit --date=short` | Graphical log of all branches with author and date | safe |
+| `ll` | `log --pretty=kit --date=short -20` | Last 20 commits with author and date | safe |
+| `lp` | `log --pretty=kit --date=short` | Pretty log with date and author | safe |
+| `lf` | `log --pretty=kit --date=short --stat` | Log with changed file stats and commit details | safe |
 | `who` | `shortlog -sn --no-merges` | Show commit count per contributor | safe |
-| `today` | `log --since=midnight --oneline` | Show commits made since midnight | safe |
+| `today` | `log --since=midnight --pretty=kit --date=short` | Show commits made since midnight | safe |
 
 ## rebase
 
