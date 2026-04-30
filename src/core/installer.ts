@@ -5,7 +5,7 @@ import type { AliasEntry } from './aliases.js';
 import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
 import { addIncludePath, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, resolveProfilePath } from './paths.js';
-import { loadProfile, gitconfigNameToYml } from './profile.js';
+import { loadProfile, loadAliasesForProfile } from './profile.js';
 import { ensureAliasEntries } from './validator.js';
 
 export interface InstallOptions {
@@ -100,15 +100,8 @@ async function readAliasesFromDirectory(dirPath: string): Promise<AliasEntry[]> 
 
 async function readAliasesForProfile(profileName: string): Promise<AliasEntry[]> {
   const profileDef = await loadProfile(resolveProfilePath(profileName));
-  const allEntries: AliasEntry[] = [];
-
-  for (const include of profileDef.includes) {
-    const ymlName = gitconfigNameToYml(include);
-    const entries = await loadAliasesFromFile(resolvePackagePath('aliases', ymlName));
-    allEntries.push(...entries);
-  }
-
-  return ensureAliasEntries(allEntries);
+  const entries = await loadAliasesForProfile(profileDef, resolvePackagePath('aliases'));
+  return ensureAliasEntries(entries);
 }
 
 export async function installAliases(options: InstallOptions = {}): Promise<InstallResult> {

@@ -25,9 +25,9 @@ export async function generateCommand(): Promise<GenerateResult> {
 
   // Generate one .gitconfig per yml file
   for (const file of ymlFiles) {
-    const profile = path.basename(file, path.extname(file));
+    const basename = path.basename(file, path.extname(file));
     const aliases = ensureAliasEntries(await loadAliasesFromFile(path.join(aliasesDirectory, file)));
-    const gitconfigPath = path.join(generatedDirectory, `${profile}.gitconfig`);
+    const gitconfigPath = path.join(generatedDirectory, `${basename}.gitconfig`);
     await writeFile(gitconfigPath, renderAliasGitConfig(aliases), 'utf8');
     generatedPaths.push(gitconfigPath);
   }

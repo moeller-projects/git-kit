@@ -1,5 +1,7 @@
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import type { AliasEntry } from './aliases.js';
+import { loadAliasesFromFile } from './aliases.js';
 
 export interface ProfileDefinition {
   name: string;
@@ -70,4 +72,16 @@ export async function loadAllProfiles(profilesDirectory: string): Promise<Profil
 
 export function gitconfigNameToYml(gitconfigName: string): string {
   return `${path.basename(gitconfigName, '.gitconfig')}.yml`;
+}
+
+export async function loadAliasesForProfile(profileDef: ProfileDefinition, aliasesDirectory: string): Promise<AliasEntry[]> {
+  const allEntries: AliasEntry[] = [];
+
+  for (const include of profileDef.includes) {
+    const ymlName = gitconfigNameToYml(include);
+    const entries = await loadAliasesFromFile(path.join(aliasesDirectory, ymlName));
+    allEntries.push(...entries);
+  }
+
+  return allEntries;
 }

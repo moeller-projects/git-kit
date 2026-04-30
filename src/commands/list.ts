@@ -1,5 +1,5 @@
-import { loadAliasesFromDirectory, loadAliasesFromFile, groupAliasesByCategory } from '../core/aliases.js';
-import { loadProfile, gitconfigNameToYml } from '../core/profile.js';
+import { loadAliasesFromDirectory, groupAliasesByCategory } from '../core/aliases.js';
+import { loadProfile, loadAliasesForProfile } from '../core/profile.js';
 import { resolvePackagePath, resolveProfilePath } from '../core/paths.js';
 import { ensureAliasEntries } from '../core/validator.js';
 import type { AliasEntry } from '../core/aliases.js';
@@ -9,13 +9,7 @@ export async function listCommand(profile?: string): Promise<string> {
 
   if (profile != null) {
     const profileDef = await loadProfile(resolveProfilePath(profile));
-    const allEntries: AliasEntry[] = [];
-    for (const include of profileDef.includes) {
-      const ymlName = gitconfigNameToYml(include);
-      const entries = await loadAliasesFromFile(resolvePackagePath('aliases', ymlName));
-      allEntries.push(...entries);
-    }
-    aliases = ensureAliasEntries(allEntries);
+    aliases = ensureAliasEntries(await loadAliasesForProfile(profileDef, resolvePackagePath('aliases')));
   } else {
     aliases = ensureAliasEntries(await loadAliasesFromDirectory(resolvePackagePath('aliases')));
   }

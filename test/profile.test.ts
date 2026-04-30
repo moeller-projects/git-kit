@@ -99,7 +99,7 @@ describe('gitconfigNameToYml', () => {
     expect(gitconfigNameToYml('core.gitconfig')).toBe('core.yml');
   });
 
-  test('strips directory prefix if present', () => {
+  test('converts gitconfig extension to yml', () => {
     expect(gitconfigNameToYml('log.gitconfig')).toBe('log.yml');
   });
 });
