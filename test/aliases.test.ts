@@ -27,7 +27,7 @@ describe('alias parsing', () => {
   });
 
   test('validates shell alias risk', () => {
-    const aliases = parseAliasesYaml(`aliases:\n  sheller:\n    command: !git status\n    description: Run shell command\n    category: core\n    risk: safe\n`);
+    const aliases = parseAliasesYaml(`aliases:\n  sheller:\n    command: '!git status'\n    description: Run shell command\n    category: core\n    risk: safe\n`);
     const issues = validateAliasEntries(aliases);
 
     expect(issues.some((issue) => issue.code === 'unsafe-shell-risk')).toBe(true);

@@ -1,0 +1,7 @@
+[alias]
+    s = status --short --branch
+    co = checkout
+    cob = checkout -b
+    cm = commit -m
+    amend = commit --amend --no-edit
+    pf = push --force-with-lease

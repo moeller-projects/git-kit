@@ -121,17 +121,19 @@ export function removeIncludePath(content: string, includePath: string, platform
         return section;
       }
 
+      let removedFromSection = 0;
       const filteredLines = section.lines.filter((line) => {
         const configuredPath = parsePathLine(line);
         const shouldRemove = configuredPath != null && normalizeConfigValue(configuredPath, platform) === expectedPath;
         if (shouldRemove) {
           removedCount += 1;
+          removedFromSection += 1;
         }
         return !shouldRemove;
       });
 
       const hasOnlyWhitespace = filteredLines.every((line) => line.trim().length === 0);
-      if (removedCount > 0 && hasOnlyWhitespace) {
+      if (removedFromSection > 0 && hasOnlyWhitespace) {
         return null;
       }
 
