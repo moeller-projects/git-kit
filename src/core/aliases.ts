@@ -97,13 +97,17 @@ export function validateAliases(entries: AliasEntry[]): AliasValidationIssue[] {
         code: 'empty-alias',
         message: 'Alias key must not be empty.',
       });
-    } else if (seenAliases.has(entry.name)) {
-      issues.push({
-        code: 'duplicate-alias',
-        message: `Duplicate alias detected: ${entry.name}`,
-      });
     } else {
-      seenAliases.add(entry.name);
+      const normalizedAliasName = entry.name.toLowerCase();
+
+      if (seenAliases.has(normalizedAliasName)) {
+        issues.push({
+          code: 'duplicate-alias',
+          message: `Duplicate alias detected: ${entry.name}`,
+        });
+      } else {
+        seenAliases.add(normalizedAliasName);
+      }
     }
 
     if (entry.command.length === 0) {
