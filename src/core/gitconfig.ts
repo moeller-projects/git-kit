@@ -2,6 +2,8 @@ import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { getDefaultGlobalGitConfigPath, getHomeDirectory } from './paths.js';
 
+type GitConfigSection = { header: string | null; lines: string[] };
+
 function normalizeConfigValue(value: string, platform: NodeJS.Platform): string {
   const normalized = value.trim().replace(/^['"]|['"]$/g, '').replace(/\\/g, '/');
   return platform === 'win32' ? normalized.toLowerCase() : normalized;
@@ -16,10 +18,18 @@ function isIncludeHeader(header: string): boolean {
   return /^\s*\[include\]\s*$/i.test(header);
 }
 
-function splitSections(content: string): Array<{ header: string | null; lines: string[] }> {
+function detectNewline(content: string): '\n' | '\r\n' {
+  return content.includes('\r\n') ? '\r\n' : '\n';
+}
+
+function trimTrailingNewlines(content: string): string {
+  return content.replace(/(?:\r?\n)+$/, '');
+}
+
+function splitSections(content: string): GitConfigSection[] {
   const normalizedContent = content.replace(/\r\n/g, '\n');
   const lines = normalizedContent.split('\n');
-  const sections: Array<{ header: string | null; lines: string[] }> = [];
+  const sections: GitConfigSection[] = [];
   let currentSection = { header: null as string | null, lines: [] as string[] };
 
   for (const line of lines) {
@@ -36,17 +46,22 @@ function splitSections(content: string): Array<{ header: string | null; lines: s
   return sections;
 }
 
-function renderSections(sections: Array<{ header: string | null; lines: string[] }>, hasTrailingNewline: boolean): string {
-  const rendered = sections
-    .flatMap((section) => (section.header == null ? [...section.lines] : [section.header, ...section.lines]))
-    .join('\n')
-    .replace(/^\n+/, '');
+function renderSections(sections: GitConfigSection[], hasTrailingNewline: boolean, newline: '\n' | '\r\n'): string {
+  const renderedLines = sections.flatMap((section) => (section.header == null ? [...section.lines] : [section.header, ...section.lines]));
+  while (renderedLines[0] === '') {
+    renderedLines.shift();
+  }
+  while (renderedLines[renderedLines.length - 1] === '') {
+    renderedLines.pop();
+  }
+
+  const rendered = renderedLines.join(newline);
 
   if (rendered.length === 0) {
     return '';
   }
 
-  return hasTrailingNewline ? `${rendered}\n` : rendered;
+  return hasTrailingNewline ? `${rendered}${newline}` : rendered;
 }
 
 export function renderAliasGitConfig(entries: Array<{ name: string; command: string }>): string {
@@ -99,20 +114,22 @@ export function addIncludePath(content: string, includePath: string, platform: N
     return { changed: false, content };
   }
 
+  const newline = detectNewline(content);
   const normalizedPath = includePath.replace(/\\/g, '/');
-  const includeBlock = `[include]\n    path = ${normalizedPath}\n`;
-  const trimmed = content.replace(/\s*$/, '');
+  const includeBlock = `[include]${newline}    path = ${normalizedPath}${newline}`;
+  const trimmed = trimTrailingNewlines(content);
 
   if (trimmed.length === 0) {
     return { changed: true, content: includeBlock };
   }
 
-  return { changed: true, content: `${trimmed}\n\n${includeBlock}` };
+  return { changed: true, content: `${trimmed}${newline}${newline}${includeBlock}` };
 }
 
 export function removeIncludePath(content: string, includePath: string, platform: NodeJS.Platform = process.platform): { changed: boolean; content: string; removedCount: number } {
   const expectedPath = normalizeConfigValue(includePath, platform);
-  const hasTrailingNewline = content.endsWith('\n');
+  const newline = detectNewline(content);
+  const hasTrailingNewline = content.endsWith('\r\n') || content.endsWith('\n');
   let removedCount = 0;
 
   const sections = splitSections(content)
@@ -142,11 +159,11 @@ export function removeIncludePath(content: string, includePath: string, platform
         lines: filteredLines,
       };
     })
-    .filter((section): section is { header: string | null; lines: string[] } => section != null);
+    .filter((section): section is GitConfigSection => section != null);
 
   return {
     changed: removedCount > 0,
-    content: renderSections(sections, hasTrailingNewline),
+    content: renderSections(sections, hasTrailingNewline, newline),
     removedCount,
   };
 }

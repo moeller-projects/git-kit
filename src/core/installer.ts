@@ -13,6 +13,11 @@ export interface InstallOptions {
   globalGitConfigPath?: string;
 }
 
+export interface UninstallOptions {
+  managedConfigDirectory?: string;
+  globalGitConfigPath?: string;
+}
+
 export interface InstallResult {
   managedAliasesPath: string;
   globalGitConfigPath: string;
@@ -35,7 +40,25 @@ function createBackupTimestamp(date: Date = new Date()): string {
   const hour = String(date.getHours()).padStart(2, '0');
   const minute = String(date.getMinutes()).padStart(2, '0');
   const second = String(date.getSeconds()).padStart(2, '0');
-  return `${year}${month}${day}${hour}${minute}${second}`;
+  const millisecond = String(date.getMilliseconds()).padStart(3, '0');
+  return `${year}${month}${day}${hour}${minute}${second}${millisecond}`;
+}
+
+async function resolveBackupPath(filePath: string): Promise<string> {
+  const baseBackupPath = `${filePath}.git-kit-backup-${createBackupTimestamp()}`;
+
+  if (!(await fileExists(baseBackupPath))) {
+    return baseBackupPath;
+  }
+
+  let suffix = 1;
+  let backupPath = `${baseBackupPath}-${suffix}`;
+  while (await fileExists(backupPath)) {
+    suffix += 1;
+    backupPath = `${baseBackupPath}-${suffix}`;
+  }
+
+  return backupPath;
 }
 
 async function fileExists(filePath: string): Promise<boolean> {
@@ -57,7 +80,7 @@ async function backupIfNeeded(filePath: string): Promise<string | undefined> {
     return undefined;
   }
 
-  const backupPath = `${filePath}.git-kit-backup-${createBackupTimestamp()}`;
+  const backupPath = await resolveBackupPath(filePath);
   await copyFile(filePath, backupPath);
   return backupPath;
 }
@@ -97,7 +120,7 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
   };
 }
 
-export async function uninstallAliases(options: InstallOptions = {}): Promise<UninstallResult> {
+export async function uninstallAliases(options: UninstallOptions = {}): Promise<UninstallResult> {
   const managedConfigDirectory = options.managedConfigDirectory ?? getManagedConfigDirectory();
   const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory);
   const globalGitConfigPath = options.globalGitConfigPath ?? resolveGlobalGitConfigPath(undefined, managedAliasesPath);

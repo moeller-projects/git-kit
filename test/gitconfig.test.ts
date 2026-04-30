@@ -21,6 +21,15 @@ describe('gitconfig helpers', () => {
     expect(secondInsert.changed).toBe(false);
   });
 
+  test('preserves existing CRLF newlines when inserting include blocks', () => {
+    const includePath = 'C:/git-kit/aliases.gitconfig';
+    const result = addIncludePath('[user]\r\n    name = Example\r\n', includePath);
+
+    expect(result.changed).toBe(true);
+    expect(result.content).toContain(`\r\n\r\n[include]\r\n    path = ${includePath}\r\n`);
+    expect(result.content).not.toContain('\n\n[include]\n');
+  });
+
   test('removes only matching include block', () => {
     const includePath = '/tmp/git-kit/aliases.gitconfig';
     const content = `[include]\n    path = ${includePath}\n\n[include]\n    path = /tmp/other.gitconfig\n`;
@@ -29,5 +38,14 @@ describe('gitconfig helpers', () => {
     expect(result.changed).toBe(true);
     expect(result.content).not.toContain(includePath);
     expect(result.content).toContain('/tmp/other.gitconfig');
+  });
+
+  test('preserves existing CRLF newlines when removing include blocks', () => {
+    const includePath = 'C:/git-kit/aliases.gitconfig';
+    const content = `[include]\r\n    path = ${includePath}\r\n\r\n[user]\r\n    name = Example\r\n`;
+    const result = removeIncludePath(content, includePath);
+
+    expect(result.changed).toBe(true);
+    expect(result.content).toBe('[user]\r\n    name = Example\r\n');
   });
 });
