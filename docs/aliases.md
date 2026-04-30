@@ -93,7 +93,7 @@ Generated from `aliases/`.
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
 | `dc` | `diff --cached` | Show changes not yet staged | safe |
-| `ds` | `diff --staged` | Show changes about to be commited | safe |
+| `ds` | `diff --staged` | Show changes about to be committed | safe |
 | `dw` | `diff --word-diff` | Show changes but by word, not line | safe |
 | `dd` | `diff-deep` | Show changes with our preferred options; a.k.a | safe |
 | `diff-all` | `!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done` | Open difftool for all changed files | medium |

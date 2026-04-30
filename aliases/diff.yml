@@ -7,7 +7,7 @@ aliases:
 
   ds:
     command: diff --staged
-    description: Show changes about to be commited
+    description: Show changes about to be committed
     category: diff
     risk: safe
 
