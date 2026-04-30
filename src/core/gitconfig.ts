@@ -19,7 +19,18 @@ function isIncludeHeader(header: string): boolean {
 }
 
 function detectNewline(content: string): '\n' | '\r\n' {
-  return content.match(/\r?\n/)?.[0] === '\r\n' ? '\r\n' : '\n';
+  const newlineMatches = content.match(/\r\n|\n/g);
+  if (newlineMatches == null) {
+    return '\n';
+  }
+
+  const crlfCount = newlineMatches.filter((match) => match === '\r\n').length;
+  const lfCount = newlineMatches.length - crlfCount;
+  if (crlfCount === lfCount) {
+    return newlineMatches[0] === '\r\n' ? '\r\n' : '\n';
+  }
+
+  return crlfCount > lfCount ? '\r\n' : '\n';
 }
 
 function trimTrailingNewlines(content: string): string {
