@@ -147,7 +147,7 @@
     merge-span-log = !git log "$(git merge-span .. "$1")"
     merge-span-diff = !git diff "$(git merge-span ... "$1")"
     merge-span-difftool = !git difftool "$(git merge-span ... "$1")"
-    rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)") HEAD)"; }; f
+    rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f
     ours = !f() { git checkout --ours   "$@" && git add "$@"; }; f
     theirs = !f() { git checkout --theirs "$@" && git add "$@"; }; f
     pf = pull --ff-only
@@ -160,7 +160,7 @@
     rbi = rebase --interactive
     rbiu = rebase --interactive @{upstream}
     fixup = !f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f
-    remote-ref = !local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."#local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #
+    remote-ref = !local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #
     rebase-recent = !git rebase --interactive "$(git remote-ref)"
     rl = reflog
     rr = remote

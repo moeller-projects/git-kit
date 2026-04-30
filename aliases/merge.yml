@@ -42,7 +42,7 @@ aliases:
     risk: medium
 
   rebase-branch:
-    command: '!f() { git rebase --interactive "$(git merge-base "$(git default-branch)") HEAD)"; }; f'
+    command: '!f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f'
     description: Interactively rebase all commits on the current branch
     category: merge
     risk: medium

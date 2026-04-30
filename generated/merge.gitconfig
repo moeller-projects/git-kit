@@ -6,6 +6,6 @@
     merge-span-log = !git log "$(git merge-span .. "$1")"
     merge-span-diff = !git diff "$(git merge-span ... "$1")"
     merge-span-difftool = !git difftool "$(git merge-span ... "$1")"
-    rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)") HEAD)"; }; f
+    rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f
     ours = !f() { git checkout --ours   "$@" && git add "$@"; }; f
     theirs = !f() { git checkout --theirs "$@" && git add "$@"; }; f

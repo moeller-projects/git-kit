@@ -204,7 +204,7 @@ Generated from `aliases/`.
 | `merge-span-log` | `!git log "$(git merge-span .. "$1")"` | Show commits introduced by a merge | medium |
 | `merge-span-diff` | `!git diff "$(git merge-span ... "$1")"` | Show changes introduced by a merge | medium |
 | `merge-span-difftool` | `!git difftool "$(git merge-span ... "$1")"` | Show merge changes in the configured difftool | medium |
-| `rebase-branch` | `!f() { git rebase --interactive "$(git merge-base "$(git default-branch)") HEAD)"; }; f` | Interactively rebase all commits on the current branch | medium |
+| `rebase-branch` | `!f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f` | Interactively rebase all commits on the current branch | medium |
 | `ours` | `!f() { git checkout --ours   "$@" && git add "$@"; }; f` | During a merge conflict, take our version of a file | medium |
 | `theirs` | `!f() { git checkout --theirs "$@" && git add "$@"; }; f` | During a merge conflict, take their version of a file | medium |
 
@@ -227,7 +227,7 @@ Generated from `aliases/`.
 | `rbi` | `rebase --interactive` | Rebase interactively | medium |
 | `rbiu` | `rebase --interactive @{upstream}` | Rebase interactively on unpushed commits | medium |
 | `fixup` | `!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f` | Create a fixup commit and immediately rebase-autosquash it | medium |
-| `remote-ref` | `!local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."#local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #` | Print the remote-tracking ref for the current branch | medium |
+| `remote-ref` | `!local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #` | Print the remote-tracking ref for the current branch | medium |
 | `rebase-recent` | `!git rebase --interactive "$(git remote-ref)"` | Interactively rebase commits not yet pushed | medium |
 
 ## reflog

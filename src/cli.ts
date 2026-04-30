@@ -17,7 +17,7 @@ async function run(): Promise<void> {
   program
     .command('install')
     .description('Install the managed alias include.')
-    .option('--profile <name>', 'Install only a specific alias profile (e.g. log, stash)')
+    .option('--profile <name>', 'Install only a specific alias profile (e.g. minimal, lazy, power)')
     .action(async (options: { profile?: string }) => {
       logger.info(await installCommand(options.profile));
     });

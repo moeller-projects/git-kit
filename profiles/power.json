@@ -2,7 +2,8 @@
   "name": "power",
   "description": "Full alias set for power users",
   "includes": [
-    "core.gitconfig",
+    "shortcuts.gitconfig",
+    "status.gitconfig",
     "branch.gitconfig",
     "commit.gitconfig",
     "log.gitconfig",
