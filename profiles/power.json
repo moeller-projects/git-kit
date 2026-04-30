@@ -1,0 +1,14 @@
+{
+  "name": "power",
+  "description": "Full alias set for power users",
+  "includes": [
+    "core.gitconfig",
+    "branch.gitconfig",
+    "commit.gitconfig",
+    "log.gitconfig",
+    "diff.gitconfig",
+    "stash.gitconfig",
+    "rebase.gitconfig",
+    "remote.gitconfig"
+  ]
+}

@@ -45,6 +45,10 @@ export function getManagedConfigDirectory(platform: NodeJS.Platform = process.pl
   return path.join(getHomeDirectory(), '.config', 'git-kit');
 }
 
+export function resolveProfilePath(name: string): string {
+  return resolvePackagePath('profiles', `${name}.json`);
+}
+
 export function getManagedAliasesPath(managedConfigDirectory: string, profile?: string): string {
   const filename = profile != null && profile.length > 0 ? `${profile}.gitconfig` : 'aliases.gitconfig';
   return path.join(managedConfigDirectory, filename);

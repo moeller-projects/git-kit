@@ -4,7 +4,8 @@ import path from 'node:path';
 import type { AliasEntry } from './aliases.js';
 import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
 import { addIncludePath, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
-import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath } from './paths.js';
+import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, resolveProfilePath } from './paths.js';
+import { loadProfile, gitconfigNameToYml } from './profile.js';
 import { ensureAliasEntries } from './validator.js';
 
 export interface InstallOptions {
@@ -97,6 +98,19 @@ async function readAliasesFromDirectory(dirPath: string): Promise<AliasEntry[]> 
   return ensureAliasEntries(aliases);
 }
 
+async function readAliasesForProfile(profileName: string): Promise<AliasEntry[]> {
+  const profileDef = await loadProfile(resolveProfilePath(profileName));
+  const allEntries: AliasEntry[] = [];
+
+  for (const include of profileDef.includes) {
+    const ymlName = gitconfigNameToYml(include);
+    const entries = await loadAliasesFromFile(resolvePackagePath('aliases', ymlName));
+    allEntries.push(...entries);
+  }
+
+  return ensureAliasEntries(allEntries);
+}
+
 export async function installAliases(options: InstallOptions = {}): Promise<InstallResult> {
   const managedConfigDirectory = options.managedConfigDirectory ?? getManagedConfigDirectory();
   await ensureWritableDirectory(managedConfigDirectory);
@@ -107,7 +121,7 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
   if (options.aliasesFilePath != null) {
     aliases = await readAliases(options.aliasesFilePath);
   } else if (options.profile != null) {
-    aliases = await readAliases(resolvePackagePath('aliases', `${options.profile}.yml`));
+    aliases = await readAliasesForProfile(options.profile);
   } else {
     aliases = await readAliasesFromDirectory(resolvePackagePath('aliases'));
   }

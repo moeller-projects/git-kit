@@ -1,0 +1,7 @@
+{
+  "name": "minimal",
+  "description": "Essential day-to-day aliases only",
+  "includes": [
+    "core.gitconfig"
+  ]
+}

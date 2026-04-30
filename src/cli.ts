@@ -5,6 +5,7 @@ import { formatDoctorChecks } from './commands/cli-shared.js';
 import { generateCommand } from './commands/generate.js';
 import { installCommand } from './commands/install.js';
 import { listCommand } from './commands/list.js';
+import { profilesCommand } from './commands/profiles.js';
 import { uninstallCommand } from './commands/uninstall.js';
 import { logger } from './core/logger.js';
 
@@ -32,8 +33,16 @@ async function run(): Promise<void> {
   program
     .command('list')
     .description('List known aliases grouped by category.')
+    .option('--profile <name>', 'Show only aliases included in a specific profile')
+    .action(async (options: { profile?: string }) => {
+      logger.info(await listCommand(options.profile));
+    });
+
+  program
+    .command('profiles')
+    .description('List available alias profiles.')
     .action(async () => {
-      logger.info(await listCommand());
+      logger.info(await profilesCommand());
     });
 
   program

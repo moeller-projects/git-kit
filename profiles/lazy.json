@@ -1,0 +1,12 @@
+{
+  "name": "lazy",
+  "description": "Comfortable aliases for everyday development",
+  "includes": [
+    "core.gitconfig",
+    "branch.gitconfig",
+    "commit.gitconfig",
+    "log.gitconfig",
+    "diff.gitconfig",
+    "stash.gitconfig"
+  ]
+}
