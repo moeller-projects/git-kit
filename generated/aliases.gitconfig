@@ -23,14 +23,14 @@
     lf = log --oneline --stat
     who = shortlog -sn --no-merges
     today = log --since=midnight --oneline
-    pf = push --force-with-lease
-    f = fetch --all --prune
-    pl = pull --rebase
     rb = rebase
     rbi = rebase -i
     rbc = rebase --continue
     rba = rebase --abort
     cp = cherry-pick
+    pf = push --force-with-lease
+    f = fetch --all --prune
+    pl = pull --rebase
     ss = stash push -m
     sp = stash pop
     sl = stash list
