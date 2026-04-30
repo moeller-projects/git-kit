@@ -8,7 +8,7 @@ describe('gitconfig helpers', () => {
         { name: 's', command: 'status --short --branch' },
         { name: 'co', command: 'checkout' },
       ]),
-    ).toBe(`[alias]\n    s = status --short --branch\n    co = checkout\n`);
+    ).toBe('[alias]\n    s = status --short --branch\n    co = checkout\n');
   });
 
   test('inserts include block once', () => {

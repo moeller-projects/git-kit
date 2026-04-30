@@ -1,0 +1,54 @@
+aliases:
+  rb:
+    command: rebase
+    description: Rebase the current branch
+    category: rebase
+    risk: medium
+
+  rba:
+    command: rebase --abort
+    description: Abort an in-progress rebase
+    category: rebase
+    risk: medium
+
+  rbc:
+    command: rebase --continue
+    description: Continue an in-progress rebase
+    category: rebase
+    risk: medium
+
+  rbs:
+    command: rebase --skip
+    description: Skip the current patch during rebase
+    category: rebase
+    risk: medium
+
+  rbi:
+    command: rebase --interactive
+    description: Rebase interactively
+    category: rebase
+    risk: medium
+
+  rbiu:
+    command: rebase --interactive @{upstream}
+    description: Rebase interactively on unpushed commits
+    category: rebase
+    risk: medium
+
+  fixup:
+    command: '!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f'
+    description: Create a fixup commit and immediately rebase-autosquash it
+    category: rebase
+    risk: medium
+
+  remote-ref:
+    command: '!local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #'
+    description: Print the remote-tracking ref for the current branch
+    category: rebase
+    risk: medium
+
+  rebase-recent:
+    command: '!git rebase --interactive "$(git remote-ref)"'
+    description: Interactively rebase commits not yet pushed
+    category: rebase
+    risk: medium

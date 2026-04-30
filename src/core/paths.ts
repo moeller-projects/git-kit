@@ -45,7 +45,20 @@ export function getManagedConfigDirectory(platform: NodeJS.Platform = process.pl
   return path.join(getHomeDirectory(), '.config', 'git-kit');
 }
 
-export function getManagedAliasesPath(managedConfigDirectory: string): string {
+export function resolveProfilePath(name: string): string {
+  if (!/^[a-z0-9][a-z0-9_-]*$/.test(name)) {
+    throw new Error(`Invalid profile name: "${name}". Profile names may only contain lowercase letters, digits, hyphens, and underscores.`);
+  }
+  return resolvePackagePath('profiles', `${name}.json`);
+}
+
+export function getManagedAliasesPath(managedConfigDirectory: string, profile?: string): string {
+  if (profile != null && profile.length > 0) {
+    if (!/^[a-z0-9][a-z0-9_-]*$/.test(profile)) {
+      throw new Error(`Invalid profile name: "${profile}". Profile names may only contain lowercase letters, digits, hyphens, and underscores.`);
+    }
+    return path.join(managedConfigDirectory, `${profile}.gitconfig`);
+  }
   return path.join(managedConfigDirectory, 'aliases.gitconfig');
 }
 

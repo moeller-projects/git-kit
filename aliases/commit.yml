@@ -1,0 +1,78 @@
+aliases:
+  ca:
+    command: commit --amend
+    description: Amend the tip of the current branch
+    category: commit
+    risk: medium
+
+  cam:
+    command: commit --amend --message
+    description: Amend the tip of the current branch with a new message
+    category: commit
+    risk: medium
+
+  cane:
+    command: commit --amend --no-edit
+    description: Amend the tip of the current branch without editing the message
+    category: commit
+    risk: medium
+
+  caa:
+    command: commit --amend --all
+    description: Amend the tip, staging all modified and deleted files
+    category: commit
+    risk: medium
+
+  caam:
+    command: commit --amend --all --message
+    description: Amend the tip, staging all files, with a new message
+    category: commit
+    risk: medium
+
+  caane:
+    command: commit --amend --all --no-edit
+    description: Amend the tip, staging all files, without editing the message
+    category: commit
+    risk: medium
+
+  ci:
+    command: commit --interactive
+    description: Commit using the interactive interface
+    category: commit
+    risk: medium
+
+  cm:
+    command: commit --message
+    description: Commit with a message
+    category: commit
+    risk: medium
+
+  commit-parents:
+    command: "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
+    description: Show a commit's parent hashes
+    category: commit
+    risk: medium
+
+  commit-is-merge:
+    command: "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
+    description: Exit 0 if the commit is a merge, else exit 1
+    category: commit
+    risk: medium
+
+  commit-message-key-lines:
+    command: '!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f'
+    description: Show keyword-tagged lines from a commit message
+    category: commit
+    risk: medium
+
+  wip:
+    command: '!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip'
+    description: Stage all changes and commit with message "wip"
+    category: commit
+    risk: medium
+
+  unwip:
+    command: '!git log --max-count=1 | grep -q -c wip && git reset HEAD~1'
+    description: Undo the last commit if its message is "wip"
+    category: commit
+    risk: medium

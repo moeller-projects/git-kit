@@ -1,0 +1,20 @@
+[alias]
+    aa = add --all
+    ap = add --patch
+    au = add --update
+    add-cached = !git add "$(git ls-files --cached             | sort -u)"
+    add-deleted = !git add "$(git ls-files --deleted            | sort -u)"
+    add-others = !git add "$(git ls-files --others             | sort -u)"
+    add-ignored = !git add "$(git ls-files --ignored            | sort -u)"
+    add-killed = !git add "$(git ls-files --killed             | sort -u)"
+    add-modified = !git add "$(git ls-files --modified           | sort -u)"
+    add-stage = !git add "$(git ls-files --stage    | cut -f2 | sort -u)"
+    add-unmerged = !git add "$(git ls-files --unmerged | cut -f2 | sort -u)"
+    edit-cached = !$(git var GIT_EDITOR) "$(git ls-files --cached             | sort -u)"
+    edit-deleted = !$(git var GIT_EDITOR) "$(git ls-files --deleted            | sort -u)"
+    edit-others = !$(git var GIT_EDITOR) "$(git ls-files --others             | sort -u)"
+    edit-ignored = !$(git var GIT_EDITOR) "$(git ls-files --ignored            | sort -u)"
+    edit-killed = !$(git var GIT_EDITOR) "$(git ls-files --killed             | sort -u)"
+    edit-modified = !$(git var GIT_EDITOR) "$(git ls-files --modified           | sort -u)"
+    edit-stage = !$(git var GIT_EDITOR) "$(git ls-files --stage    | cut -f2 | sort -u)"
+    edit-unmerged = !$(git var GIT_EDITOR) "$(git ls-files --unmerged | cut -f2 | sort -u)"

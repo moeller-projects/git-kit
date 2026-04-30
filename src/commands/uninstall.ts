@@ -1,7 +1,7 @@
 import { uninstallAliases } from '../core/installer.js';
 
-export async function uninstallCommand(): Promise<string> {
-  const result = await uninstallAliases();
+export async function uninstallCommand(profile?: string): Promise<string> {
+  const result = await uninstallAliases({ profile });
   const removedParts: string[] = [];
 
   if (result.includeRemoved) {

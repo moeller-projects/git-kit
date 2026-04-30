@@ -1,0 +1,108 @@
+aliases:
+  reset-commit:
+    command: reset --soft HEAD~1
+    description: Reset commits
+    category: reset
+    risk: medium
+
+  reset-commit-hard:
+    command: reset --hard HEAD~1
+    description: Git reset-commit-hard alias
+    category: reset
+    risk: dangerous
+
+  reset-commit-hard-clean:
+    command: '!git reset --hard HEAD~1 && git clean -fd'
+    description: Git reset-commit-hard-clean alias
+    category: reset
+    risk: dangerous
+
+  reset-to-pristine:
+    command: '!git reset --hard && git clean -ffdx'
+    description: Git reset-to-pristine alias
+    category: reset
+    risk: dangerous
+
+  reset-to-upstream:
+    command: '!git reset --hard "$(git upstream-branch)"'
+    description: Git reset-to-upstream alias
+    category: reset
+    risk: dangerous
+
+  undo-commit:
+    command: reset --soft HEAD~1
+    description: Undo commits
+    category: reset
+    risk: medium
+
+  undo-commit-hard:
+    command: reset --hard HEAD~1
+    description: Git undo-commit-hard alias
+    category: reset
+    risk: dangerous
+
+  undo-commit-hard-clean:
+    command: '!git reset --hard HEAD~1 && git clean -fd'
+    description: Git undo-commit-hard-clean alias
+    category: reset
+    risk: dangerous
+
+  undo-to-pristine:
+    command: '!git reset --hard && git clean -ffdx'
+    description: Git undo-to-pristine alias
+    category: reset
+    risk: dangerous
+
+  undo-to-upstream:
+    command: '!git reset --hard "$(git upstream-branch)"'
+    description: Git undo-to-upstream alias
+    category: reset
+    risk: dangerous
+
+  uncommit:
+    command: reset --soft HEAD~1
+    description: Undo the last commit, keeping changes staged
+    category: reset
+    risk: medium
+
+  unadd:
+    command: reset HEAD
+    description: Unstage changes from the index
+    category: reset
+    risk: medium
+
+  discard:
+    command: checkout --
+    description: Discard working directory changes to a file
+    category: reset
+    risk: medium
+
+  cleaner:
+    command: clean -dff
+    description: Clean working tree with force options
+    category: reset
+    risk: dangerous
+
+  cleanest:
+    command: clean -dffx
+    description: Clean working tree with the most aggressive options
+    category: reset
+    risk: dangerous
+
+  cleanout:
+    command: '!git clean -df && git checkout -- .'
+    description: Clean and checkout to restore working tree
+    category: reset
+    risk: dangerous
+
+  expunge:
+    command: '!f() { git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $1" --prune-empty --tag-name-filter "cat" -- --all ; }; f'
+    description: Permanently remove a file from all history
+    category: reset
+    risk: dangerous
+
+  show-unreachable:
+    command: '!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log'
+    description: Show log of unreachable commits
+    category: reset
+    risk: medium

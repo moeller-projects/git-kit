@@ -1,0 +1,6 @@
+aliases:
+  rl:
+    command: reflog
+    description: Show the reference log
+    category: reflog
+    risk: safe

@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
+import path from 'node:path';
 import { parseDocument, isMap, type ParsedNode, type YAMLMap } from 'yaml';
 
 export type AliasRisk = 'safe' | 'medium' | 'dangerous';
@@ -85,6 +86,19 @@ export function parseAliasesYaml(content: string): AliasEntry[] {
 export async function loadAliasesFromFile(filePath: string): Promise<AliasEntry[]> {
   const content = await readFile(filePath, 'utf8');
   return parseAliasesYaml(content);
+}
+
+export async function loadAliasesFromDirectory(dirPath: string): Promise<AliasEntry[]> {
+  const files = await readdir(dirPath);
+  const ymlFiles = files.filter((f) => f.endsWith('.yml') || f.endsWith('.yaml')).sort();
+  const allEntries: AliasEntry[] = [];
+
+  for (const file of ymlFiles) {
+    const entries = await loadAliasesFromFile(path.join(dirPath, file));
+    allEntries.push(...entries);
+  }
+
+  return allEntries;
 }
 
 export function validateAliases(entries: AliasEntry[]): AliasValidationIssue[] {

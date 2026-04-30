@@ -1,0 +1,7 @@
+[alias]
+    rr = remote
+    rrs = remote show
+    rru = remote update
+    rrp = remote prune
+    remotes-push = !git remote | xargs -I% -n1 git push %
+    remotes-prune = !git remote | xargs -n 1 git remote prune

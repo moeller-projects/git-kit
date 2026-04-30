@@ -1,0 +1,9 @@
+[pretty]
+    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
+
+[alias]
+    s = status --short --branch
+    co = checkout
+    unstage = restore --staged
+    discard = restore
+    root = rev-parse --show-toplevel

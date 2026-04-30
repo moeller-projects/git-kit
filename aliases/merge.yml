@@ -1,0 +1,60 @@
+aliases:
+  ma:
+    command: merge --abort
+    description: Abort an in-progress merge
+    category: merge
+    risk: medium
+
+  mc:
+    command: merge --continue
+    description: Continue an in-progress merge
+    category: merge
+    risk: medium
+
+  mncnf:
+    command: merge --no-commit --no-ff
+    description: Merge without auto-commit and without fast-forward
+    category: merge
+    risk: medium
+
+  merge-span:
+    command: "!f() { echo \"$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f2)\"; }; f"
+    description: Find the span of commits introduced by a merge
+    category: merge
+    risk: medium
+
+  merge-span-log:
+    command: '!git log "$(git merge-span .. "$1")"'
+    description: Show commits introduced by a merge
+    category: merge
+    risk: medium
+
+  merge-span-diff:
+    command: '!git diff "$(git merge-span ... "$1")"'
+    description: Show changes introduced by a merge
+    category: merge
+    risk: medium
+
+  merge-span-difftool:
+    command: '!git difftool "$(git merge-span ... "$1")"'
+    description: Show merge changes in the configured difftool
+    category: merge
+    risk: medium
+
+  rebase-branch:
+    command: '!f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f'
+    description: Interactively rebase all commits on the current branch
+    category: merge
+    risk: medium
+
+  ours:
+    command: '!f() { git checkout --ours   "$@" && git add "$@"; }; f'
+    description: During a merge conflict, take our version of a file
+    category: merge
+    risk: medium
+
+  theirs:
+    command: '!f() { git checkout --theirs "$@" && git add "$@"; }; f'
+    description: During a merge conflict, take their version of a file
+    category: merge
+    risk: medium

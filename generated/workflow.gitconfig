@@ -1,0 +1,22 @@
+[alias]
+    cloner = clone --recursive
+    clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
+    panic = !tar cvf ../panic.tar -- *
+    archive = !f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f
+    pushy = push --force-with-lease
+    get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
+    put = !git commit --all && git push
+    mainly = !git checkout "$(git default-branch)" && git fetch origin --prune && git reset --hard "origin/$(git default-branch)"
+    ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
+    push1 = !git push origin "$(git current-branch)"
+    pull1 = !git pull origin "$(git current-branch)"
+    track = !f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f
+    untrack = !f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f
+    publish = !f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f
+    unpublish = !f() { git push "${1:-origin}" :"$(git current-branch)"; }; f
+    inbound = !git remote update --prune; git log ..@{upstream}
+    outbound = log @{upstream}..
+    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout main && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f
+    pruner = !git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all
+    repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
+    optimizer = !git pruner; git repacker; git prune-packed

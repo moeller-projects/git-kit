@@ -1,0 +1,6 @@
+aliases:
+  snapshot:
+    command: '!git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index'
+    description: Snapshot working tree to stash without removing changes
+    category: stash
+    risk: medium

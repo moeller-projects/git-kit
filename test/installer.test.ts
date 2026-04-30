@@ -48,6 +48,52 @@ describe('installer', () => {
     expect(globalConfigContent).toContain('/tmp/keep.gitconfig');
   });
 
+  test('installs using a named profile', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-profile-install-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    const result = await installAliases({ profile: 'minimal', managedConfigDirectory, globalGitConfigPath });
+
+    expect(result.includeAdded).toBe(true);
+    expect(result.managedAliasesPath).toContain('minimal.gitconfig');
+
+    const managedContent = await readFile(result.managedAliasesPath, 'utf8');
+    expect(managedContent).toContain('[alias]');
+  });
+
+  test('installs using the default directory (all aliases)', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-dir-install-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    const result = await installAliases({ managedConfigDirectory, globalGitConfigPath });
+
+    expect(result.includeAdded).toBe(true);
+    expect(result.managedAliasesPath).toContain('aliases.gitconfig');
+
+    const managedContent = await readFile(result.managedAliasesPath, 'utf8');
+    expect(managedContent).toContain('[alias]');
+  });
+
+  test('rejects profile names with path traversal characters', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-security-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await expect(
+      installAliases({ profile: '../etc/passwd', managedConfigDirectory, globalGitConfigPath }),
+    ).rejects.toThrow(/Invalid profile name/);
+
+    await expect(
+      installAliases({ profile: 'foo/bar', managedConfigDirectory, globalGitConfigPath }),
+    ).rejects.toThrow(/Invalid profile name/);
+  });
+
   test('creates unique backup files when multiple backups share a timestamp', async () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-backup-'));
     const aliasesFilePath = path.join(tempDirectory, 'aliases.yml');

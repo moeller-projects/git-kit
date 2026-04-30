@@ -1,0 +1,11 @@
+[alias]
+    dc = diff --cached
+    ds = diff --staged
+    dw = diff --word-diff
+    dd = diff-deep
+    diff-all = !for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done
+    diff-changes = diff --name-status -r
+    diff-stat = diff --stat --ignore-space-change -r
+    diff-staged = diff --cached
+    diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
+    diff-chunk = !f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f

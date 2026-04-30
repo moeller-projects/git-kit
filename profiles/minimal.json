@@ -1,0 +1,8 @@
+{
+  "name": "minimal",
+  "description": "Essential day-to-day aliases only",
+  "includes": [
+    "shortcuts.gitconfig",
+    "status.gitconfig"
+  ]
+}

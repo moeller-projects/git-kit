@@ -1,0 +1,42 @@
+aliases:
+  topic-base-branch:
+    command: '!git config --get init.topicBaseBranchName || git default-branch'
+    description: Show the base branch for topic branches
+    category: topic
+    risk: medium
+
+  topic-start:
+    command: '!f(){ new_branch="$1"; old_branch="$(git topic-base-branch)"; git checkout "$old_branch"; git pull --ff-only; git checkout -b "$new_branch" "$old_branch"; git push --set-upstream origin "$new_branch"; };f'
+    description: Start a new topic branch from the base branch
+    category: topic
+    risk: medium
+
+  topic-begin:
+    command: topic-start
+    description: Alias for topic-start
+    category: topic
+    risk: medium
+
+  topic-end:
+    command: '!f(){ new_branch="$(git current-branch)"; old_branch="$(git topic-base-branch)"; if [ "$new_branch" = "$old_branch" ]; then printf "You are asking to do git topic-end,\n"; printf "but you are not on a new topic branch;\n"; printf "you are on the base topic branch: %s.\n" "$old_branch"; printf "Please checkout the topic branch that you want,\n"; printf "then retry the git topic-end command.\n"; else git push; git checkout "$old_branch"; git branch --delete "$new_branch"; git push origin ":$new_branch"; fi; };f'
+    description: Finish a topic branch by pushing and deleting it
+    category: topic
+    risk: medium
+
+  topic-finish:
+    command: topic-end
+    description: Alias for topic-end
+    category: topic
+    risk: medium
+
+  topic-sync:
+    command: '!f(){ new_branch="$(git current-branch)"; old_branch="$(git topic-base-branch)"; if [ "$new_branch" = "$old_branch" ]; then printf "You are asking to do git topic-sync,\n"; printf "but you are not on a new topic branch;\n"; printf "you are on the base topic branch: %s.\n" "$old_branch"; printf "Please checkout the topic branch that you want,\n"; printf "then retry the git topic-sync command.\n"; else git pull; git push; fi; };f'
+    description: Sync the current topic branch by pulling and pushing
+    category: topic
+    risk: medium
+
+  topic-move:
+    command: '!f(){ new_branch="$1"; old_branch="$(git current-branch)"; git branch --move "$old_branch" "$new_branch"; git push --set-upstream origin ":$old_branch" "$new_branch"; };f'
+    description: Rename the current topic branch
+    category: topic
+    risk: medium
