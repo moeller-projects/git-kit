@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { addIncludePath, addIncludePathBefore, removeIncludePath, renderAliasGitConfig, KIT_PRETTY_FORMAT_NAME, KIT_PRETTY_FORMAT } from '../src/core/gitconfig.js';
+import { addIncludePath, addIncludePathAfter, removeIncludePath, renderAliasGitConfig, KIT_PRETTY_FORMAT_NAME, KIT_PRETTY_FORMAT } from '../src/core/gitconfig.js';
 
 describe('gitconfig helpers', () => {
   test('renders alias gitconfig with pretty section', () => {
@@ -51,19 +51,20 @@ describe('gitconfig helpers', () => {
     expect(result.content).toBe('[user]\r\n    name = Example\r\n');
   });
 
-  describe('addIncludePathBefore', () => {
-    test('inserts new include before the target include', () => {
+  describe('addIncludePathAfter', () => {
+    test('inserts new include after the target include', () => {
       const managedPath = '/config/git-kit/aliases.gitconfig';
       const extraPath = '/home/user/.gitalias';
       const content = `[user]\n    name = Example\n\n[include]\n    path = ${managedPath}\n`;
 
-      const result = addIncludePathBefore(content, extraPath, managedPath);
+      const result = addIncludePathAfter(content, extraPath, managedPath);
 
       expect(result.changed).toBe(true);
-      const extraIndex = result.content.indexOf(extraPath);
       const managedIndex = result.content.indexOf(managedPath);
-      expect(extraIndex).toBeGreaterThan(-1);
-      expect(managedIndex).toBeGreaterThan(extraIndex);
+      const extraIndex = result.content.indexOf(extraPath);
+      expect(managedIndex).toBeGreaterThan(-1);
+      // extra config must appear AFTER managed config so user aliases win
+      expect(extraIndex).toBeGreaterThan(managedIndex);
     });
 
     test('falls back to appending when target include is not present', () => {
@@ -71,7 +72,7 @@ describe('gitconfig helpers', () => {
       const extraPath = '/home/user/.gitalias';
       const content = '[user]\n    name = Example\n';
 
-      const result = addIncludePathBefore(content, extraPath, managedPath);
+      const result = addIncludePathAfter(content, extraPath, managedPath);
 
       expect(result.changed).toBe(true);
       expect(result.content).toContain(extraPath);
@@ -80,9 +81,9 @@ describe('gitconfig helpers', () => {
     test('is idempotent when the insert path is already present', () => {
       const managedPath = '/config/git-kit/aliases.gitconfig';
       const extraPath = '/home/user/.gitalias';
-      const content = `[include]\n    path = ${extraPath}\n\n[include]\n    path = ${managedPath}\n`;
+      const content = `[include]\n    path = ${managedPath}\n\n[include]\n    path = ${extraPath}\n`;
 
-      const result = addIncludePathBefore(content, extraPath, managedPath);
+      const result = addIncludePathAfter(content, extraPath, managedPath);
 
       expect(result.changed).toBe(false);
     });

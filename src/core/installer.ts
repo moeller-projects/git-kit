@@ -3,7 +3,7 @@ import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import type { AliasEntry } from './aliases.js';
 import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
-import { addIncludePath, addIncludePathBefore, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
+import { addIncludePath, addIncludePathAfter, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, resolveProfilePath } from './paths.js';
 import { loadProfile, loadAliasesForProfile } from './profile.js';
 import { ensureAliasEntries } from './validator.js';
@@ -127,20 +127,21 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
   let globalContent = globalConfigExists ? await readFile(globalGitConfigPath, 'utf8') : '';
   let anyChanged = false;
 
-  // If an extra config path is provided, include it BEFORE the managed aliases so
-  // git-kit aliases take precedence (later includes win in git config).
-  if (options.extraGitConfigPath != null) {
-    const extraResult = addIncludePathBefore(globalContent, options.extraGitConfigPath, managedAliasesPath);
-    if (extraResult.changed) {
-      globalContent = extraResult.content;
-      anyChanged = true;
-    }
-  }
-
+  // Add the managed aliases include first.
   const managedResult = addIncludePath(globalContent, managedAliasesPath);
   if (managedResult.changed) {
     globalContent = managedResult.content;
     anyChanged = true;
+  }
+
+  // If an extra config path is provided, include it AFTER the managed aliases so
+  // the user's custom aliases take precedence over git-kit's (later includes win in git config).
+  if (options.extraGitConfigPath != null) {
+    const extraResult = addIncludePathAfter(globalContent, options.extraGitConfigPath, managedAliasesPath);
+    if (extraResult.changed) {
+      globalContent = extraResult.content;
+      anyChanged = true;
+    }
   }
 
   let backupPath: string | undefined;

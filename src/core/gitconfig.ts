@@ -149,31 +149,31 @@ export function addIncludePath(content: string, includePath: string, platform: N
   return { changed: true, content: `${trimmed}${newline}${newline}${includeBlock}` };
 }
 
-export function addIncludePathBefore(
+export function addIncludePathAfter(
   content: string,
   insertPath: string,
-  beforePath: string,
+  afterPath: string,
   platform: NodeJS.Platform = process.platform,
 ): { changed: boolean; content: string } {
   if (hasIncludePath(content, insertPath, platform)) {
     return { changed: false, content };
   }
 
-  const normalizedBeforePath = normalizeConfigValue(beforePath, platform);
+  const normalizedAfterPath = normalizeConfigValue(afterPath, platform);
   const sections = splitSections(content);
 
-  const insertBeforeIndex = sections.findIndex((section) => {
+  const insertAfterIndex = sections.findIndex((section) => {
     if (section.header == null || !isIncludeHeader(section.header)) {
       return false;
     }
 
     return section.lines.some((line) => {
       const configuredPath = parsePathLine(line);
-      return configuredPath != null && normalizeConfigValue(configuredPath, platform) === normalizedBeforePath;
+      return configuredPath != null && normalizeConfigValue(configuredPath, platform) === normalizedAfterPath;
     });
   });
 
-  if (insertBeforeIndex === -1) {
+  if (insertAfterIndex === -1) {
     return addIncludePath(content, insertPath, platform);
   }
 
@@ -181,7 +181,7 @@ export function addIncludePathBefore(
   const hasTrailingNewline = content.endsWith('\r\n') || content.endsWith('\n');
   const normalizedInsertPath = insertPath.replace(/\\/g, '/');
   const newSection: GitConfigSection = { header: '[include]', lines: [`    path = ${normalizedInsertPath}`, ''] };
-  const newSections = [...sections.slice(0, insertBeforeIndex), newSection, ...sections.slice(insertBeforeIndex)];
+  const newSections = [...sections.slice(0, insertAfterIndex + 1), newSection, ...sections.slice(insertAfterIndex + 1)];
 
   return {
     changed: true,

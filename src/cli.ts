@@ -18,7 +18,7 @@ async function run(): Promise<void> {
     .command('install')
     .description('Install the managed alias include.')
     .option('--profile <name>', 'Install only a specific alias profile (e.g. log, stash)')
-    .option('--extra-config <path>', 'Include an additional gitconfig before the managed aliases (its aliases will not override git-kit aliases)')
+    .option('--extra-config <path>', 'Include an additional gitconfig after the managed aliases (its aliases override git-kit aliases when there is a conflict)')
     .action(async (options: { profile?: string; extraConfig?: string }) => {
       logger.info(await installCommand(options.profile, options.extraConfig));
     });

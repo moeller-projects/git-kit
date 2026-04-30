@@ -85,7 +85,7 @@ describe('installer', () => {
     expect(new Set(backupFiles).size).toBe(2);
   });
 
-  test('extra config include is added before the managed include', async () => {
+  test('extra config include is added after the managed include so user aliases win', async () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-extra-'));
     const aliasesFilePath = path.join(tempDirectory, 'aliases.yml');
     const managedConfigDirectory = path.join(tempDirectory, 'managed');
@@ -103,10 +103,10 @@ describe('installer', () => {
     expect(globalConfigContent).toContain(extraGitConfigPath);
     expect(globalConfigContent).toContain('aliases.gitconfig');
 
-    // Extra config must appear before managed config so git-kit aliases win
-    const extraIndex = globalConfigContent.indexOf(extraGitConfigPath);
+    // Extra config must appear AFTER managed config so user's custom aliases win
     const managedIndex = globalConfigContent.indexOf('aliases.gitconfig');
-    expect(extraIndex).toBeLessThan(managedIndex);
+    const extraIndex = globalConfigContent.indexOf(extraGitConfigPath);
+    expect(extraIndex).toBeGreaterThan(managedIndex);
   });
 
   test('re-installing with extra config is idempotent', async () => {
