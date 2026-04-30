@@ -1,8 +1,14 @@
-[pretty]
-    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
-
 [alias]
-    cm = commit -m
-    amend = commit --amend --no-edit
-    fixup = commit --fixup
-    wip = !git add -A && git commit -m 'wip'
+    ca = commit --amend
+    cam = commit --amend --message
+    cane = commit --amend --no-edit
+    caa = commit --amend --all
+    caam = commit --amend --all --message
+    caane = commit --amend --all --no-edit
+    ci = commit --interactive
+    cm = commit --message
+    commit-parents = !f(){ git cat-file -p "${*:-HEAD}" | sed -n '/0/,/^ *$/{/^parent /p}'; };f
+    commit-is-merge = !f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f
+    commit-message-key-lines = !f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f
+    wip = !git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip
+    unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1

@@ -1,30 +1,120 @@
 aliases:
-  cob:
-    command: checkout -b
-    description: Create and checkout a new branch
+  bm:
+    command: branch --merged
+    description: branch and only list branches whose tips are reachable from the specified commit (HEAD if not spe...
     category: branch
     risk: safe
 
-  br:
-    command: branch
-    description: List local branches
+  bnm:
+    command: branch --no-merged
+    description: branch and only list branches whose tips are not reachable from the specified commit (HEAD if not...
     category: branch
     risk: safe
 
-  brd:
-    command: branch -d
-    description: Delete a merged branch
+  bed:
+    command: branch --edit-description
+    description: branch with edit description
     category: branch
     risk: medium
 
-  brdf:
-    command: branch -D
-    description: Force-delete a branch regardless of merge status
+  bsd:
+    command: '!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f'
+    description: branch with show description; ideally git will add this feature in the future as `git --show-desc...
+    category: branch
+    risk: medium
+
+  bv:
+    command: branch --verbose
+    description: 'branch verbose: When in list mode, show the hash, the commit subject line, etc'
+    category: branch
+    risk: safe
+
+  bvv:
+    command: branch --verbose --verbose
+    description: 'branch verbose verbose: When in list mode, show the hash the commit subject line, the upstream br...'
+    category: branch
+    risk: safe
+
+  heads:
+    command: "!git log origin/main.. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    description: Show local commits not yet on origin/main
+    category: branch
+    risk: medium
+
+  branch-commit-first:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f'
+    description: Show a branch's first commit hash
+    category: branch
+    risk: medium
+
+  branch-commit-last:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f'
+    description: Show a branch's last commit hash
+    category: branch
+    risk: medium
+
+  branch-commit-prev:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f'
+    description: Show a branch's previous commit hash
+    category: branch
+    risk: medium
+
+  branch-commit-next:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f'
+    description: Show a branch's next commit hash
+    category: branch
+    risk: medium
+
+  refs-by-date:
+    command: for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) (objectname:short) %(contents:subject)'
+    description: List all refs sorted by most recent committer date
+    category: branch
+    risk: safe
+
+  track-all-remote-branches:
+    command: '!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f'
+    description: Track all remote branches as local branches
+    category: branch
+    risk: medium
+
+  hew:
+    command: '!git hew-local "$@" && git hew-remote "$@" #'
+    description: Delete all merged branches locally and remotely
     category: branch
     risk: dangerous
 
-  recent:
-    command: "branch --sort=-committerdate --format=%(refname:short)"
-    description: List branches sorted by most recent commit
+  hew-dry-run:
+    command: '!git hew-local-dry-run "$@" && git hew-remote-dry-run "$@" #'
+    description: Preview branches that would be deleted by hew
+    category: branch
+    risk: medium
+
+  hew-local:
+    command: '!f() { git hew-local-dry-run "$@" | xargs git branch --delete ; }; f "$@"'
+    description: Delete all locally merged branches
+    category: branch
+    risk: dangerous
+
+  hew-local-dry-run:
+    command: '!f() { commit=${1:-$(git current-branch)}; git branch --merged "$commit" | grep -v "^[[:space:]]*\\*[[:space:]]*$commit$" ; }; f "$@"'
+    description: Preview locally merged branches to be deleted
+    category: branch
+    risk: medium
+
+  hew-remote:
+    command: '!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f "$@"'
+    description: Delete all remotely merged branches
+    category: branch
+    risk: dangerous
+
+  hew-remote-dry-run:
+    command: "!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged \"$commit\" | grep -v \"^[[:space:]]*origin/$commit$\" | sed 's#[[:space:]]*origin/##' ; }; f \"$@\""
+    description: Preview remotely merged branches to be deleted
+    category: branch
+    risk: medium
+
+  branches:
+    command: branch -a
+    description: List all local and remote branches
     category: branch
     risk: safe

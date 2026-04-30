@@ -1,0 +1,126 @@
+aliases:
+  cloner:
+    command: clone --recursive
+    description: Clone a repository including all submodules
+    category: workflow
+    risk: medium
+
+  clone-lean:
+    command: clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
+    description: Minimal clone skipping unneeded blobs and trees
+    category: workflow
+    risk: medium
+
+  panic:
+    command: '!tar cvf ../panic.tar -- *'
+    description: Archive working tree as a tar file for emergency backup
+    category: workflow
+    risk: medium
+
+  archive:
+    command: '!f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f'
+    description: Create a tar archive of the entire repository
+    category: workflow
+    risk: medium
+
+  pushy:
+    command: push --force-with-lease
+    description: Force-push using --force-with-lease for safety
+    category: workflow
+    risk: dangerous
+
+  get:
+    command: '!git fetch --prune && git pull --rebase && git submodule update --init --recursive'
+    description: Fetch, rebase pull, and update all submodules
+    category: workflow
+    risk: medium
+
+  put:
+    command: '!git commit --all && git push'
+    description: Commit all changes and push
+    category: workflow
+    risk: medium
+
+  mainly:
+    command: '!git checkout "$(git default-branch)" && git fetch origin --prune && git reset --hard "origin/$(git default-branch)"'
+    description: Reset local branch to match origin main
+    category: workflow
+    risk: dangerous
+
+  ignore:
+    command: '!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore'
+    description: Append all untracked files to .gitignore
+    category: workflow
+    risk: medium
+
+  push1:
+    command: '!git push origin "$(git current-branch)"'
+    description: Push the current branch to origin
+    category: workflow
+    risk: medium
+
+  pull1:
+    command: '!git pull origin "$(git current-branch)"'
+    description: Pull the current branch from origin
+    category: workflow
+    risk: medium
+
+  track:
+    command: '!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f'
+    description: Set the upstream tracking branch
+    category: workflow
+    risk: medium
+
+  untrack:
+    command: '!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f'
+    description: Remove the upstream tracking branch
+    category: workflow
+    risk: medium
+
+  publish:
+    command: '!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f'
+    description: Push current branch and set upstream
+    category: workflow
+    risk: medium
+
+  unpublish:
+    command: '!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f'
+    description: Delete the remote version of the current branch
+    category: workflow
+    risk: dangerous
+
+  inbound:
+    command: '!git remote update --prune; git log ..@{upstream}'
+    description: Show incoming commits from upstream
+    category: workflow
+    risk: medium
+
+  outbound:
+    command: log @{upstream}..
+    description: Show outgoing commits not yet pushed
+    category: workflow
+    risk: safe
+
+  reincarnate:
+    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout main && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
+    description: Delete and recreate a branch based on main
+    category: workflow
+    risk: dangerous
+
+  pruner:
+    command: '!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all'
+    description: Prune all unreachable objects immediately
+    category: workflow
+    risk: medium
+
+  repacker:
+    command: repack -a -d -f --depth=300 --window=300 --window-memory=1g
+    description: Repack the repository for optimal storage
+    category: workflow
+    risk: medium
+
+  optimizer:
+    command: '!git pruner; git repacker; git prune-packed'
+    description: Run pruner, repacker, and prune-packed to optimize the repo
+    category: workflow
+    risk: medium

@@ -1,0 +1,162 @@
+aliases:
+  sb:
+    command: show-branch
+    description: Print a list of branches and their commits
+    category: util
+    risk: safe
+
+  alias:
+    command: '!f(){ echo "Git Alias is project that has a collection of git alias commands."; echo "The purpose is to help make git easier, faster, and more capable."; echo "Free open source repository <https://github.com/gitalias/gitalias>."; echo ""; echo "To see your existing git aliases:"; echo "    git aliases"; echo ""; echo "To see your existing git aliases by using git directly:"; echo "    git config --get-regexp ^alias\\."; };f'
+    description: Show help for the git-alias project
+    category: util
+    risk: medium
+
+  add-alias:
+    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
+    description: Add a new git alias to local or global config
+    category: util
+    risk: medium
+
+  move-alias:
+    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
+    description: Rename an existing git alias
+    category: util
+    risk: medium
+
+  init-empty:
+    command: "!f() { git init && git commit --allow-empty --allow-empty-message --message ''; }; f"
+    description: Init a repo with an empty rebaseable first commit
+    category: util
+    risk: medium
+
+  orphans:
+    command: fsck --full
+    description: Find all objects not referenced by any other object
+    category: util
+    risk: safe
+
+  rev-list-all-objects-by-size:
+    command: "!git rev-list --all --objects  | awk '{print $1}'| git cat-file --batch-check | grep -F blob | sort -k3nr"
+    description: List all repo objects sorted by size in bytes
+    category: util
+    risk: medium
+
+  rev-list-all-objects-by-size-and-name:
+    command: "!git rev-list --all --objects | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print substr($0,6)}' | sort --numeric-sort --key=2"
+    description: List all repo objects by size and filename
+    category: util
+    risk: medium
+
+  initer:
+    command: init-empty
+    description: Initialize a repo with an empty rebaseable first commit
+    category: util
+    risk: medium
+
+  assume:
+    command: update-index --assume-unchanged
+    description: Tell git to assume a file is unchanged
+    category: util
+    risk: medium
+
+  unassume:
+    command: update-index --no-assume-unchanged
+    description: Tell git to stop assuming a file is unchanged
+    category: util
+    risk: medium
+
+  assume-all:
+    command: "!git status --short | awk '{ print $2 }' | xargs -r git assume"
+    description: Assume all modified files are unchanged
+    category: util
+    risk: medium
+
+  unassume-all:
+    command: '!git assumed | xargs -r git update-index --no-assume-unchanged'
+    description: Unassume all assumed-unchanged files
+    category: util
+    risk: medium
+
+  assumed:
+    command: '!git ls-files -v | grep ^h | cut -c 3-'
+    description: List all files assumed to be unchanged
+    category: util
+    risk: medium
+
+  aliases:
+    command: "!git config --get-regexp '^alias\\\\.' | cut -c 7- | sed 's/ / = /'"
+    description: List all configured git aliases
+    category: util
+    risk: medium
+
+  stashes:
+    command: stash list
+    description: List all stash entries
+    category: util
+    risk: safe
+
+  top:
+    command: rev-parse --show-toplevel
+    description: Print the repository root directory
+    category: util
+    risk: safe
+
+  default-branch:
+    command: config init.defaultBranch
+    description: Show the configured default branch name
+    category: util
+    risk: safe
+
+  current-branch:
+    command: rev-parse --abbrev-ref HEAD
+    description: Show the current branch name
+    category: util
+    risk: safe
+
+  upstream-branch:
+    command: "!git for-each-ref --format='%(upstream:short)' \"$(git symbolic-ref -q HEAD)\""
+    description: Show the upstream branch for the current branch
+    category: util
+    risk: medium
+
+  upb:
+    command: rev-parse --abbrev-ref "@{upstream}"
+    description: Show the upstream branch (short form)
+    category: util
+    risk: medium
+
+  exec:
+    command: '! exec'
+    description: Execute a shell command from the repository root
+    category: util
+    risk: medium
+
+  search-commits:
+    command: '!f() { query="$1"; shift; git log -S"$query" "$@"; }; f "$@"'
+    description: Search commit history for a given string
+    category: util
+    risk: medium
+
+  debug:
+    command: "!GIT_PAGER='' gdb --args git"
+    description: Debug a git builtin command using gdb
+    category: util
+    risk: medium
+
+  intercommit:
+    command: "!sh -c 'git show \"$1\" > .git/commit1 && git show \"$2\" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -"
+    description: Show the diff between two commits using interdiff
+    category: util
+    risk: medium
+
+  graphviz:
+    command: "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
+    description: Output a digraph of commit history for use with dotty
+    category: util
+    risk: medium
+
+  serve:
+    command: -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
+    description: Serve the local repo over the git protocol
+    category: util
+    risk: medium

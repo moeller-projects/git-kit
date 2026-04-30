@@ -1,0 +1,12 @@
+aliases:
+  rv:
+    command: revert
+    description: Undo changes from a commit by creating a new commit
+    category: revert
+    risk: medium
+
+  rvnc:
+    command: revert --no-commit
+    description: Revert without auto-committing
+    category: revert
+    risk: medium

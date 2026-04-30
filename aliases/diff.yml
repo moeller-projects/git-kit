@@ -1,24 +1,60 @@
 aliases:
-  df:
-    command: diff
-    description: Show unstaged changes
+  dc:
+    command: diff --cached
+    description: Show changes not yet staged
     category: diff
     risk: safe
 
-  dc:
-    command: diff --cached
-    description: Show staged changes
+  ds:
+    command: diff --staged
+    description: Show changes about to be commited
     category: diff
     risk: safe
 
   dw:
     command: diff --word-diff
-    description: Show word-level diff for unstaged changes
+    description: Show changes but by word, not line
     category: diff
     risk: safe
 
-  ds:
-    command: diff --stat
-    description: Show a summary of changed files
+  dd:
+    command: diff-deep
+    description: Show changes with our preferred options; a.k.a
     category: diff
     risk: safe
+
+  diff-all:
+    command: '!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done'
+    description: Open difftool for all changed files
+    category: diff
+    risk: medium
+
+  diff-changes:
+    command: diff --name-status -r
+    description: Show changed file names and status
+    category: diff
+    risk: safe
+
+  diff-stat:
+    command: diff --stat --ignore-space-change -r
+    description: Show a stat summary ignoring whitespace
+    category: diff
+    risk: safe
+
+  diff-staged:
+    command: diff --cached
+    description: Show staged changes (alias for diff --cached)
+    category: diff
+    risk: safe
+
+  diff-deep:
+    command: diff --check --dirstat --find-copies --find-renames --histogram --color
+    description: Diff with extra checks, stats, and rename detection
+    category: diff
+    risk: safe
+
+  diff-chunk:
+    command: '!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f'
+    description: Diff a single function or chunk between two commits
+    category: diff
+    risk: medium

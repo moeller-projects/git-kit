@@ -1,8 +1,2 @@
-[pretty]
-    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
-
 [alias]
-    ss = stash push -m
-    sp = stash pop
-    sl = stash list
-    sd = stash drop
+    snapshot = !git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index

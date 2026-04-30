@@ -1,7 +1,7 @@
-[pretty]
-    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
-
 [alias]
-    pf = push --force-with-lease
-    f = fetch --all --prune
-    pl = pull --rebase
+    rr = remote
+    rrs = remote show
+    rru = remote update
+    rrp = remote prune
+    remotes-push = !git remote | xargs -I% -n1 git push %
+    remotes-prune = !git remote | xargs -n 1 git remote prune

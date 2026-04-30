@@ -1,0 +1,4 @@
+[alias]
+    fa = fetch --all
+    fav = fetch --all --verbose
+    fap = fetch --all --prune

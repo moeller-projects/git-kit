@@ -1,0 +1,18 @@
+aliases:
+  pf:
+    command: pull --ff-only
+    description: Pull only if it can fast-forward, else fail
+    category: pull
+    risk: safe
+
+  pr:
+    command: pull --rebase
+    description: Pull with rebase for a cleaner linear history
+    category: pull
+    risk: medium
+
+  prp:
+    command: pull --rebase=preserve
+    description: Pull with rebase preserving merge commits
+    category: pull
+    risk: medium

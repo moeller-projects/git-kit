@@ -1,10 +1,59 @@
-[pretty]
-    kit = format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d
-
 [alias]
-    lg = log --graph --all --pretty=kit --date=short
-    ll = log --pretty=kit --date=short -20
-    lp = log --pretty=kit --date=short
-    lf = log --pretty=kit --date=short --stat
-    who = shortlog -sn --no-merges
-    today = log --since=midnight --pretty=kit --date=short
+    lg = log --graph
+    lo = log --oneline
+    lor = log --oneline --reverse
+    lp = log --patch
+    lfp = log --first-parent
+    lto = log --topo-order
+    ll = log-list
+    lll = log-list-long
+    log-fresh = log ORIG_HEAD.. --stat --no-merges
+    log-list = log --graph --topo-order --date=short --abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN]%Creset %Cblue%G?%Creset'
+    log-list-long = log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'
+    log-my = !git log --author "$(git config user.email)"
+    log-graph = log --graph --all --oneline --decorate
+    log-date-first = !git log --date-order --format=%cI | tail -1
+    log-date-last = log -1 --date-order --format=%cI
+    log-1-hour = log --since=1-hour-ago
+    log-1-day = log --since=1-day-ago
+    log-1-week = log --since=1-week-ago
+    log-1-month = log --since=1-month-ago
+    log-1-year = log --since=1-year-ago
+    log-my-hour = !git log --author "$(git config user.email)" --since=1-hour-ago
+    log-my-day = !git log --author "$(git config user.email)" --since=1-day-ago
+    log-my-week = !git log --author "$(git config user.email)" --since=1-week-ago
+    log-my-month = !git log --author "$(git config user.email)" --since=1-month-ago
+    log-my-year = !git log --author "$(git config user.email)" --since=1-year-ago
+    log-of-format-and-count = !f() { format="$1"; shift; git log "$@" --format=oneline --format="$format" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) "%"}}' | sort; }; f
+    log-of-count-and-format = !f() { format="$1"; shift; git log "$@" --format=oneline --format="$format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f
+    log-of-format-and-count-with-date = !f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) "%"}}' | sort -r; }; f
+    log-of-count-and-format-with-date = !f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f
+    log-of-email-and-count = !f() { git log-of-format-and-count "%aE" "$@"; }; f
+    log-of-count-and-email = !f() { git log-of-count-and-format "%aE" "$@"; }; f
+    log-of-hour-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f
+    log-of-count-and-hour = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f
+    log-of-day-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%d" "$@" ; }; f
+    log-of-count-and-day = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%d" "$@" ; }; f
+    log-of-week-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y#%V" "$@"; }; f
+    log-of-count-and-week = !f() { git log-of-count-and-format-with-date "%ad" "%Y#%V" "$@"; }; f
+    log-of-month-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m" "$@" ; }; f
+    log-of-count-and-month = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m" "$@" ; }; f
+    log-of-year-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y" "$@" ; }; f
+    log-of-count-and-year = !f() { git log-of-count-and-format-with-date "%ad" "%Y" "$@" ; }; f
+    log-of-hour-of-day-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%H" "$@"; }; f
+    log-of-count-and-hour-of-day = !f() { git log-of-count-and-format-with-date "%ad" "%H" "$@"; }; f
+    log-of-day-of-week-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%u" "$@"; }; f
+    log-of-count-and-day-of-week = !f() { git log-of-count-and-format-with-date "%ad" "%u" "$@"; }; f
+    log-of-week-of-year-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%V" "$@"; }; f
+    log-of-count-and-week-of-year = !f() { git log-of-count-and-format-with-date "%ad" "%V" "$@"; }; f
+    log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
+    log-timeline = log --format='%h %an %ar - %s'
+    log-local = log --oneline @{upstream}..HEAD
+    log-fetched = log --oneline HEAD..@{upstream}
+    chart = !f() { git log --format=oneline --format="%aE %at" --since=6-weeks-ago "$*" | awk ' function time_to_slot(t) { return strftime("%Y-%m-%d", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : "X") : "." } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf("Chart time range %s to %s.\\n", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = ""; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f
+    churn = !f() { git log --all --find-copies --find-renames --name-only --format='format:' "$@" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f
+    summary = !f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; git log-of-count-and-email | head -7; printf "\nMost-active dates, with commit count and %%...\n"; git log-of-count-and-day | head -7; printf "\nMost-active files, with churn count\n"; git churn | head -7; }; f
+    whois = !sh -c 'git log --regexp-ignore-case -1 --pretty="format:%an <%ae>\n" --author="$1"' -
+    whatis = show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
+    who = shortlog --summary --numbered --no-merges
+    issues = !sh -c "git log $1 --oneline | grep -o \\"ISSUE-[0-9]\\+\\" | sort -u"

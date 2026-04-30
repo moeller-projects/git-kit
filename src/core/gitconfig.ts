@@ -4,9 +4,6 @@ import { getDefaultGlobalGitConfigPath, getHomeDirectory } from './paths.js';
 
 type GitConfigSection = { header: string | null; lines: string[] };
 
-export const KIT_PRETTY_FORMAT_NAME = 'kit';
-export const KIT_PRETTY_FORMAT = 'format:%C(yellow bold)%h%Creset %C(cyan)%ad%Creset %C(white bold)%s%Creset %C(green dim)[%an]%Creset%C(auto)%d';
-
 function normalizeConfigValue(value: string, platform: NodeJS.Platform): string {
   const normalized = value.trim().replace(/^['"]|['"]$/g, '').replace(/\\/g, '/');
   return platform === 'win32' ? normalized.toLowerCase() : normalized;
@@ -83,12 +80,7 @@ function renderSections(sections: GitConfigSection[], hasTrailingNewline: boolea
 }
 
 export function renderAliasGitConfig(entries: Array<{ name: string; command: string }>): string {
-  const lines = [
-    '[pretty]',
-    `    ${KIT_PRETTY_FORMAT_NAME} = ${KIT_PRETTY_FORMAT}`,
-    '',
-    '[alias]',
-  ];
+  const lines = ['[alias]'];
 
   for (const entry of entries) {
     lines.push(`    ${entry.name} = ${entry.command}`);
@@ -147,46 +139,6 @@ export function addIncludePath(content: string, includePath: string, platform: N
   }
 
   return { changed: true, content: `${trimmed}${newline}${newline}${includeBlock}` };
-}
-
-export function addIncludePathAfter(
-  content: string,
-  insertPath: string,
-  afterPath: string,
-  platform: NodeJS.Platform = process.platform,
-): { changed: boolean; content: string } {
-  if (hasIncludePath(content, insertPath, platform)) {
-    return { changed: false, content };
-  }
-
-  const normalizedAfterPath = normalizeConfigValue(afterPath, platform);
-  const sections = splitSections(content);
-
-  const insertAfterIndex = sections.findIndex((section) => {
-    if (section.header == null || !isIncludeHeader(section.header)) {
-      return false;
-    }
-
-    return section.lines.some((line) => {
-      const configuredPath = parsePathLine(line);
-      return configuredPath != null && normalizeConfigValue(configuredPath, platform) === normalizedAfterPath;
-    });
-  });
-
-  if (insertAfterIndex === -1) {
-    return addIncludePath(content, insertPath, platform);
-  }
-
-  const newline = detectNewline(content);
-  const hasTrailingNewline = content.endsWith('\r\n') || content.endsWith('\n');
-  const normalizedInsertPath = insertPath.replace(/\\/g, '/');
-  const newSection: GitConfigSection = { header: '[include]', lines: [`    path = ${normalizedInsertPath}`, ''] };
-  const newSections = [...sections.slice(0, insertAfterIndex + 1), newSection, ...sections.slice(insertAfterIndex + 1)];
-
-  return {
-    changed: true,
-    content: renderSections(newSections, hasTrailingNewline, newline),
-  };
 }
 
 export function removeIncludePath(content: string, includePath: string, platform: NodeJS.Platform = process.platform): { changed: boolean; content: string; removedCount: number } {

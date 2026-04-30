@@ -1,0 +1,4 @@
+[alias]
+    last-tag = describe --tags --abbrev=0
+    last-tagged = !git describe --tags "$(git rev-list --tags --max-count=1)"
+    tags = tag -n1 --list
