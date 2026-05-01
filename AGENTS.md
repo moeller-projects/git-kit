@@ -21,7 +21,7 @@ src/
   cli.ts      # CLI entry point (Commander)
   commands/   # One file per CLI sub-command (install, uninstall, list, …)
   core/       # Shared utilities: alias loading, gitconfig I/O, paths, logger
-test/         # Bun test files (*. test.ts)
+test/         # Bun test files (*.test.ts)
 generated/    # Auto-generated gitconfig alias file — DO NOT hand-edit
 docs/         # Auto-generated alias documentation — DO NOT hand-edit
 dist/         # Build output — DO NOT commit
