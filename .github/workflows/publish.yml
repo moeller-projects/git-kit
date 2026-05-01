@@ -1,9 +1,15 @@
 name: Publish package
 
 on:
-  push:
-    branches:
-      - main
+  # Disabled — re-enable by restoring the push trigger below.
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type "publish" to confirm a manual publish'
+        required: true
 
 jobs:
   publish:
@@ -36,3 +42,5 @@ jobs:
 
       - if: steps.package-version.outputs.published == 'false'
         run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
