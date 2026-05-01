@@ -14,7 +14,7 @@ A modular Git alias distribution toolkit. Installs a curated set of Git aliases 
 ## Requirements
 
 - [Git](https://git-scm.com/) 2.x or later
-- [Node.js](https://nodejs.org/) 18 or later (for npm install)
+- [Node.js](https://nodejs.org/) 18 or later (required to install and run `git-kit`)
 
 ## Installation
 
@@ -26,7 +26,7 @@ npm install -g @lukasmoeller/git-kit
 
 ### Install aliases
 
-Install the default alias profile:
+Install the full alias set:
 
 ```bash
 git-kit install
@@ -68,17 +68,47 @@ Update the managed alias file with the latest aliases:
 git-kit update
 ```
 
+Update a specific profile:
+
+```bash
+git-kit update --profile power
+```
+
 ### Check installation
 
 ```bash
 git-kit doctor
 ```
 
+Check a specific profile:
+
+```bash
+git-kit doctor --profile minimal
+```
+
 ### Uninstall
+
+Uninstall all managed aliases:
 
 ```bash
 git-kit uninstall
 ```
+
+Uninstall a specific profile:
+
+```bash
+git-kit uninstall --profile minimal
+```
+
+### Generate configs and docs
+
+Regenerate the managed alias config files and documentation from the source alias definitions:
+
+```bash
+git-kit generate
+```
+
+> This is primarily a development/maintainer command. Run it after modifying files in `aliases/`.
 
 ## Configuration
 
@@ -87,7 +117,7 @@ git-kit uninstall
 Managed files are stored at:
 
 - **macOS/Linux:** `~/.config/git-kit`
-- **Windows:** `%APPDATA%/git-kit`
+- **Windows:** `%APPDATA%\git-kit`
 
 ### Profiles
 
