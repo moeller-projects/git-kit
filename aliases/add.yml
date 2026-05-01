@@ -18,49 +18,49 @@ aliases:
     risk: medium
 
   add-cached:
-    command: '!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all cached files to the index
     category: add
     risk: medium
 
   add-deleted:
-    command: '!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all deleted files to the index
     category: add
     risk: medium
 
   add-others:
-    command: '!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all untracked files to the index
     category: add
     risk: medium
 
   add-ignored:
-    command: '!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all ignored files to the index
     category: add
     risk: medium
 
   add-killed:
-    command: '!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all killed files to the index
     category: add
     risk: medium
 
   add-modified:
-    command: '!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all modified files to the index
     category: add
     risk: medium
 
   add-stage:
-    command: '!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all staged files to the index
     category: add
     risk: medium
 
   add-unmerged:
-    command: '!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add $files; }; f'
+    command: '!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all unmerged files to the index
     category: add
     risk: medium
