@@ -2,6 +2,7 @@
   "name": "lazy",
   "description": "Comfortable aliases for everyday development",
   "includes": [
+    "core.gitconfig",
     "shortcuts.gitconfig",
     "status.gitconfig",
     "branch.gitconfig",

@@ -71,12 +71,6 @@ aliases:
     category: reset
     risk: medium
 
-  discard:
-    command: checkout --
-    description: Discard working directory changes to a file
-    category: reset
-    risk: medium
-
   cleaner:
     command: clean -dff
     description: Clean working tree with force options
@@ -96,8 +90,8 @@ aliases:
     risk: dangerous
 
   expunge:
-    command: '!f() { git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $1" --prune-empty --tag-name-filter "cat" -- --all ; }; f'
-    description: Permanently remove a file from all history
+    command: '!f() { git filter-repo --path "$1" --invert-paths --force; }; f'
+    description: Permanently remove a file from all history (requires git-filter-repo)
     category: reset
     risk: dangerous
 

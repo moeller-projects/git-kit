@@ -2,29 +2,29 @@
     aa = add --all
     ap = add --patch
     au = add --update
-    add-cached = !git add "$(git ls-files --cached             | sort -u)"
-    add-deleted = !git add "$(git ls-files --deleted            | sort -u)"
-    add-others = !git add "$(git ls-files --others             | sort -u)"
-    add-ignored = !git add "$(git ls-files --ignored            | sort -u)"
-    add-killed = !git add "$(git ls-files --killed             | sort -u)"
-    add-modified = !git add "$(git ls-files --modified           | sort -u)"
-    add-stage = !git add "$(git ls-files --stage    | cut -f2 | sort -u)"
-    add-unmerged = !git add "$(git ls-files --unmerged | cut -f2 | sort -u)"
-    edit-cached = !$(git var GIT_EDITOR) "$(git ls-files --cached             | sort -u)"
-    edit-deleted = !$(git var GIT_EDITOR) "$(git ls-files --deleted            | sort -u)"
-    edit-others = !$(git var GIT_EDITOR) "$(git ls-files --others             | sort -u)"
-    edit-ignored = !$(git var GIT_EDITOR) "$(git ls-files --ignored            | sort -u)"
-    edit-killed = !$(git var GIT_EDITOR) "$(git ls-files --killed             | sort -u)"
-    edit-modified = !$(git var GIT_EDITOR) "$(git ls-files --modified           | sort -u)"
-    edit-stage = !$(git var GIT_EDITOR) "$(git ls-files --stage    | cut -f2 | sort -u)"
-    edit-unmerged = !$(git var GIT_EDITOR) "$(git ls-files --unmerged | cut -f2 | sort -u)"
+    add-cached = !f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-deleted = !f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-others = !f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-ignored = !f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-killed = !f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-modified = !f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-stage = !f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || git add $files; }; f
+    add-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add $files; }; f
+    edit-cached = !f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-deleted = !f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-others = !f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-ignored = !f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-killed = !f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-modified = !f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-stage = !f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    edit-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
     bm = branch --merged
     bnm = branch --no-merged
     bed = branch --edit-description
     bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f
     bv = branch --verbose
     bvv = branch --verbose --verbose
-    heads = !git log origin/main.. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'
+    heads = !git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'
     branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f
     branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f
     branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
@@ -60,6 +60,9 @@
     commit-message-key-lines = !f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f
     wip = !git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip
     unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1
+    unstage = restore --staged
+    discard = restore
+    root = rev-parse --show-toplevel
     dc = diff --cached
     ds = diff --staged
     dw = diff --word-diff
@@ -67,7 +70,6 @@
     diff-all = !for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done
     diff-changes = diff --name-status -r
     diff-stat = diff --stat --ignore-space-change -r
-    diff-staged = diff --cached
     diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
     diff-chunk = !f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f
     fa = fetch --all
@@ -181,11 +183,10 @@
     undo-to-upstream = !git reset --hard "$(git upstream-branch)"
     uncommit = reset --soft HEAD~1
     unadd = reset HEAD
-    discard = checkout --
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
-    expunge = !f() { git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $1" --prune-empty --tag-name-filter "cat" -- --all ; }; f
+    expunge = !f() { git filter-repo --path "$1" --invert-paths --force; }; f
     show-unreachable = !git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log
     rv = revert
     rvnc = revert --no-commit
@@ -265,7 +266,7 @@
     unpublish = !f() { git push "${1:-origin}" :"$(git current-branch)"; }; f
     inbound = !git remote update --prune; git log ..@{upstream}
     outbound = log @{upstream}..
-    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout main && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f
+    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f
     pruner = !git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all
     repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
     optimizer = !git pruner; git repacker; git prune-packed

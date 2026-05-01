@@ -102,7 +102,7 @@ aliases:
     risk: safe
 
   reincarnate:
-    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout main && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
+    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
     description: Delete and recreate a branch based on main
     category: workflow
     risk: dangerous
