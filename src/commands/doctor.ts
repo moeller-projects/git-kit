@@ -23,9 +23,9 @@ async function exists(filePath: string): Promise<boolean> {
   }
 }
 
-export async function doctorCommand(): Promise<DoctorCheck[]> {
+export async function doctorCommand(profile?: string): Promise<DoctorCheck[]> {
   const managedConfigDirectory = getManagedConfigDirectory();
-  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory);
+  const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory, profile);
   const aliasesDirectory = resolvePackagePath('aliases');
   const generatedGitConfigPath = resolvePackagePath('generated', 'aliases.gitconfig');
   const aliases = await loadAliasesFromDirectory(aliasesDirectory);

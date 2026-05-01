@@ -1,7 +1,7 @@
 aliases:
   dc:
     command: diff --cached
-    description: Show changes not yet staged
+    description: Show staged changes (alias for diff --cached)
     category: diff
     risk: safe
 
@@ -38,12 +38,6 @@ aliases:
   diff-stat:
     command: diff --stat --ignore-space-change -r
     description: Show a stat summary ignoring whitespace
-    category: diff
-    risk: safe
-
-  diff-staged:
-    command: diff --cached
-    description: Show staged changes (alias for diff --cached)
     category: diff
     risk: safe
 

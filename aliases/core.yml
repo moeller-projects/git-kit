@@ -1,0 +1,18 @@
+aliases:
+  unstage:
+    command: restore --staged
+    description: Unstage changes from the index (restore --staged)
+    category: core
+    risk: medium
+
+  discard:
+    command: restore
+    description: Discard working directory changes to a file
+    category: core
+    risk: medium
+
+  root:
+    command: rev-parse --show-toplevel
+    description: Show the top-level directory of the repository
+    category: core
+    risk: safe

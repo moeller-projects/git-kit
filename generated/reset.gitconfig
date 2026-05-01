@@ -11,9 +11,8 @@
     undo-to-upstream = !git reset --hard "$(git upstream-branch)"
     uncommit = reset --soft HEAD~1
     unadd = reset HEAD
-    discard = checkout --
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
-    expunge = !f() { git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $1" --prune-empty --tag-name-filter "cat" -- --all ; }; f
+    expunge = !f() { git filter-repo --path "$1" --invert-paths --force; }; f
     show-unreachable = !git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log

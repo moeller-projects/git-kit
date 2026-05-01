@@ -7,6 +7,7 @@ import { installCommand } from './commands/install.js';
 import { listCommand } from './commands/list.js';
 import { profilesCommand } from './commands/profiles.js';
 import { uninstallCommand } from './commands/uninstall.js';
+import { updateCommand } from './commands/update.js';
 import { logger } from './core/logger.js';
 
 async function run(): Promise<void> {
@@ -48,12 +49,21 @@ async function run(): Promise<void> {
   program
     .command('doctor')
     .description('Run installation and configuration checks.')
-    .action(async () => {
-      const checks = await doctorCommand();
+    .option('--profile <name>', 'Check a specific alias profile')
+    .action(async (options: { profile?: string }) => {
+      const checks = await doctorCommand(options.profile);
       logger.info(formatDoctorChecks(checks));
       if (checks.some((check) => !check.ok)) {
         process.exitCode = 1;
       }
+    });
+
+  program
+    .command('update')
+    .description('Update the managed alias include with the latest aliases.')
+    .option('--profile <name>', 'Update only a specific alias profile')
+    .action(async (options: { profile?: string }) => {
+      logger.info(await updateCommand(options.profile));
     });
 
   program

@@ -9,7 +9,7 @@ export interface AliasEntry {
   command: string;
   description: string;
   category: string;
-  risk: string;
+  risk: AliasRisk | '';
 }
 
 export interface AliasValidationIssue {
@@ -69,7 +69,7 @@ export function parseAliasesYaml(content: string): AliasEntry[] {
         command: '',
         description: '',
         category: '',
-        risk: '',
+        risk: '' as AliasRisk | '',
       } satisfies AliasEntry;
     }
 
@@ -78,7 +78,10 @@ export function parseAliasesYaml(content: string): AliasEntry[] {
       command: readRequiredString(valueNode, 'command'),
       description: readRequiredString(valueNode, 'description'),
       category: readRequiredString(valueNode, 'category'),
-      risk: readRequiredString(valueNode, 'risk'),
+      risk: ((): AliasRisk | '' => {
+        const raw = readRequiredString(valueNode, 'risk');
+        return validRisks.has(raw as AliasRisk) ? (raw as AliasRisk) : '';
+      })(),
     } satisfies AliasEntry;
   });
 }

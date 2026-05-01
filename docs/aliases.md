@@ -9,22 +9,22 @@ Generated from `aliases/`.
 | `aa` | `add --all` | Add all files including untracked | medium |
 | `ap` | `add --patch` | Add files interactively by patch | medium |
 | `au` | `add --update` | Add only updated (already tracked) files | medium |
-| `add-cached` | `!git add "$(git ls-files --cached             | sort -u)"` | Add all cached files to the index | medium |
-| `add-deleted` | `!git add "$(git ls-files --deleted            | sort -u)"` | Add all deleted files to the index | medium |
-| `add-others` | `!git add "$(git ls-files --others             | sort -u)"` | Add all untracked files to the index | medium |
-| `add-ignored` | `!git add "$(git ls-files --ignored            | sort -u)"` | Add all ignored files to the index | medium |
-| `add-killed` | `!git add "$(git ls-files --killed             | sort -u)"` | Add all killed files to the index | medium |
-| `add-modified` | `!git add "$(git ls-files --modified           | sort -u)"` | Add all modified files to the index | medium |
-| `add-stage` | `!git add "$(git ls-files --stage    | cut -f2 | sort -u)"` | Add all staged files to the index | medium |
-| `add-unmerged` | `!git add "$(git ls-files --unmerged | cut -f2 | sort -u)"` | Add all unmerged files to the index | medium |
-| `edit-cached` | `!$(git var GIT_EDITOR) "$(git ls-files --cached             | sort -u)"` | Open all cached files in the editor | medium |
-| `edit-deleted` | `!$(git var GIT_EDITOR) "$(git ls-files --deleted            | sort -u)"` | Open all deleted files in the editor | medium |
-| `edit-others` | `!$(git var GIT_EDITOR) "$(git ls-files --others             | sort -u)"` | Open all untracked files in the editor | medium |
-| `edit-ignored` | `!$(git var GIT_EDITOR) "$(git ls-files --ignored            | sort -u)"` | Open all ignored files in the editor | medium |
-| `edit-killed` | `!$(git var GIT_EDITOR) "$(git ls-files --killed             | sort -u)"` | Open all killed files in the editor | medium |
-| `edit-modified` | `!$(git var GIT_EDITOR) "$(git ls-files --modified           | sort -u)"` | Open all modified files in the editor | medium |
-| `edit-stage` | `!$(git var GIT_EDITOR) "$(git ls-files --stage    | cut -f2 | sort -u)"` | Open all staged files in the editor | medium |
-| `edit-unmerged` | `!$(git var GIT_EDITOR) "$(git ls-files --unmerged | cut -f2 | sort -u)"` | Open all unmerged files in the editor | medium |
+| `add-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all cached files to the index | medium |
+| `add-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all deleted files to the index | medium |
+| `add-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all untracked files to the index | medium |
+| `add-ignored` | `!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all ignored files to the index | medium |
+| `add-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all killed files to the index | medium |
+| `add-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all modified files to the index | medium |
+| `add-stage` | `!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all staged files to the index | medium |
+| `add-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all unmerged files to the index | medium |
+| `edit-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all cached files in the editor | medium |
+| `edit-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all deleted files in the editor | medium |
+| `edit-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all untracked files in the editor | medium |
+| `edit-ignored` | `!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all ignored files in the editor | medium |
+| `edit-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all killed files in the editor | medium |
+| `edit-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all modified files in the editor | medium |
+| `edit-stage` | `!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all staged files in the editor | medium |
+| `edit-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all unmerged files in the editor | medium |
 
 ## branch
 
@@ -36,7 +36,7 @@ Generated from `aliases/`.
 | `bsd` | `!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f` | branch with show description; ideally git will add this feature in the future as `git --show-desc... | medium |
 | `bv` | `branch --verbose` | branch verbose: When in list mode, show the hash, the commit subject line, etc | safe |
 | `bvv` | `branch --verbose --verbose` | branch verbose verbose: When in list mode, show the hash the commit subject line, the upstream br... | safe |
-| `heads` | `!git log origin/main.. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'` | Show local commits not yet on origin/main | medium |
+| `heads` | `!git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'` | Show local commits not yet on origin/main | medium |
 | `branch-commit-first` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's first commit hash | medium |
 | `branch-commit-last` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's last commit hash | medium |
 | `branch-commit-prev` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f` | Show a branch's previous commit hash | medium |
@@ -88,18 +88,25 @@ Generated from `aliases/`.
 | `wip` | `!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip` | Stage all changes and commit with message "wip" | medium |
 | `unwip` | `!git log --max-count=1 | grep -q -c wip && git reset HEAD~1` | Undo the last commit if its message is "wip" | medium |
 
+## core
+
+| Alias | Command | Description | Risk |
+| --- | --- | --- | --- |
+| `unstage` | `restore --staged` | Unstage changes from the index (restore --staged) | medium |
+| `discard` | `restore` | Discard working directory changes to a file | medium |
+| `root` | `rev-parse --show-toplevel` | Show the top-level directory of the repository | safe |
+
 ## diff
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `dc` | `diff --cached` | Show changes not yet staged | safe |
+| `dc` | `diff --cached` | Show staged changes (alias for diff --cached) | safe |
 | `ds` | `diff --staged` | Show changes about to be committed | safe |
 | `dw` | `diff --word-diff` | Show changes but by word, not line | safe |
 | `dd` | `diff-deep` | Show changes with our preferred options; a.k.a | safe |
 | `diff-all` | `!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done` | Open difftool for all changed files | medium |
 | `diff-changes` | `diff --name-status -r` | Show changed file names and status | safe |
 | `diff-stat` | `diff --stat --ignore-space-change -r` | Show a stat summary ignoring whitespace | safe |
-| `diff-staged` | `diff --cached` | Show staged changes (alias for diff --cached) | safe |
 | `diff-deep` | `diff --check --dirstat --find-copies --find-renames --histogram --color` | Diff with extra checks, stats, and rename detection | safe |
 | `diff-chunk` | `!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f` | Diff a single function or chunk between two commits | medium |
 
@@ -263,11 +270,10 @@ Generated from `aliases/`.
 | `undo-to-upstream` | `!git reset --hard "$(git upstream-branch)"` | Git undo-to-upstream alias | dangerous |
 | `uncommit` | `reset --soft HEAD~1` | Undo the last commit, keeping changes staged | medium |
 | `unadd` | `reset HEAD` | Unstage changes from the index | medium |
-| `discard` | `checkout --` | Discard working directory changes to a file | medium |
 | `cleaner` | `clean -dff` | Clean working tree with force options | dangerous |
 | `cleanest` | `clean -dffx` | Clean working tree with the most aggressive options | dangerous |
 | `cleanout` | `!git clean -df && git checkout -- .` | Clean and checkout to restore working tree | dangerous |
-| `expunge` | `!f() { git filter-branch --force --index-filter "git rm --cached --ignore-unmatch $1" --prune-empty --tag-name-filter "cat" -- --all ; }; f` | Permanently remove a file from all history | dangerous |
+| `expunge` | `!f() { git filter-repo --path "$1" --invert-paths --force; }; f` | Permanently remove a file from all history (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
 
 ## revert
@@ -392,7 +398,7 @@ Generated from `aliases/`.
 | `unpublish` | `!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f` | Delete the remote version of the current branch | dangerous |
 | `inbound` | `!git remote update --prune; git log ..@{upstream}` | Show incoming commits from upstream | medium |
 | `outbound` | `log @{upstream}..` | Show outgoing commits not yet pushed | safe |
-| `reincarnate` | `!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout main && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f` | Delete and recreate a branch based on main | dangerous |
+| `reincarnate` | `!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f` | Delete and recreate a branch based on main | dangerous |
 | `pruner` | `!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all` | Prune all unreachable objects immediately | medium |
 | `repacker` | `repack -a -d -f --depth=300 --window=300 --window-memory=1g` | Repack the repository for optimal storage | medium |
 | `optimizer` | `!git pruner; git repacker; git prune-packed` | Run pruner, repacker, and prune-packed to optimize the repo | medium |

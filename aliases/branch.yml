@@ -36,7 +36,7 @@ aliases:
     risk: safe
 
   heads:
-    command: "!git log origin/main.. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    command: "!git log \"origin/$(git default-branch)\".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
     description: Show local commits not yet on origin/main
     category: branch
     risk: medium
