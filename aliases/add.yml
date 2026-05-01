@@ -18,43 +18,43 @@ aliases:
     risk: medium
 
   add-cached:
-    command: '!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all cached files to the index
     category: add
     risk: medium
 
   add-deleted:
-    command: '!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all deleted files to the index
     category: add
     risk: medium
 
   add-others:
-    command: '!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all untracked files to the index
     category: add
     risk: medium
 
   add-ignored:
-    command: '!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all ignored files to the index
     category: add
     risk: medium
 
   add-killed:
-    command: '!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all killed files to the index
     category: add
     risk: medium
 
   add-modified:
-    command: '!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all modified files to the index
     category: add
     risk: medium
 
   add-stage:
-    command: '!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f'
     description: Add all staged files to the index
     category: add
     risk: medium
@@ -66,43 +66,43 @@ aliases:
     risk: medium
 
   edit-cached:
-    command: '!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all cached files in the editor
     category: add
     risk: medium
 
   edit-deleted:
-    command: '!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all deleted files in the editor
     category: add
     risk: medium
 
   edit-others:
-    command: '!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all untracked files in the editor
     category: add
     risk: medium
 
   edit-ignored:
-    command: '!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all ignored files in the editor
     category: add
     risk: medium
 
   edit-killed:
-    command: '!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all killed files in the editor
     category: add
     risk: medium
 
   edit-modified:
-    command: '!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all modified files in the editor
     category: add
     risk: medium
 
   edit-stage:
-    command: '!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
     description: Open all staged files in the editor
     category: add
     risk: medium

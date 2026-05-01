@@ -9,21 +9,21 @@ Generated from `aliases/`.
 | `aa` | `add --all` | Add all files including untracked | medium |
 | `ap` | `add --patch` | Add files interactively by patch | medium |
 | `au` | `add --update` | Add only updated (already tracked) files | medium |
-| `add-cached` | `!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all cached files to the index | medium |
-| `add-deleted` | `!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all deleted files to the index | medium |
-| `add-others` | `!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all untracked files to the index | medium |
-| `add-ignored` | `!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all ignored files to the index | medium |
-| `add-killed` | `!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all killed files to the index | medium |
-| `add-modified` | `!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all modified files to the index | medium |
-| `add-stage` | `!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all staged files to the index | medium |
+| `add-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all cached files to the index | medium |
+| `add-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all deleted files to the index | medium |
+| `add-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all untracked files to the index | medium |
+| `add-ignored` | `!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all ignored files to the index | medium |
+| `add-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all killed files to the index | medium |
+| `add-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all modified files to the index | medium |
+| `add-stage` | `!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all staged files to the index | medium |
 | `add-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all unmerged files to the index | medium |
-| `edit-cached` | `!f() { files=$(git ls-files --cached             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all cached files in the editor | medium |
-| `edit-deleted` | `!f() { files=$(git ls-files --deleted            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all deleted files in the editor | medium |
-| `edit-others` | `!f() { files=$(git ls-files --others             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all untracked files in the editor | medium |
-| `edit-ignored` | `!f() { files=$(git ls-files --ignored            | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all ignored files in the editor | medium |
-| `edit-killed` | `!f() { files=$(git ls-files --killed             | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all killed files in the editor | medium |
-| `edit-modified` | `!f() { files=$(git ls-files --modified           | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all modified files in the editor | medium |
-| `edit-stage` | `!f() { files=$(git ls-files --stage    | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all staged files in the editor | medium |
+| `edit-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all cached files in the editor | medium |
+| `edit-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all deleted files in the editor | medium |
+| `edit-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all untracked files in the editor | medium |
+| `edit-ignored` | `!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all ignored files in the editor | medium |
+| `edit-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all killed files in the editor | medium |
+| `edit-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all modified files in the editor | medium |
+| `edit-stage` | `!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all staged files in the editor | medium |
 | `edit-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all unmerged files in the editor | medium |
 
 ## branch
