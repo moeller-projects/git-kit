@@ -43,10 +43,10 @@ bun install
 bun run generate
 bun test
 bun run build
-git diff --exit-code   # fails if generated files are stale
+bun run validate      # fails if generated/docs are stale
 ```
 
-There is no dedicated lint script. TypeScript type-checking is performed implicitly by Bun during test and build.
+There is no dedicated lint or type-check script. `bun test` and `bun run build` execute/transpile the TypeScript code, but this workflow does not include a separate `tsc --noEmit` type-check step.
 
 ## Coding Style & Naming Conventions
 
