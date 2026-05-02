@@ -2,3 +2,4 @@
     co = checkout
     cong = checkout --no-guess
     cob = checkout -b
+    swb = switch --create

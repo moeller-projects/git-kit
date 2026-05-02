@@ -35,11 +35,11 @@ aliases:
     category: add
     risk: medium
 
-  add-ignored:
-    command: '!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f'
-    description: Add all ignored files to the index
+  add-force-ignored:
+    command: '!f() { files=$(git ls-files --ignored --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f'
+    description: "WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index."
     category: add
-    risk: medium
+    risk: dangerous
 
   add-killed:
     command: '!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f'

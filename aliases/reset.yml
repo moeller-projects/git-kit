@@ -28,6 +28,7 @@ aliases:
     description: Git reset-to-upstream alias
     category: reset
     risk: dangerous
+    depends_on: [upstream-branch]
 
   undo-commit:
     command: reset --soft HEAD~1
@@ -58,6 +59,7 @@ aliases:
     description: Git undo-to-upstream alias
     category: reset
     risk: dangerous
+    depends_on: [upstream-branch]
 
   uncommit:
     command: reset --soft HEAD~1
@@ -66,10 +68,11 @@ aliases:
     risk: medium
 
   unadd:
-    command: reset HEAD
-    description: Unstage changes from the index
+    command: restore --staged
+    description: Unstage changes from the index (modern restore --staged, requires git >= 2.23)
     category: reset
     risk: medium
+    since_version: "2.23"
 
   cleaner:
     command: clean -dff
@@ -90,8 +93,8 @@ aliases:
     risk: dangerous
 
   expunge:
-    command: '!f() { git filter-repo --path "$1" --invert-paths --force; }; f'
-    description: Permanently remove a file from all history (requires git-filter-repo)
+    command: "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
+    description: Permanently remove a file from all history with confirmation prompt (requires git-filter-repo)
     category: reset
     risk: dangerous
 

@@ -16,3 +16,10 @@ aliases:
     description: Create and checkout a new branch
     category: checkout
     risk: medium
+
+  swb:
+    command: switch --create
+    description: Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23)
+    category: checkout
+    risk: medium
+    since_version: "2.23"

@@ -4,3 +4,33 @@ aliases:
     description: Snapshot working tree to stash without removing changes
     category: stash
     risk: medium
+
+  sp:
+    command: stash push
+    description: Push current changes onto the stash stack
+    category: stash
+    risk: medium
+
+  sl:
+    command: stash list
+    description: List all stash entries
+    category: stash
+    risk: safe
+
+  sd:
+    command: stash drop
+    description: Drop the most recent stash entry
+    category: stash
+    risk: medium
+
+  spo:
+    command: stash pop
+    description: Pop and apply the most recent stash entry
+    category: stash
+    risk: medium
+
+  ssa:
+    command: stash show --patch
+    description: Show the most recent stash entry as a full patch diff
+    category: stash
+    risk: safe

@@ -52,6 +52,7 @@ aliases:
     description: Initialize a repo with an empty rebaseable first commit
     category: util
     risk: medium
+    depends_on: [init-empty]
 
   assume:
     command: update-index --assume-unchanged
@@ -70,12 +71,14 @@ aliases:
     description: Assume all modified files are unchanged
     category: util
     risk: medium
+    depends_on: [assume]
 
   unassume-all:
     command: '!git assumed | xargs -r git update-index --no-assume-unchanged'
     description: Unassume all assumed-unchanged files
     category: util
     risk: medium
+    depends_on: [assumed]
 
   assumed:
     command: '!git ls-files -v | grep ^h | cut -c 3-'

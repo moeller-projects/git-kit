@@ -5,7 +5,7 @@
     add-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-ignored = !f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f
+    add-force-ignored = !f() { files=$(git ls-files --ignored --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
     add-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f

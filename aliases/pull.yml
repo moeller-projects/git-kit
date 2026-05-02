@@ -12,7 +12,8 @@ aliases:
     risk: medium
 
   prp:
-    command: pull --rebase=preserve
-    description: Pull with rebase preserving merge commits
+    command: pull --rebase=merges
+    description: Pull with rebase preserving merge commits (replaces deprecated --rebase=preserve, requires git >= 2.18)
     category: pull
     risk: medium
+    since_version: "2.18"
