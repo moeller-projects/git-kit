@@ -48,14 +48,14 @@ aliases:
     risk: medium
 
   put-dry-run:
-    command: '!git commit --all --dry-run && git push --dry-run'
-    description: Preview what put would commit and push without making any changes
+    command: '!git diff --cached --stat && git push --dry-run'
+    description: Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push
     category: workflow
     risk: medium
 
   mainly:
     command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
-    description: Reset local branch to match origin main (prompts for confirmation before hard-reset)
+    description: Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset)
     category: workflow
     risk: dangerous
     depends_on: [default-branch]

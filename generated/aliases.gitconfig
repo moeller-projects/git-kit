@@ -5,7 +5,8 @@
     add-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-force-ignored = !f() { files=$(git ls-files --ignored --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
+    add-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
+    add-force-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
     add-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f
     add-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f
@@ -134,7 +135,7 @@
     log-fetched = log --oneline HEAD..@{upstream}
     chart = !f() { git log --format=oneline --format="%aE %at" --since=6-weeks-ago "$*" | awk ' function time_to_slot(t) { return strftime("%Y-%m-%d", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : "X") : "." } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf("Chart time range %s to %s.\\n", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = ""; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f
     churn = !f() { git log --all --find-copies --find-renames --name-only --format='format:' "$@" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f
-    summary = !f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; (git log-of-count-and-email | head -7) || echo "[unavailable]"; printf "\nMost-active dates, with commit count and %%...\n"; (git log-of-count-and-day | head -7) || echo "[unavailable]"; printf "\nMost-active files, with churn count\n"; (git churn | head -7) || echo "[unavailable]"; }; f
+    summary = !f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; if out=$(git log-of-count-and-email 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active dates, with commit count and %%...\n"; if out=$(git log-of-count-and-day 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active files, with churn count\n"; if out=$(git churn 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; }; f
     whois = !sh -c 'git log --regexp-ignore-case -1 --pretty="format:%an <%ae>\n" --author="$1"' -
     whatis = show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
     who = shortlog --summary --numbered --no-merges
@@ -184,7 +185,7 @@
     undo-to-pristine = !git reset --hard && git clean -ffdx
     undo-to-upstream = !git reset --hard "$(git upstream-branch)"
     uncommit = reset --soft HEAD~1
-    unadd = restore --staged
+    unadd = !f() { git restore --staged -- "${@:-.}"; }; f
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
@@ -203,7 +204,7 @@
     o = checkout
     p = pull
     s = status
-    w = log --diff-filter=D --summary
+    w = log --name-status
     sw = switch
     snapshot = !git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index
     sp = stash push
@@ -265,7 +266,7 @@
     pushy-check = !git log @{upstream}.. && git push --force-with-lease
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
     put = !git commit --all && git push
-    put-dry-run = !git commit --all --dry-run && git push --dry-run
+    put-dry-run = !git diff --cached --stat && git push --dry-run
     mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
     ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
     push1 = !git push origin "$(git current-branch)"

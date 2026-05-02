@@ -35,9 +35,15 @@ aliases:
     category: add
     risk: medium
 
-  add-force-ignored:
-    command: '!f() { files=$(git ls-files --ignored --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f'
+  add-ignored:
+    command: '!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f'
     description: "WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index."
+    category: add
+    risk: dangerous
+
+  add-force-ignored:
+    command: '!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f'
+    description: "WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index (alias for add-ignored)."
     category: add
     risk: dangerous
 

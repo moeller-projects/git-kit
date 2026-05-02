@@ -10,5 +10,5 @@
     o = checkout
     p = pull
     s = status
-    w = log --diff-filter=D --summary
+    w = log --name-status
     sw = switch

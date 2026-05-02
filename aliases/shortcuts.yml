@@ -66,8 +66,8 @@ aliases:
     risk: safe
 
   w:
-    command: log --diff-filter=D --summary
-    description: Show commits that deleted files with a summary (replaces deprecated git whatchanged; note this filters to deletions only)
+    command: log --name-status
+    description: Show commit history with file status (modern equivalent of deprecated git whatchanged)
     category: shortcuts
     risk: safe
 
