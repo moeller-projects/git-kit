@@ -275,7 +275,7 @@ Generated from `aliases/`.
 | `cleaner` | `clean -dff` | Clean working tree with force options | dangerous |
 | `cleanest` | `clean -dffx` | Clean working tree with the most aggressive options | dangerous |
 | `cleanout` | `!git clean -df && git checkout -- .` | Clean and checkout to restore working tree | dangerous |
-| `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
+| `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
 
 ## revert
@@ -300,7 +300,7 @@ Generated from `aliases/`.
 | `o` | `checkout` | Shortcut for git checkout | medium |
 | `p` | `pull` | Shortcut for git pull | medium |
 | `s` | `status` | Shortcut for git status | safe |
-| `w` | `log --diff-filter=D --summary` | Show commits with deleted files (replaces deprecated git whatchanged) | safe |
+| `w` | `log --diff-filter=D --summary` | Show commits that deleted files with a summary (replaces deprecated git whatchanged; note this filters to deletions only) | safe |
 | `sw` | `switch` | Shortcut for git switch (modern checkout alternative, requires git >= 2.23) | medium |
 
 ## stash
@@ -398,7 +398,7 @@ Generated from `aliases/`.
 | `get` | `!git fetch --prune && git pull --rebase && git submodule update --init --recursive` | Fetch, rebase pull, and update all submodules | medium |
 | `put` | `!git commit --all && git push` | Commit all changes and push | medium |
 | `put-dry-run` | `!git commit --all --dry-run && git push --dry-run` | Preview what put would commit and push without making any changes | medium |
-| `mainly` | `!f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f` | Reset local branch to match origin main (prompts for confirmation before hard-reset) | dangerous |
+| `mainly` | `!f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f` | Reset local branch to match origin main (prompts for confirmation before hard-reset) | dangerous |
 | `ignore` | `!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore` | Append all untracked files to .gitignore | medium |
 | `push1` | `!git push origin "$(git current-branch)"` | Push the current branch to origin | medium |
 | `pull1` | `!git pull origin "$(git current-branch)"` | Pull the current branch from origin | medium |

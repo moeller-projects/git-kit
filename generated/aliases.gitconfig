@@ -188,7 +188,7 @@
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
-    expunge = !f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f
+    expunge = !f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f
     show-unreachable = !git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log
     rv = revert
     rvnc = revert --no-commit
@@ -266,7 +266,7 @@
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
     put = !git commit --all && git push
     put-dry-run = !git commit --all --dry-run && git push --dry-run
-    mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
+    mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
     ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
     push1 = !git push origin "$(git current-branch)"
     pull1 = !git pull origin "$(git current-branch)"

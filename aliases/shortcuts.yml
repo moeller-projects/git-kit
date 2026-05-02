@@ -67,7 +67,7 @@ aliases:
 
   w:
     command: log --diff-filter=D --summary
-    description: Show commits with deleted files (replaces deprecated git whatchanged)
+    description: Show commits that deleted files with a summary (replaces deprecated git whatchanged; note this filters to deletions only)
     category: shortcuts
     risk: safe
 

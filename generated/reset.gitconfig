@@ -14,5 +14,5 @@
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
-    expunge = !f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f
+    expunge = !f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f
     show-unreachable = !git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log

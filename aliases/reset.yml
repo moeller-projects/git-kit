@@ -93,7 +93,7 @@ aliases:
     risk: dangerous
 
   expunge:
-    command: "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
+    command: "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     description: Permanently remove a file from all history with confirmation prompt (requires git-filter-repo)
     category: reset
     risk: dangerous

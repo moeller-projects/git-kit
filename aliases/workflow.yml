@@ -54,7 +54,7 @@ aliases:
     risk: medium
 
   mainly:
-    command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
+    command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
     description: Reset local branch to match origin main (prompts for confirmation before hard-reset)
     category: workflow
     risk: dangerous

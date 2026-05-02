@@ -8,7 +8,7 @@
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
     put = !git commit --all && git push
     put-dry-run = !git commit --all --dry-run && git push --dry-run
-    mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
+    mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
     ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
     push1 = !git push origin "$(git current-branch)"
     pull1 = !git pull origin "$(git current-branch)"
