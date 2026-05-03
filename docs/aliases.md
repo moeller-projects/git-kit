@@ -12,7 +12,8 @@ Generated from `aliases/`.
 | `add-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all cached files to the index | medium |
 | `add-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all deleted files to the index | medium |
 | `add-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all untracked files to the index | medium |
-| `add-ignored` | `!f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all ignored files to the index | medium |
+| `add-ignored` | `!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f` | WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index. | dangerous |
+| `add-force-ignored` | `!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f` | WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index (alias for add-ignored). | dangerous |
 | `add-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all killed files to the index | medium |
 | `add-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all modified files to the index | medium |
 | `add-stage` | `!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all staged files to the index | medium |
@@ -58,6 +59,7 @@ Generated from `aliases/`.
 | `co` | `checkout` | Checkout a branch or path | medium |
 | `cong` | `checkout --no-guess` | Checkout without guessing branch names | medium |
 | `cob` | `checkout -b` | Create and checkout a new branch | medium |
+| `swb` | `switch --create` | Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23) | medium |
 
 ## cherry-pick
 
@@ -161,31 +163,31 @@ Generated from `aliases/`.
 | `log-of-count-and-format` | `!f() { format="$1"; shift; git log "$@" --format=oneline --format="$format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f` | Count log entries grouped by a format string (descending) | medium |
 | `log-of-format-and-count-with-date` | `!f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) "%"}}' | sort -r; }; f` | Count log entries by format and date | medium |
 | `log-of-count-and-format-with-date` | `!f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f` | Count log entries by format and date (descending) | medium |
-| `log-of-email-and-count` | `!f() { git log-of-format-and-count "%aE" "$@"; }; f` | Count commits per author email | medium |
-| `log-of-count-and-email` | `!f() { git log-of-count-and-format "%aE" "$@"; }; f` | Count commits per author email (descending) | medium |
-| `log-of-hour-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f` | Count commits per hour | medium |
-| `log-of-count-and-hour` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f` | Count commits per hour (descending) | medium |
-| `log-of-day-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%d" "$@" ; }; f` | Count commits per day | medium |
-| `log-of-count-and-day` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%d" "$@" ; }; f` | Count commits per day (descending) | medium |
-| `log-of-week-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y#%V" "$@"; }; f` | Count commits per week | medium |
-| `log-of-count-and-week` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y#%V" "$@"; }; f` | Count commits per week (descending) | medium |
-| `log-of-month-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m" "$@" ; }; f` | Count commits per month | medium |
-| `log-of-count-and-month` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m" "$@" ; }; f` | Count commits per month (descending) | medium |
-| `log-of-year-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y" "$@" ; }; f` | Count commits per year | medium |
-| `log-of-count-and-year` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y" "$@" ; }; f` | Count commits per year (descending) | medium |
-| `log-of-hour-of-day-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%H" "$@"; }; f` | Count commits by hour of day | medium |
-| `log-of-count-and-hour-of-day` | `!f() { git log-of-count-and-format-with-date "%ad" "%H" "$@"; }; f` | Count commits by hour of day (descending) | medium |
-| `log-of-day-of-week-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%u" "$@"; }; f` | Count commits by day of week | medium |
-| `log-of-count-and-day-of-week` | `!f() { git log-of-count-and-format-with-date "%ad" "%u" "$@"; }; f` | Count commits by day of week (descending) | medium |
-| `log-of-week-of-year-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%V" "$@"; }; f` | Count commits by week of year | medium |
-| `log-of-count-and-week-of-year` | `!f() { git log-of-count-and-format-with-date "%ad" "%V" "$@"; }; f` | Count commits by week of year (descending) | medium |
+| `log-of-email-and-count` | `!f() { git log-of-format-and-count "%aE" "$@"; }; f` | Count commits per author email; thin wrapper around log-of-format-and-count | medium |
+| `log-of-count-and-email` | `!f() { git log-of-count-and-format "%aE" "$@"; }; f` | Count commits per author email (descending); thin wrapper around log-of-count-and-format | medium |
+| `log-of-hour-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f` | Count commits per hour; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-hour` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f` | Count commits per hour (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-day-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%d" "$@" ; }; f` | Count commits per day; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-day` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%d" "$@" ; }; f` | Count commits per day (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-week-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y#%V" "$@"; }; f` | Count commits per week; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-week` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y#%V" "$@"; }; f` | Count commits per week (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-month-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m" "$@" ; }; f` | Count commits per month; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-month` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m" "$@" ; }; f` | Count commits per month (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-year-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%Y" "$@" ; }; f` | Count commits per year; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-year` | `!f() { git log-of-count-and-format-with-date "%ad" "%Y" "$@" ; }; f` | Count commits per year (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-hour-of-day-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%H" "$@"; }; f` | Count commits by hour of day; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-hour-of-day` | `!f() { git log-of-count-and-format-with-date "%ad" "%H" "$@"; }; f` | Count commits by hour of day (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-day-of-week-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%u" "$@"; }; f` | Count commits by day of week; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-day-of-week` | `!f() { git log-of-count-and-format-with-date "%ad" "%u" "$@"; }; f` | Count commits by day of week (descending); thin wrapper around log-of-count-and-format-with-date | medium |
+| `log-of-week-of-year-and-count` | `!f() { git log-of-format-and-count-with-date "%ad" "%V" "$@"; }; f` | Count commits by week of year; thin wrapper around log-of-format-and-count-with-date | medium |
+| `log-of-count-and-week-of-year` | `!f() { git log-of-count-and-format-with-date "%ad" "%V" "$@"; }; f` | Count commits by week of year (descending); thin wrapper around log-of-count-and-format-with-date | medium |
 | `log-refs` | `log --all --graph --decorate --oneline --simplify-by-decoration --no-merges` | Show decorated simplified graph of all refs | safe |
 | `log-timeline` | `log --format='%h %an %ar - %s'` | Show log with author and relative age | safe |
 | `log-local` | `log --oneline @{upstream}..HEAD` | Show local commits not yet pushed upstream | safe |
 | `log-fetched` | `log --oneline HEAD..@{upstream}` | Show fetched commits not yet merged | safe |
 | `chart` | `!f() { git log --format=oneline --format="%aE %at" --since=6-weeks-ago "$*" | awk ' function time_to_slot(t) { return strftime("%Y-%m-%d", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : "X") : "." } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf("Chart time range %s to %s.\\n", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = ""; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f` | Show a per-author activity chart for the past 6 weeks | medium |
 | `churn` | `!f() { git log --all --find-copies --find-renames --name-only --format='format:' "$@" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f` | Show files sorted by how frequently they change | medium |
-| `summary` | `!f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; git log-of-count-and-email | head -7; printf "\nMost-active dates, with commit count and %%...\n"; git log-of-count-and-day | head -7; printf "\nMost-active files, with churn count\n"; git churn | head -7; }; f` | Print a helpful summary of repo metrics | medium |
+| `summary` | `!f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; if out=$(git log-of-count-and-email 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active dates, with commit count and %%...\n"; if out=$(git log-of-count-and-day 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active files, with churn count\n"; if out=$(git churn 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; }; f` | Print a helpful summary of repo metrics | medium |
 | `whois` | `!sh -c 'git log --regexp-ignore-case -1 --pretty="format:%an <%ae>\n" --author="$1"' -` | Look up a contributor by name or email substring | medium |
 | `whatis` | `show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short` | Briefly describe any git object | safe |
 | `who` | `shortlog --summary --numbered --no-merges` | Show commit counts per contributor | safe |
@@ -221,7 +223,7 @@ Generated from `aliases/`.
 | --- | --- | --- | --- |
 | `pf` | `pull --ff-only` | Pull only if it can fast-forward, else fail | safe |
 | `pr` | `pull --rebase` | Pull with rebase for a cleaner linear history | medium |
-| `prp` | `pull --rebase=preserve` | Pull with rebase preserving merge commits | medium |
+| `prp` | `pull --rebase=merges` | Pull with rebase preserving merge commits (replaces deprecated --rebase=preserve, requires git >= 2.18) | medium |
 
 ## rebase
 
@@ -252,6 +254,7 @@ Generated from `aliases/`.
 | `rru` | `remote update` | Fetch updates for all configured remotes | safe |
 | `rrp` | `remote prune` | Prune stale remote-tracking branches for a remote | medium |
 | `remotes-push` | `!git remote | xargs -I% -n1 git push %` | Push to every configured remote | dangerous |
+| `remotes-push-dry-run` | `!git remote | xargs -I% -n1 git push % --dry-run` | Preview what remotes-push would push to every remote without making any changes | medium |
 | `remotes-prune` | `!git remote | xargs -n 1 git remote prune` | Prune all stale references for every remote | medium |
 
 ## reset
@@ -269,11 +272,11 @@ Generated from `aliases/`.
 | `undo-to-pristine` | `!git reset --hard && git clean -ffdx` | Git undo-to-pristine alias | dangerous |
 | `undo-to-upstream` | `!git reset --hard "$(git upstream-branch)"` | Git undo-to-upstream alias | dangerous |
 | `uncommit` | `reset --soft HEAD~1` | Undo the last commit, keeping changes staged | medium |
-| `unadd` | `reset HEAD` | Unstage changes from the index | medium |
+| `unadd` | `!f() { git restore --staged -- "${@:-.}"; }; f` | Unstage changes from the index; unstages all staged files when called with no arguments (uses git restore --staged, requires git >= 2.23) | medium |
 | `cleaner` | `clean -dff` | Clean working tree with force options | dangerous |
 | `cleanest` | `clean -dffx` | Clean working tree with the most aggressive options | dangerous |
 | `cleanout` | `!git clean -df && git checkout -- .` | Clean and checkout to restore working tree | dangerous |
-| `expunge` | `!f() { git filter-repo --path "$1" --invert-paths --force; }; f` | Permanently remove a file from all history (requires git-filter-repo) | dangerous |
+| `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
 
 ## revert
@@ -298,13 +301,19 @@ Generated from `aliases/`.
 | `o` | `checkout` | Shortcut for git checkout | medium |
 | `p` | `pull` | Shortcut for git pull | medium |
 | `s` | `status` | Shortcut for git status | safe |
-| `w` | `whatchanged` | Shortcut for git whatchanged | safe |
+| `w` | `log --name-status` | Show commit history with file status (modern equivalent of deprecated git whatchanged) | safe |
+| `sw` | `switch` | Shortcut for git switch (modern checkout alternative, requires git >= 2.23) | medium |
 
 ## stash
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
 | `snapshot` | `!git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index` | Snapshot working tree to stash without removing changes | medium |
+| `sp` | `stash push` | Push current changes onto the stash stack | medium |
+| `sl` | `stash list` | List all stash entries | safe |
+| `sd` | `stash drop` | Drop the most recent stash entry | medium |
+| `spo` | `stash pop` | Pop and apply the most recent stash entry | medium |
+| `ssa` | `stash show --patch` | Show the most recent stash entry as a full patch diff | safe |
 
 ## status
 
@@ -386,9 +395,11 @@ Generated from `aliases/`.
 | `panic` | `!tar cvf ../panic.tar -- *` | Archive working tree as a tar file for emergency backup | medium |
 | `archive` | `!f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f` | Create a tar archive of the entire repository | medium |
 | `pushy` | `push --force-with-lease` | Force-push using --force-with-lease for safety | dangerous |
+| `pushy-check` | `!git log @{upstream}.. && git push --force-with-lease` | Show unreviewed commits ahead of upstream, then force-push with --force-with-lease | dangerous |
 | `get` | `!git fetch --prune && git pull --rebase && git submodule update --init --recursive` | Fetch, rebase pull, and update all submodules | medium |
 | `put` | `!git commit --all && git push` | Commit all changes and push | medium |
-| `mainly` | `!git checkout "$(git default-branch)" && git fetch origin --prune && git reset --hard "origin/$(git default-branch)"` | Reset local branch to match origin main | dangerous |
+| `put-dry-run` | `!git diff --cached --stat && git push --dry-run` | Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push | medium |
+| `mainly` | `!f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f` | Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset) | dangerous |
 | `ignore` | `!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore` | Append all untracked files to .gitignore | medium |
 | `push1` | `!git push origin "$(git current-branch)"` | Push the current branch to origin | medium |
 | `pull1` | `!git pull origin "$(git current-branch)"` | Pull the current branch from origin | medium |
@@ -402,3 +413,8 @@ Generated from `aliases/`.
 | `pruner` | `!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all` | Prune all unreachable objects immediately | medium |
 | `repacker` | `repack -a -d -f --depth=300 --window=300 --window-memory=1g` | Repack the repository for optimal storage | medium |
 | `optimizer` | `!git pruner; git repacker; git prune-packed` | Run pruner, repacker, and prune-packed to optimize the repo | medium |
+| `worktree-add` | `worktree add` | Add a new linked worktree (requires git >= 2.5) | medium |
+| `worktree-list` | `worktree list` | List all worktrees for this repository (requires git >= 2.5) | safe |
+| `worktree-remove` | `worktree remove` | Remove a linked worktree (requires git >= 2.17) | medium |
+| `sparse-init` | `sparse-checkout init` | Enable sparse-checkout and initialize it for the repository (requires git >= 2.25) | medium |
+| `sparse-set` | `sparse-checkout set` | Set the sparse-checkout path patterns (requires git >= 2.25) | medium |

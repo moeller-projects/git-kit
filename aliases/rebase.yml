@@ -52,3 +52,4 @@ aliases:
     description: Interactively rebase commits not yet pushed
     category: rebase
     risk: medium
+    depends_on: [remote-ref]

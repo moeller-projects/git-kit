@@ -66,7 +66,14 @@ aliases:
     risk: safe
 
   w:
-    command: whatchanged
-    description: Shortcut for git whatchanged
+    command: log --name-status
+    description: Show commit history with file status (modern equivalent of deprecated git whatchanged)
     category: shortcuts
     risk: safe
+
+  sw:
+    command: switch
+    description: Shortcut for git switch (modern checkout alternative, requires git >= 2.23)
+    category: shortcuts
+    risk: medium
+    since_version: "2.23"

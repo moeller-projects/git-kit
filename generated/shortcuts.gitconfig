@@ -10,4 +10,5 @@
     o = checkout
     p = pull
     s = status
-    w = whatchanged
+    w = log --name-status
+    sw = switch

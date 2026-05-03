@@ -29,6 +29,12 @@ aliases:
     category: workflow
     risk: dangerous
 
+  pushy-check:
+    command: '!git log @{upstream}.. && git push --force-with-lease'
+    description: Show unreviewed commits ahead of upstream, then force-push with --force-with-lease
+    category: workflow
+    risk: dangerous
+
   get:
     command: '!git fetch --prune && git pull --rebase && git submodule update --init --recursive'
     description: Fetch, rebase pull, and update all submodules
@@ -41,11 +47,18 @@ aliases:
     category: workflow
     risk: medium
 
+  put-dry-run:
+    command: '!git diff --cached --stat && git push --dry-run'
+    description: Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push
+    category: workflow
+    risk: medium
+
   mainly:
-    command: '!git checkout "$(git default-branch)" && git fetch origin --prune && git reset --hard "origin/$(git default-branch)"'
-    description: Reset local branch to match origin main
+    command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
+    description: Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset)
     category: workflow
     risk: dangerous
+    depends_on: [default-branch]
 
   ignore:
     command: '!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore'
@@ -58,36 +71,42 @@ aliases:
     description: Push the current branch to origin
     category: workflow
     risk: medium
+    depends_on: [current-branch]
 
   pull1:
     command: '!git pull origin "$(git current-branch)"'
     description: Pull the current branch from origin
     category: workflow
     risk: medium
+    depends_on: [current-branch]
 
   track:
     command: '!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f'
     description: Set the upstream tracking branch
     category: workflow
     risk: medium
+    depends_on: [current-branch]
 
   untrack:
     command: '!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f'
     description: Remove the upstream tracking branch
     category: workflow
     risk: medium
+    depends_on: [current-branch]
 
   publish:
     command: '!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f'
     description: Push current branch and set upstream
     category: workflow
     risk: medium
+    depends_on: [current-branch]
 
   unpublish:
     command: '!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f'
     description: Delete the remote version of the current branch
     category: workflow
     risk: dangerous
+    depends_on: [current-branch]
 
   inbound:
     command: '!git remote update --prune; git log ..@{upstream}'
@@ -106,6 +125,7 @@ aliases:
     description: Delete and recreate a branch based on main
     category: workflow
     risk: dangerous
+    depends_on: [current-branch, default-branch, unpublish, publish]
 
   pruner:
     command: '!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all'
@@ -124,3 +144,39 @@ aliases:
     description: Run pruner, repacker, and prune-packed to optimize the repo
     category: workflow
     risk: medium
+    depends_on: [pruner, repacker]
+
+  worktree-add:
+    command: worktree add
+    description: Add a new linked worktree (requires git >= 2.5)
+    category: workflow
+    risk: medium
+    since_version: "2.5"
+
+  worktree-list:
+    command: worktree list
+    description: List all worktrees for this repository (requires git >= 2.5)
+    category: workflow
+    risk: safe
+    since_version: "2.5"
+
+  worktree-remove:
+    command: worktree remove
+    description: Remove a linked worktree (requires git >= 2.17)
+    category: workflow
+    risk: medium
+    since_version: "2.17"
+
+  sparse-init:
+    command: sparse-checkout init
+    description: Enable sparse-checkout and initialize it for the repository (requires git >= 2.25)
+    category: workflow
+    risk: medium
+    since_version: "2.25"
+
+  sparse-set:
+    command: sparse-checkout set
+    description: Set the sparse-checkout path patterns (requires git >= 2.25)
+    category: workflow
+    risk: medium
+    since_version: "2.25"
