@@ -39,10 +39,12 @@
     hew-remote = !f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f "$@"
     hew-remote-dry-run = !f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f "$@"
     branches = branch -a
+    recent = branch --sort=-committerdate
     co = checkout
     cong = checkout --no-guess
     cob = checkout -b
     swb = switch --create
+    swi = !f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z "$branch" ] && return; if git switch "$branch"; then echo "Switched to '$branch'."; fi; }; f
     cp = cherry-pick
     cpa = cherry-pick --abort
     cpc = cherry-pick --continue
@@ -286,3 +288,8 @@
     worktree-remove = worktree remove
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
+    wt-new = !f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f
+    wt-open = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f
+    wt-rm = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f
+    wt-list = worktree list
+    wt-prune = worktree prune

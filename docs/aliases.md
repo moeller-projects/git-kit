@@ -51,6 +51,7 @@ Generated from `aliases/`.
 | `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f "$@"` | Delete all remotely merged branches | dangerous |
 | `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f "$@"` | Preview remotely merged branches to be deleted | medium |
 | `branches` | `branch -a` | List all local and remote branches | safe |
+| `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
 
 ## checkout
 
@@ -60,6 +61,7 @@ Generated from `aliases/`.
 | `cong` | `checkout --no-guess` | Checkout without guessing branch names | medium |
 | `cob` | `checkout -b` | Create and checkout a new branch | medium |
 | `swb` | `switch --create` | Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23) | medium |
+| `swi` | `!f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z "$branch" ] && return; if git switch "$branch"; then echo "Switched to '$branch'."; fi; }; f` | Interactively switch branches using fzf (requires fzf) | medium |
 
 ## cherry-pick
 
@@ -418,3 +420,13 @@ Generated from `aliases/`.
 | `worktree-remove` | `worktree remove` | Remove a linked worktree (requires git >= 2.17) | medium |
 | `sparse-init` | `sparse-checkout init` | Enable sparse-checkout and initialize it for the repository (requires git >= 2.25) | medium |
 | `sparse-set` | `sparse-checkout set` | Set the sparse-checkout path patterns (requires git >= 2.25) | medium |
+
+## worktree
+
+| Alias | Command | Description | Risk |
+| --- | --- | --- | --- |
+| `wt-new` | `!f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default origin/main) | medium |
+| `wt-open` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree | medium |
+| `wt-rm` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |
+| `wt-list` | `worktree list` | List all worktrees for this repository | safe |
+| `wt-prune` | `worktree prune` | Prune stale worktree references | medium |
