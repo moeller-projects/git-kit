@@ -1,0 +1,30 @@
+aliases:
+  wt-new:
+    command: '!f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr ''/'' ''-''); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f'
+    description: Create a new worktree with a new branch from a base (default origin/main)
+    category: worktree
+    risk: medium
+
+  wt-open:
+    command: '!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr ''/'' ''-''); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f'
+    description: Open an existing branch in a new worktree
+    category: worktree
+    risk: medium
+
+  wt-rm:
+    command: '!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr ''/'' ''-''); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f'
+    description: Remove a worktree by branch name
+    category: worktree
+    risk: medium
+
+  wt-list:
+    command: worktree list
+    description: List all worktrees for this repository
+    category: worktree
+    risk: safe
+
+  wt-prune:
+    command: worktree prune
+    description: Prune stale worktree references
+    category: worktree
+    risk: medium

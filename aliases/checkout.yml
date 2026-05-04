@@ -23,3 +23,10 @@ aliases:
     category: checkout
     risk: medium
     since_version: "2.23"
+
+  swi:
+    command: '!f() { branch=$(git branch --format=''%(refname:short)'' | fzf); [ -z "$branch" ] && return; if git switch "$branch"; then echo "Switched to ''$branch''."; fi; }; f'
+    description: Interactively switch branches using fzf (requires fzf)
+    category: checkout
+    risk: medium
+    since_version: "2.23"

@@ -26,18 +26,18 @@ aliases:
 
   bv:
     command: branch --verbose
-    description: 'branch verbose: When in list mode, show the hash, the commit subject line, etc'
+    description: "branch verbose: When in list mode, show the hash, the commit subject line, etc"
     category: branch
     risk: safe
 
   bvv:
     command: branch --verbose --verbose
-    description: 'branch verbose verbose: When in list mode, show the hash the commit subject line, the upstream br...'
+    description: "branch verbose verbose: When in list mode, show the hash the commit subject line, the upstream br..."
     category: branch
     risk: safe
 
   heads:
-    command: "!git log \"origin/$(git default-branch)\".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    command: '!git log "origin/$(git default-branch)".. --format=''%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset'' | git name-rev --stdin --always --name-only | column -t -s'';'''
     description: Show local commits not yet on origin/main
     category: branch
     risk: medium
@@ -119,7 +119,7 @@ aliases:
     depends_on: [hew-remote-dry-run]
 
   hew-remote-dry-run:
-    command: "!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged \"$commit\" | grep -v \"^[[:space:]]*origin/$commit$\" | sed 's#[[:space:]]*origin/##' ; }; f \"$@\""
+    command: '!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed ''s#[[:space:]]*origin/##'' ; }; f "$@"'
     description: Preview remotely merged branches to be deleted
     category: branch
     risk: medium
@@ -128,5 +128,11 @@ aliases:
   branches:
     command: branch -a
     description: List all local and remote branches
+    category: branch
+    risk: safe
+
+  recent:
+    command: branch --sort=-committerdate
+    description: List branches sorted by most recent commit date
     category: branch
     risk: safe
