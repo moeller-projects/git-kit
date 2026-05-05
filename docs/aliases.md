@@ -34,14 +34,14 @@ Generated from `aliases/`.
 | `bm` | `branch --merged` | branch and only list branches whose tips are reachable from the specified commit (HEAD if not spe... | safe |
 | `bnm` | `branch --no-merged` | branch and only list branches whose tips are not reachable from the specified commit (HEAD if not... | safe |
 | `bed` | `branch --edit-description` | branch with edit description | medium |
-| `bsd` | `!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f` | branch with show description; ideally git will add this feature in the future as `git --show-desc... | medium |
+| `bsd` | `!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; }; f "$@"` | branch with show description; ideally git will add this feature in the future as `git --show-desc... | medium |
 | `bv` | `branch --verbose` | branch verbose: When in list mode, show the hash, the commit subject line, etc | safe |
 | `bvv` | `branch --verbose --verbose` | branch verbose verbose: When in list mode, show the hash the commit subject line, the upstream br... | safe |
 | `heads` | `!git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'` | Show local commits not yet on origin/main | medium |
-| `branch-commit-first` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's first commit hash | medium |
-| `branch-commit-last` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's last commit hash | medium |
-| `branch-commit-prev` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f` | Show a branch's previous commit hash | medium |
-| `branch-commit-next` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f` | Show a branch's next commit hash | medium |
+| `branch-commit-first` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f "$@"` | Show a branch's first commit hash | medium |
+| `branch-commit-last` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f "$@"` | Show a branch's last commit hash | medium |
+| `branch-commit-prev` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"` | Show a branch's previous commit hash | medium |
+| `branch-commit-next` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"` | Show a branch's next commit hash | medium |
 | `refs-by-date` | `for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) (objectname:short) %(contents:subject)'` | List all refs sorted by most recent committer date | safe |
 | `track-all-remote-branches` | `!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f` | Track all remote branches as local branches | medium |
 | `hew` | `!git hew-local "$@" && git hew-remote "$@" #` | Delete all merged branches locally and remotely | dangerous |
@@ -88,7 +88,7 @@ Generated from `aliases/`.
 | `cm` | `commit --message` | Commit with a message | medium |
 | `commit-parents` | `!f(){ git cat-file -p "${*:-HEAD}" | sed -n '/0/,/^ *$/{/^parent /p}'; };f` | Show a commit's parent hashes | medium |
 | `commit-is-merge` | `!f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f` | Exit 0 if the commit is a merge, else exit 1 | medium |
-| `commit-message-key-lines` | `!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f` | Show keyword-tagged lines from a commit message | medium |
+| `commit-message-key-lines` | `!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f "$@"` | Show keyword-tagged lines from a commit message | medium |
 | `wip` | `!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip` | Stage all changes and commit with message "wip" | medium |
 | `unwip` | `!git log --max-count=1 | grep -q -c wip && git reset HEAD~1` | Undo the last commit if its message is "wip" | medium |
 
@@ -112,7 +112,7 @@ Generated from `aliases/`.
 | `diff-changes` | `diff --name-status -r` | Show changed file names and status | safe |
 | `diff-stat` | `diff --stat --ignore-space-change -r` | Show a stat summary ignoring whitespace | safe |
 | `diff-deep` | `diff --check --dirstat --find-copies --find-renames --histogram --color` | Diff with extra checks, stats, and rename detection | safe |
-| `diff-chunk` | `!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f` | Diff a single function or chunk between two commits | medium |
+| `diff-chunk` | `!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f "$@"` | Diff a single function or chunk between two commits | medium |
 
 ## fetch
 
@@ -216,8 +216,8 @@ Generated from `aliases/`.
 | `merge-span-diff` | `!git diff "$(git merge-span ... "$1")"` | Show changes introduced by a merge | medium |
 | `merge-span-difftool` | `!git difftool "$(git merge-span ... "$1")"` | Show merge changes in the configured difftool | medium |
 | `rebase-branch` | `!f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f` | Interactively rebase all commits on the current branch | medium |
-| `ours` | `!f() { git checkout --ours   "$@" && git add "$@"; }; f` | During a merge conflict, take our version of a file | medium |
-| `theirs` | `!f() { git checkout --theirs "$@" && git add "$@"; }; f` | During a merge conflict, take their version of a file | medium |
+| `ours` | `!f() { git checkout --ours   "$@" && git add "$@"; }; f "$@"` | During a merge conflict, take our version of a file | medium |
+| `theirs` | `!f() { git checkout --theirs "$@" && git add "$@"; }; f "$@"` | During a merge conflict, take their version of a file | medium |
 
 ## pull
 
@@ -237,7 +237,7 @@ Generated from `aliases/`.
 | `rbs` | `rebase --skip` | Skip the current patch during rebase | medium |
 | `rbi` | `rebase --interactive` | Rebase interactively | medium |
 | `rbiu` | `rebase --interactive @{upstream}` | Rebase interactively on unpushed commits | medium |
-| `fixup` | `!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f` | Create a fixup commit and immediately rebase-autosquash it | medium |
+| `fixup` | `!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f "$@"` | Create a fixup commit and immediately rebase-autosquash it | medium |
 | `remote-ref` | `!local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #` | Print the remote-tracking ref for the current branch | medium |
 | `rebase-recent` | `!git rebase --interactive "$(git remote-ref)"` | Interactively rebase commits not yet pushed | medium |
 
@@ -274,7 +274,7 @@ Generated from `aliases/`.
 | `undo-to-pristine` | `!git reset --hard && git clean -ffdx` | Git undo-to-pristine alias | dangerous |
 | `undo-to-upstream` | `!git reset --hard "$(git upstream-branch)"` | Git undo-to-upstream alias | dangerous |
 | `uncommit` | `reset --soft HEAD~1` | Undo the last commit, keeping changes staged | medium |
-| `unadd` | `!f() { git restore --staged -- "${@:-.}"; }; f` | Unstage changes from the index; unstages all staged files when called with no arguments (uses git restore --staged, requires git >= 2.23) | medium |
+| `unadd` | `!f() { git restore --staged -- "${@:-.}"; }; f "$@"` | Unstage changes from the index; unstages all staged files when called with no arguments (uses git restore --staged, requires git >= 2.23) | medium |
 | `cleaner` | `clean -dff` | Clean working tree with force options | dangerous |
 | `cleanest` | `clean -dffx` | Clean working tree with the most aggressive options | dangerous |
 | `cleanout` | `!git clean -df && git checkout -- .` | Clean and checkout to restore working tree | dangerous |
@@ -405,13 +405,13 @@ Generated from `aliases/`.
 | `ignore` | `!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore` | Append all untracked files to .gitignore | medium |
 | `push1` | `!git push origin "$(git current-branch)"` | Push the current branch to origin | medium |
 | `pull1` | `!git pull origin "$(git current-branch)"` | Pull the current branch from origin | medium |
-| `track` | `!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f` | Set the upstream tracking branch | medium |
-| `untrack` | `!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f` | Remove the upstream tracking branch | medium |
-| `publish` | `!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f` | Push current branch and set upstream | medium |
-| `unpublish` | `!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f` | Delete the remote version of the current branch | dangerous |
+| `track` | `!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f "$@"` | Set the upstream tracking branch | medium |
+| `untrack` | `!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f "$@"` | Remove the upstream tracking branch | medium |
+| `publish` | `!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f "$@"` | Push current branch and set upstream | medium |
+| `unpublish` | `!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f "$@"` | Delete the remote version of the current branch | dangerous |
 | `inbound` | `!git remote update --prune; git log ..@{upstream}` | Show incoming commits from upstream | medium |
 | `outbound` | `log @{upstream}..` | Show outgoing commits not yet pushed | safe |
-| `reincarnate` | `!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f` | Delete and recreate a branch based on main | dangerous |
+| `reincarnate` | `!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f "$@"` | Delete and recreate a branch based on main | dangerous |
 | `pruner` | `!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all` | Prune all unreachable objects immediately | medium |
 | `repacker` | `repack -a -d -f --depth=300 --window=300 --window-memory=1g` | Repack the repository for optimal storage | medium |
 | `optimizer` | `!git pruner; git repacker; git prune-packed` | Run pruner, repacker, and prune-packed to optimize the repo | medium |
@@ -425,8 +425,8 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `wt-new` | `!f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default origin/main) | medium |
-| `wt-open` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree | medium |
-| `wt-rm` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |
+| `wt-new` | `!f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f "$@"` | Create a new worktree with a new branch from a base (default origin/main) | medium |
+| `wt-open` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f "$@"` | Open an existing branch in a new worktree | medium |
+| `wt-rm` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f "$@"` | Remove a worktree by branch name | medium |
 | `wt-list` | `worktree list` | List all worktrees for this repository | safe |
 | `wt-prune` | `worktree prune` | Prune stale worktree references | medium |

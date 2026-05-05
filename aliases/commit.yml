@@ -60,7 +60,7 @@ aliases:
     risk: medium
 
   commit-message-key-lines:
-    command: '!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f'
+    command: '!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f "$@"'
     description: Show keyword-tagged lines from a commit message
     category: commit
     risk: medium

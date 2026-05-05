@@ -68,7 +68,7 @@ aliases:
     risk: medium
 
   unadd:
-    command: '!f() { git restore --staged -- "${@:-.}"; }; f'
+    command: '!f() { git restore --staged -- "${@:-.}"; }; f "$@"'
     description: Unstage changes from the index; unstages all staged files when called with no arguments (uses git restore --staged, requires git >= 2.23)
     category: reset
     risk: medium

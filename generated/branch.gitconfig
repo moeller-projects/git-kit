@@ -2,14 +2,14 @@
     bm = branch --merged
     bnm = branch --no-merged
     bed = branch --edit-description
-    bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f
+    bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; }; f "$@"
     bv = branch --verbose
     bvv = branch --verbose --verbose
     heads = !git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'
-    branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
-    branch-commit-next = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
+    branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f "$@"
+    branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f "$@"
+    branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"
+    branch-commit-next = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"
     refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) (objectname:short) %(contents:subject)'
     track-all-remote-branches = !f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f
     hew = !git hew-local "$@" && git hew-remote "$@" #

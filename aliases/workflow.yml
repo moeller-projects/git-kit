@@ -81,28 +81,28 @@ aliases:
     depends_on: [current-branch]
 
   track:
-    command: '!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f'
+    command: '!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f "$@"'
     description: Set the upstream tracking branch
     category: workflow
     risk: medium
     depends_on: [current-branch]
 
   untrack:
-    command: '!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f'
+    command: '!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f "$@"'
     description: Remove the upstream tracking branch
     category: workflow
     risk: medium
     depends_on: [current-branch]
 
   publish:
-    command: '!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f'
+    command: '!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f "$@"'
     description: Push current branch and set upstream
     category: workflow
     risk: medium
     depends_on: [current-branch]
 
   unpublish:
-    command: '!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f'
+    command: '!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f "$@"'
     description: Delete the remote version of the current branch
     category: workflow
     risk: dangerous
@@ -121,7 +121,7 @@ aliases:
     risk: safe
 
   reincarnate:
-    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
+    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f "$@"'
     description: Delete and recreate a branch based on main
     category: workflow
     risk: dangerous

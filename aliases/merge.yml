@@ -48,13 +48,13 @@ aliases:
     risk: medium
 
   ours:
-    command: '!f() { git checkout --ours   "$@" && git add "$@"; }; f'
+    command: '!f() { git checkout --ours   "$@" && git add "$@"; }; f "$@"'
     description: During a merge conflict, take our version of a file
     category: merge
     risk: medium
 
   theirs:
-    command: '!f() { git checkout --theirs "$@" && git add "$@"; }; f'
+    command: '!f() { git checkout --theirs "$@" && git add "$@"; }; f "$@"'
     description: During a merge conflict, take their version of a file
     category: merge
     risk: medium

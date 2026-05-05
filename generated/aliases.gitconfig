@@ -22,14 +22,14 @@
     bm = branch --merged
     bnm = branch --no-merged
     bed = branch --edit-description
-    bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f
+    bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; }; f "$@"
     bv = branch --verbose
     bvv = branch --verbose --verbose
     heads = !git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'
-    branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
-    branch-commit-next = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
+    branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f "$@"
+    branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f "$@"
+    branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"
+    branch-commit-next = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"
     refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) (objectname:short) %(contents:subject)'
     track-all-remote-branches = !f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f
     hew = !git hew-local "$@" && git hew-remote "$@" #
@@ -61,7 +61,7 @@
     cm = commit --message
     commit-parents = !f(){ git cat-file -p "${*:-HEAD}" | sed -n '/0/,/^ *$/{/^parent /p}'; };f
     commit-is-merge = !f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f
-    commit-message-key-lines = !f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f
+    commit-message-key-lines = !f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f "$@"
     wip = !git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip
     unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1
     unstage = restore --staged
@@ -75,7 +75,7 @@
     diff-changes = diff --name-status -r
     diff-stat = diff --stat --ignore-space-change -r
     diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
-    diff-chunk = !f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f
+    diff-chunk = !f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f "$@"
     fa = fetch --all
     fav = fetch --all --verbose
     fap = fetch --all --prune
@@ -154,8 +154,8 @@
     merge-span-diff = !git diff "$(git merge-span ... "$1")"
     merge-span-difftool = !git difftool "$(git merge-span ... "$1")"
     rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f
-    ours = !f() { git checkout --ours   "$@" && git add "$@"; }; f
-    theirs = !f() { git checkout --theirs "$@" && git add "$@"; }; f
+    ours = !f() { git checkout --ours   "$@" && git add "$@"; }; f "$@"
+    theirs = !f() { git checkout --theirs "$@" && git add "$@"; }; f "$@"
     pf = pull --ff-only
     pr = pull --rebase
     prp = pull --rebase=merges
@@ -165,7 +165,7 @@
     rbs = rebase --skip
     rbi = rebase --interactive
     rbiu = rebase --interactive @{upstream}
-    fixup = !f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f
+    fixup = !f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f "$@"
     remote-ref = !local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #
     rebase-recent = !git rebase --interactive "$(git remote-ref)"
     rl = reflog
@@ -187,7 +187,7 @@
     undo-to-pristine = !git reset --hard && git clean -ffdx
     undo-to-upstream = !git reset --hard "$(git upstream-branch)"
     uncommit = reset --soft HEAD~1
-    unadd = !f() { git restore --staged -- "${@:-.}"; }; f
+    unadd = !f() { git restore --staged -- "${@:-.}"; }; f "$@"
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
@@ -273,13 +273,13 @@
     ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
     push1 = !git push origin "$(git current-branch)"
     pull1 = !git pull origin "$(git current-branch)"
-    track = !f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f
-    untrack = !f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f
-    publish = !f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f
-    unpublish = !f() { git push "${1:-origin}" :"$(git current-branch)"; }; f
+    track = !f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f "$@"
+    untrack = !f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f "$@"
+    publish = !f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f "$@"
+    unpublish = !f() { git push "${1:-origin}" :"$(git current-branch)"; }; f "$@"
     inbound = !git remote update --prune; git log ..@{upstream}
     outbound = log @{upstream}..
-    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f
+    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f "$@"
     pruner = !git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all
     repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
     optimizer = !git pruner; git repacker; git prune-packed
@@ -288,8 +288,8 @@
     worktree-remove = worktree remove
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
-    wt-new = !f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f
-    wt-open = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f
-    wt-rm = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f
+    wt-new = !f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f "$@"
+    wt-open = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f "$@"
+    wt-rm = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f "$@"
     wt-list = worktree list
     wt-prune = worktree prune

@@ -36,7 +36,7 @@ aliases:
     risk: medium
 
   fixup:
-    command: '!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f'
+    command: '!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f "$@"'
     description: Create a fixup commit and immediately rebase-autosquash it
     category: rebase
     risk: medium

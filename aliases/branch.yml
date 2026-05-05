@@ -18,7 +18,7 @@ aliases:
     risk: medium
 
   bsd:
-    command: '!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f'
+    command: '!f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; }; f "$@"'
     description: branch with show description; ideally git will add this feature in the future as `git --show-desc...
     category: branch
     risk: medium
@@ -44,28 +44,28 @@ aliases:
     depends_on: [default-branch]
 
   branch-commit-first:
-    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f'
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f "$@"'
     description: Show a branch's first commit hash
     category: branch
     risk: medium
     depends_on: [current-branch]
 
   branch-commit-last:
-    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f'
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f "$@"'
     description: Show a branch's last commit hash
     category: branch
     risk: medium
     depends_on: [current-branch]
 
   branch-commit-prev:
-    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f'
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"'
     description: Show a branch's previous commit hash
     category: branch
     risk: medium
     depends_on: [current-branch]
 
   branch-commit-next:
-    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f'
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f "$@"'
     description: Show a branch's next commit hash
     category: branch
     risk: medium
