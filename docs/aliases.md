@@ -12,7 +12,6 @@ Generated from `aliases/`.
 | `add-cached` | `!f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all cached files to the index | medium |
 | `add-deleted` | `!f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all deleted files to the index | medium |
 | `add-others` | `!f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all untracked files to the index | medium |
-| `add-ignored` | `!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f` | WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index. | dangerous |
 | `add-force-ignored` | `!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f` | WARNING: stages files that are explicitly gitignored — almost never intentional. Force-add gitignored files to the index (alias for add-ignored). | dangerous |
 | `add-killed` | `!f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all killed files to the index | medium |
 | `add-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all modified files to the index | medium |
@@ -89,15 +88,16 @@ Generated from `aliases/`.
 | `commit-parents` | `!f(){ git cat-file -p "${*:-HEAD}" | sed -n '/0/,/^ *$/{/^parent /p}'; };f` | Show a commit's parent hashes | medium |
 | `commit-is-merge` | `!f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f` | Exit 0 if the commit is a merge, else exit 1 | medium |
 | `commit-message-key-lines` | `!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f` | Show keyword-tagged lines from a commit message | medium |
-| `wip` | `!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip` | Stage all changes and commit with message "wip" | medium |
-| `unwip` | `!git log --max-count=1 | grep -q -c wip && git reset HEAD~1` | Undo the last commit if its message is "wip" | medium |
+| `wip` | `!git add --all && git commit --message=wip` | Stage all changes and commit with message "wip" | medium |
+| `unwip` | `!f() { test "$(git log -1 --pretty=%s)" = "wip" || { echo "last commit is not wip"; return 1; }; git reset HEAD~1; }; f` | Undo the last commit only if its message is exactly "wip" | medium |
+| `fixup-no-rebase` | `!f() { target="$1"; test -n "$target" || { echo "usage: git fixup-no-rebase <commit>"; return 2; }; git commit --fixup="$target"; }; f` | Create a fixup commit for a given commit without triggering autosquash rebase | medium |
+| `amend-staged` | `commit --amend --no-edit` | Amend the last commit with currently staged changes, keeping the message | medium |
 
 ## core
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
 | `unstage` | `restore --staged` | Unstage changes from the index (restore --staged) | medium |
-| `discard` | `restore` | Discard working directory changes to a file | medium |
 | `root` | `rev-parse --show-toplevel` | Show the top-level directory of the repository | safe |
 
 ## diff
@@ -113,6 +113,12 @@ Generated from `aliases/`.
 | `diff-stat` | `diff --stat --ignore-space-change -r` | Show a stat summary ignoring whitespace | safe |
 | `diff-deep` | `diff --check --dirstat --find-copies --find-renames --histogram --color` | Diff with extra checks, stats, and rename detection | safe |
 | `diff-chunk` | `!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f` | Diff a single function or chunk between two commits | medium |
+| `staged` | `diff --staged --stat` | Show a stat summary of staged changes | safe |
+| `unstaged` | `diff --stat` | Show a stat summary of unstaged changes | safe |
+| `changed` | `diff --name-status` | Show names and status of changed files | safe |
+| `staged-files` | `diff --staged --name-only` | List file names of staged changes | safe |
+| `unstaged-files` | `diff --name-only` | List file names of unstaged changes | safe |
+| `conflicts` | `diff --name-only --diff-filter=U` | List files with unresolved merge conflicts | safe |
 
 ## fetch
 
@@ -203,6 +209,9 @@ Generated from `aliases/`.
 | `lsd` | `ls-files --debug` | List files with debug information | safe |
 | `lsfn` | `ls-files --full-name` | List files with full name | safe |
 | `lsio` | `ls-files --ignored --others --exclude-standard` | List files ignored by git | safe |
+| `untracked` | `ls-files --others --exclude-standard` | List untracked files not ignored by git | safe |
+| `tracked` | `ls-files` | List all tracked files in the index | safe |
+| `ignored` | `status --ignored --short` | List ignored files with short status format | safe |
 
 ## merge
 
@@ -275,9 +284,12 @@ Generated from `aliases/`.
 | `undo-to-upstream` | `!git reset --hard "$(git upstream-branch)"` | Git undo-to-upstream alias | dangerous |
 | `uncommit` | `reset --soft HEAD~1` | Undo the last commit, keeping changes staged | medium |
 | `unadd` | `!f() { git restore --staged -- "${@:-.}"; }; f` | Unstage changes from the index; unstages all staged files when called with no arguments (uses git restore --staged, requires git >= 2.23) | medium |
-| `cleaner` | `clean -dff` | Clean working tree with force options | dangerous |
-| `cleanest` | `clean -dffx` | Clean working tree with the most aggressive options | dangerous |
-| `cleanout` | `!git clean -df && git checkout -- .` | Clean and checkout to restore working tree | dangerous |
+| `clean-force` | `clean -dff` | Clean working tree with force options | dangerous |
+| `clean-force-ignored` | `clean -dffx` | Clean working tree including ignored files with the most aggressive options | dangerous |
+| `reset-working-tree` | `!git clean -df && git checkout -- .` | Clean untracked files and restore working tree to HEAD | dangerous |
+| `unstage-all` | `restore --staged .` | Unstage all staged changes | medium |
+| `discard-all` | `restore .` | Discard all unstaged changes in the working tree | medium |
+| `discard-file` | `restore --` | Discard unstaged changes in a specific file | medium |
 | `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
 
@@ -321,6 +333,7 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
+| `st` | `status --short --branch` | Status with short format and branch info | safe |
 | `ss` | `status --short` | Status with short format | safe |
 | `ssb` | `status --short --branch` | Status with short format and branch info | safe |
 
@@ -387,6 +400,7 @@ Generated from `aliases/`.
 | `intercommit` | `!sh -c 'git show "$1" > .git/commit1 && git show "$2" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -` | Show the diff between two commits using interdiff | medium |
 | `graphviz` | `!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' "$@" | sed 's/[0-9a-f][0-9a-f]*/"&"/g' ; echo '}'; }; f` | Output a digraph of commit history for use with dotty | medium |
 | `serve` | `-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose` | Serve the local repo over the git protocol | medium |
+| `large-files` | `!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print $3, $4}' | sort -nr | head -50` | List the 50 largest blobs in the repository by size | medium |
 
 ## workflow
 
@@ -399,7 +413,6 @@ Generated from `aliases/`.
 | `pushy` | `push --force-with-lease` | Force-push using --force-with-lease for safety | dangerous |
 | `pushy-check` | `!git log @{upstream}.. && git push --force-with-lease` | Show unreviewed commits ahead of upstream, then force-push with --force-with-lease | dangerous |
 | `get` | `!git fetch --prune && git pull --rebase && git submodule update --init --recursive` | Fetch, rebase pull, and update all submodules | medium |
-| `put` | `!git commit --all && git push` | Commit all changes and push | medium |
 | `put-dry-run` | `!git diff --cached --stat && git push --dry-run` | Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push | medium |
 | `mainly` | `!f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f` | Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset) | dangerous |
 | `ignore` | `!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore` | Append all untracked files to .gitignore | medium |
@@ -415,9 +428,6 @@ Generated from `aliases/`.
 | `pruner` | `!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all` | Prune all unreachable objects immediately | medium |
 | `repacker` | `repack -a -d -f --depth=300 --window=300 --window-memory=1g` | Repack the repository for optimal storage | medium |
 | `optimizer` | `!git pruner; git repacker; git prune-packed` | Run pruner, repacker, and prune-packed to optimize the repo | medium |
-| `worktree-add` | `worktree add` | Add a new linked worktree (requires git >= 2.5) | medium |
-| `worktree-list` | `worktree list` | List all worktrees for this repository (requires git >= 2.5) | safe |
-| `worktree-remove` | `worktree remove` | Remove a linked worktree (requires git >= 2.17) | medium |
 | `sparse-init` | `sparse-checkout init` | Enable sparse-checkout and initialize it for the repository (requires git >= 2.25) | medium |
 | `sparse-set` | `sparse-checkout set` | Set the sparse-checkout path patterns (requires git >= 2.25) | medium |
 
@@ -425,8 +435,15 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `wt-new` | `!f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default origin/main) | medium |
-| `wt-open` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree | medium |
-| `wt-rm` | `!f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |
+| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "../${repo}-${clean}"; }; f` | Print the default worktree path for a branch using ../<repo>-<branch> | medium |
+| `wt-new` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-new <branch> [base]"; return 2; }; base="${2:-$(git default-branch)}"; target="$(git wt-path "$branch")" || return; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default from default-branch) | medium |
+| `wt-open` | `!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree; uses fzf to select branch when none given | medium |
+| `wt-rm` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-rm <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |
+| `wt-rmf` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-rmf <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree remove --force "$target"; }; f` | Force-remove a worktree by branch name | medium |
+| `wt-rmi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "fzf is required"; return 2; }; path="$(git worktree list --porcelain | awk "/^worktree /{print substr(\$0,10)}" | fzf --prompt="remove worktree> ")"; test -n "$path" || return 1; git worktree remove "$path"; }; f` | Interactively select and remove a worktree using fzf | medium |
+| `wt-cd` | `wt-path` | Print the default worktree path for a branch (alias for wt-path, for use in shell cd) | safe |
 | `wt-list` | `worktree list` | List all worktrees for this repository | safe |
+| `wt-list-v` | `worktree list --verbose` | List all worktrees with verbose output | safe |
 | `wt-prune` | `worktree prune` | Prune stale worktree references | medium |
+| `wt-prune-v` | `worktree prune --verbose` | Prune stale worktree references with verbose output | medium |
+| `branch-in-worktree` | `!f() { branch="${1:-$(git current-branch)}"; git worktree list --porcelain | grep -A2 "^worktree " | grep -q "branch refs/heads/$branch"; }; f` | Exit 0 if the given branch (or current branch) is checked out in a worktree | medium |

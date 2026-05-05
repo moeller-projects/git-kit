@@ -8,3 +8,9 @@
     diff-stat = diff --stat --ignore-space-change -r
     diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
     diff-chunk = "!f() { git show \"$1:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp1 ; git show \"$2:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f"
+    staged = diff --staged --stat
+    unstaged = diff --stat
+    changed = diff --name-status
+    staged-files = diff --staged --name-only
+    unstaged-files = diff --name-only
+    conflicts = diff --name-only --diff-filter=U

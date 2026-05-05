@@ -163,3 +163,9 @@ aliases:
     description: Serve the local repo over the git protocol
     category: util
     risk: medium
+
+  large-files:
+    command: "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print $3, $4}' | sort -nr | head -50"
+    description: List the 50 largest blobs in the repository by size
+    category: util
+    risk: medium

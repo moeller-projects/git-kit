@@ -66,13 +66,25 @@ aliases:
     risk: medium
 
   wip:
-    command: '!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip'
+    command: '!git add --all && git commit --message=wip'
     description: Stage all changes and commit with message "wip"
     category: commit
     risk: medium
 
   unwip:
-    command: '!git log --max-count=1 | grep -q -c wip && git reset HEAD~1'
-    description: Undo the last commit if its message is "wip"
+    command: '!f() { test "$(git log -1 --pretty=%s)" = "wip" || { echo "last commit is not wip"; return 1; }; git reset HEAD~1; }; f'
+    description: Undo the last commit only if its message is exactly "wip"
+    category: commit
+    risk: medium
+
+  fixup-no-rebase:
+    command: '!f() { target="$1"; test -n "$target" || { echo "usage: git fixup-no-rebase <commit>"; return 2; }; git commit --fixup="$target"; }; f'
+    description: Create a fixup commit for a given commit without triggering autosquash rebase
+    category: commit
+    risk: medium
+
+  amend-staged:
+    command: commit --amend --no-edit
+    description: Amend the last commit with currently staged changes, keeping the message
     category: commit
     risk: medium

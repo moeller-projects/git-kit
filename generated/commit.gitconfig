@@ -10,5 +10,7 @@
     commit-parents = "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
     commit-is-merge = "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
     commit-message-key-lines = "!f(){ echo \"Commit: $1\"; git log \"$1\" --format=fuller | grep \"^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:\" | sed \"s/^[[:blank:]]*//; s/:[[:blank:]]*/: /\"; }; f"
-    wip = "!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip"
-    unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1
+    wip = !git add --all && git commit --message=wip
+    unwip = "!f() { test \"$(git log -1 --pretty=%s)\" = \"wip\" || { echo \"last commit is not wip\"; return 1; }; git reset HEAD~1; }; f"
+    fixup-no-rebase = "!f() { target=\"$1\"; test -n \"$target\" || { echo \"usage: git fixup-no-rebase <commit>\"; return 2; }; git commit --fixup=\"$target\"; }; f"
+    amend-staged = commit --amend --no-edit

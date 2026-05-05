@@ -41,12 +41,6 @@ aliases:
     category: workflow
     risk: medium
 
-  put:
-    command: '!git commit --all && git push'
-    description: Commit all changes and push
-    category: workflow
-    risk: medium
-
   put-dry-run:
     command: '!git diff --cached --stat && git push --dry-run'
     description: Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push
@@ -145,27 +139,6 @@ aliases:
     category: workflow
     risk: medium
     depends_on: [pruner, repacker]
-
-  worktree-add:
-    command: worktree add
-    description: Add a new linked worktree (requires git >= 2.5)
-    category: workflow
-    risk: medium
-    since_version: "2.5"
-
-  worktree-list:
-    command: worktree list
-    description: List all worktrees for this repository (requires git >= 2.5)
-    category: workflow
-    risk: safe
-    since_version: "2.5"
-
-  worktree-remove:
-    command: worktree remove
-    description: Remove a linked worktree (requires git >= 2.17)
-    category: workflow
-    risk: medium
-    since_version: "2.17"
 
   sparse-init:
     command: sparse-checkout init

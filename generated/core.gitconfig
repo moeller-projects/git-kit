@@ -1,4 +1,3 @@
 [alias]
     unstage = restore --staged
-    discard = restore
     root = rev-parse --show-toplevel

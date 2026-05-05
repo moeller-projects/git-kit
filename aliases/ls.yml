@@ -22,3 +22,21 @@ aliases:
     description: List files ignored by git
     category: ls
     risk: safe
+
+  untracked:
+    command: ls-files --others --exclude-standard
+    description: List untracked files not ignored by git
+    category: ls
+    risk: safe
+
+  tracked:
+    command: ls-files
+    description: List all tracked files in the index
+    category: ls
+    risk: safe
+
+  ignored:
+    command: status --ignored --short
+    description: List ignored files with short status format
+    category: ls
+    risk: safe

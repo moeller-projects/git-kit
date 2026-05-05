@@ -1,6 +1,13 @@
 [alias]
-    wt-new = "!f() { branch=\"$1\"; base=\"${2:-origin/main}\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
-    wt-open = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add \"$target\" \"$branch\"; }; f"
-    wt-rm = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); target=\"../wt/${repo}-${clean}\"; git worktree remove \"$target\"; }; f"
+    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"../${repo}-${clean}\"; }; f"
+    wt-new = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-new <branch> [base]\"; return 2; }; base=\"${2:-$(git default-branch)}\"; target=\"$(git wt-path \"$branch\")\" || return; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
+    wt-open = "!f() { if [ -n \"$1\" ]; then branch=\"$1\"; else command -v fzf >/dev/null 2>&1 || { echo \"fzf is required when no branch is given\"; return 2; }; branch=\"$(git branch -a | sed \"s/^[* ]*//;s|remotes/origin/||\" | sort -u | fzf --prompt=\"branch> \")\"; test -n \"$branch\" || return 1; fi; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\"; }; f"
+    wt-rm = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rm <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove \"$target\"; }; f"
+    wt-rmf = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rmf <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove --force \"$target\"; }; f"
+    wt-rmi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"fzf is required\"; return 2; }; path=\"$(git worktree list --porcelain | awk \"/^worktree /{print substr(\\$0,10)}\" | fzf --prompt=\"remove worktree> \")\"; test -n \"$path\" || return 1; git worktree remove \"$path\"; }; f"
+    wt-cd = wt-path
     wt-list = worktree list
+    wt-list-v = worktree list --verbose
     wt-prune = worktree prune
+    wt-prune-v = worktree prune --verbose
+    branch-in-worktree = "!f() { branch=\"${1:-$(git current-branch)}\"; git worktree list --porcelain | grep -A2 \"^worktree \" | grep -q \"branch refs/heads/$branch\"; }; f"

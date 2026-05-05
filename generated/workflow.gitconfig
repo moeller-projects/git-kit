@@ -6,7 +6,6 @@
     pushy = push --force-with-lease
     pushy-check = !git log @{upstream}.. && git push --force-with-lease
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
-    put = !git commit --all && git push
     put-dry-run = !git diff --cached --stat && git push --dry-run
     mainly = "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
     ignore = "!git status | grep -P \"^\\\\t\" | grep -vF .gitignore | sed \"s/^\\\\t//\" >> .gitignore"
@@ -22,8 +21,5 @@
     pruner = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all"
     repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
     optimizer = "!git pruner; git repacker; git prune-packed"
-    worktree-add = worktree add
-    worktree-list = worktree list
-    worktree-remove = worktree remove
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
