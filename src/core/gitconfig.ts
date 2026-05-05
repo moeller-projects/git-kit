@@ -87,9 +87,12 @@ function renderSections(sections: GitConfigSection[], hasTrailingNewline: boolea
  * Shell aliases frequently contain all of these characters, so values that
  * contain any of them must be wrapped in outer double quotes with the inner
  * double quotes and backslashes escaped.
+ *
+ * Alias commands are expected to be single-line; real newlines in a command
+ * string indicate a YAML authoring error and are not handled here.
  */
 function quoteGitConfigValue(value: string): string {
-  if (/[";\n#\\]/.test(value)) {
+  if (/[";\#\\]/.test(value)) {
     return '"' + value.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
   }
   return value;

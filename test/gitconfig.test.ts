@@ -15,6 +15,7 @@ describe('gitconfig helpers', () => {
     // Commands containing `"`, `;`, `#`, or `\` must be quoted so that git's
     // config parser does not mistake `;` / `#` for comment-starters or `"`
     // for quoted-section delimiters.
+    // Commands are expected to be single-line; newlines are not handled.
     expect(
       renderAliasGitConfig([
         { name: 'lo', command: '!f() { git log "$@" --oneline; }; f' },

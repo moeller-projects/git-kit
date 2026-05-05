@@ -27,11 +27,8 @@ jobs:
           git config --global user.email "test@example.com"
           git config --global init.defaultBranch main
 
-      - name: Install all generated aliases globally
-        run: |
-          for f in "$GITHUB_WORKSPACE"/generated/*.gitconfig; do
-            git config --global --add include.path "$f"
-          done
+      - name: Install generated aliases globally
+        run: git config --global --add include.path "$GITHUB_WORKSPACE/generated/aliases.gitconfig"
 
       - name: Set up test repository with realistic state
         run: |
