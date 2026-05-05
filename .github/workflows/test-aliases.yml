@@ -431,7 +431,7 @@ jobs:
           ok   wt-prune-v
           ok   branch-in-worktree      # current branch (main) is in the main worktree
           skip wt-new          "creates a worktree — requires filesystem side-effects"
-          skip wt-open         "requires an existing branch and worktree path"
+          skip wt-open         "creates a worktree (filesystem side effect); may require interactive fzf when no branch is given"
           skip wt-rm           "requires an existing worktree to remove"
           skip wt-rmf          "destructive: force-removes a worktree"
           skip wt-rmi          "requires fzf installed"

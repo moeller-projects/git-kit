@@ -273,7 +273,7 @@
     intercommit = "!sh -c 'git show \"$1\" > .git/commit1 && git show \"$2\" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -"
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
-    large-files = !git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print $3, $4}' | sort -nr | head -50
+    large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
     cloner = clone --recursive
     clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
     panic = !tar cvf ../panic.tar -- *
@@ -298,9 +298,9 @@
     optimizer = "!git pruner; git repacker; git prune-packed"
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
-    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"../${repo}-${clean}\"; }; f"
+    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"$(dirname \"$root\")/${repo}-${clean}\"; }; f"
     wt-new = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-new <branch> [base]\"; return 2; }; base=\"${2:-$(git default-branch)}\"; target=\"$(git wt-path \"$branch\")\" || return; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
-    wt-open = "!f() { if [ -n \"$1\" ]; then branch=\"$1\"; else command -v fzf >/dev/null 2>&1 || { echo \"fzf is required when no branch is given\"; return 2; }; branch=\"$(git branch -a | sed \"s/^[* ]*//;s|remotes/origin/||\" | sort -u | fzf --prompt=\"branch> \")\"; test -n \"$branch\" || return 1; fi; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\"; }; f"
+    wt-open = "!f() { if [ -n \"$1\" ]; then branch=\"$1\"; else command -v fzf >/dev/null 2>&1 || { echo \"fzf is required when no branch is given\"; return 2; }; branch=\"$(git branch -a | grep -v \" -> \" | sed \"s/^[* ]*//;s|remotes/origin/||\" | sort -u | fzf --prompt=\"branch> \")\"; test -n \"$branch\" || return 1; fi; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\"; }; f"
     wt-rm = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rm <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove \"$target\"; }; f"
     wt-rmf = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rmf <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove --force \"$target\"; }; f"
     wt-rmi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"fzf is required\"; return 2; }; path=\"$(git worktree list --porcelain | awk \"/^worktree /{print substr(\\$0,10)}\" | fzf --prompt=\"remove worktree> \")\"; test -n \"$path\" || return 1; git worktree remove \"$path\"; }; f"
@@ -309,4 +309,4 @@
     wt-list-v = worktree list --verbose
     wt-prune = worktree prune
     wt-prune-v = worktree prune --verbose
-    branch-in-worktree = "!f() { branch=\"${1:-$(git current-branch)}\"; git worktree list --porcelain | grep -A2 \"^worktree \" | grep -q \"branch refs/heads/$branch\"; }; f"
+    branch-in-worktree = "!f() { branch=\"${1:-$(git current-branch)}\"; git worktree list --porcelain | grep -A2 \"^worktree \" | grep -Fq \"branch refs/heads/$branch\"; }; f"

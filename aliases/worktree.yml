@@ -1,7 +1,7 @@
 aliases:
   wt-path:
-    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "../${repo}-${clean}"; }; f'
-    description: Print the default worktree path for a branch using ../<repo>-<branch>
+    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f'
+    description: Print the absolute worktree path for a branch using <parent>/<repo>-<branch>
     category: worktree
     risk: medium
 
@@ -13,7 +13,7 @@ aliases:
     depends_on: [default-branch, wt-path]
 
   wt-open:
-    command: '!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f'
+    command: '!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | grep -v " -> " | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f'
     description: Open an existing branch in a new worktree; uses fzf to select branch when none given
     category: worktree
     risk: medium
@@ -71,7 +71,7 @@ aliases:
     risk: medium
 
   branch-in-worktree:
-    command: '!f() { branch="${1:-$(git current-branch)}"; git worktree list --porcelain | grep -A2 "^worktree " | grep -q "branch refs/heads/$branch"; }; f'
+    command: '!f() { branch="${1:-$(git current-branch)}"; git worktree list --porcelain | grep -A2 "^worktree " | grep -Fq "branch refs/heads/$branch"; }; f'
     description: Exit 0 if the given branch (or current branch) is checked out in a worktree
     category: worktree
     risk: medium

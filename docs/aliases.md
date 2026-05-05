@@ -400,7 +400,7 @@ Generated from `aliases/`.
 | `intercommit` | `!sh -c 'git show "$1" > .git/commit1 && git show "$2" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -` | Show the diff between two commits using interdiff | medium |
 | `graphviz` | `!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' "$@" | sed 's/[0-9a-f][0-9a-f]*/"&"/g' ; echo '}'; }; f` | Output a digraph of commit history for use with dotty | medium |
 | `serve` | `-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose` | Serve the local repo over the git protocol | medium |
-| `large-files` | `!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print $3, $4}' | sort -nr | head -50` | List the 50 largest blobs in the repository by size | medium |
+| `large-files` | `!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,""); print size, $0}' | sort -nr | head -50` | List the 50 largest blobs in the repository by size | medium |
 
 ## workflow
 
@@ -435,9 +435,9 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "../${repo}-${clean}"; }; f` | Print the default worktree path for a branch using ../<repo>-<branch> | medium |
+| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f` | Print the absolute worktree path for a branch using <parent>/<repo>-<branch> | medium |
 | `wt-new` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-new <branch> [base]"; return 2; }; base="${2:-$(git default-branch)}"; target="$(git wt-path "$branch")" || return; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default from default-branch) | medium |
-| `wt-open` | `!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree; uses fzf to select branch when none given | medium |
+| `wt-open` | `!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | grep -v " -> " | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree; uses fzf to select branch when none given | medium |
 | `wt-rm` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-rm <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |
 | `wt-rmf` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-rmf <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree remove --force "$target"; }; f` | Force-remove a worktree by branch name | medium |
 | `wt-rmi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "fzf is required"; return 2; }; path="$(git worktree list --porcelain | awk "/^worktree /{print substr(\$0,10)}" | fzf --prompt="remove worktree> ")"; test -n "$path" || return 1; git worktree remove "$path"; }; f` | Interactively select and remove a worktree using fzf | medium |
@@ -446,4 +446,4 @@ Generated from `aliases/`.
 | `wt-list-v` | `worktree list --verbose` | List all worktrees with verbose output | safe |
 | `wt-prune` | `worktree prune` | Prune stale worktree references | medium |
 | `wt-prune-v` | `worktree prune --verbose` | Prune stale worktree references with verbose output | medium |
-| `branch-in-worktree` | `!f() { branch="${1:-$(git current-branch)}"; git worktree list --porcelain | grep -A2 "^worktree " | grep -q "branch refs/heads/$branch"; }; f` | Exit 0 if the given branch (or current branch) is checked out in a worktree | medium |
+| `branch-in-worktree` | `!f() { branch="${1:-$(git current-branch)}"; git worktree list --porcelain | grep -A2 "^worktree " | grep -Fq "branch refs/heads/$branch"; }; f` | Exit 0 if the given branch (or current branch) is checked out in a worktree | medium |
