@@ -2,49 +2,49 @@
     aa = add --all
     ap = add --patch
     au = add --update
-    add-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
-    add-force-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
-    add-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    edit-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-ignored = !f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    add-cached = "!f() { files=$(git ls-files --cached | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-deleted = "!f() { files=$(git ls-files --deleted | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-others = "!f() { files=$(git ls-files --others | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
+    add-force-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
+    add-killed = "!f() { files=$(git ls-files --killed | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-stage = "!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    edit-cached = "!f() { files=$(git ls-files --cached | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-deleted = "!f() { files=$(git ls-files --deleted | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-others = "!f() { files=$(git ls-files --others | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-ignored = "!f() { files=$(git ls-files --ignored | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-killed = "!f() { files=$(git ls-files --killed | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-stage = "!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
     bm = branch --merged
     bnm = branch --no-merged
     bed = branch --edit-description
-    bsd = !f(){ branch="${1:-$(git current-branch)}";  git config "branch.$branch.description"; };f
+    bsd = "!f(){ branch=\"${1:-$(git current-branch)}\";  git config \"branch.$branch.description\"; };f"
     bv = branch --verbose
     bvv = branch --verbose --verbose
-    heads = !git log "origin/$(git default-branch)".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'
-    branch-commit-first = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-last = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f
-    branch-commit-prev = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
-    branch-commit-next = !f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | grep -A "$count" "$(git rev-parse HEAD)" | tail +2; }; f
+    heads = "!git log \"origin/$(git default-branch)\".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
+    branch-commit-first = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --reverse --pretty=%H \"$branch\" | head -\"$count\"; }; f"
+    branch-commit-last = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --pretty=%H \"$branch\" | head -\"$count\"; }; f"
+    branch-commit-prev = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --pretty=%H \"$branch\" | grep -A \"$count\" \"$(git rev-parse HEAD)\" | tail +2; }; f"
+    branch-commit-next = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --reverse --pretty=%H \"$branch\" | grep -A \"$count\" \"$(git rev-parse HEAD)\" | tail +2; }; f"
     refs-by-date = for-each-ref --sort=-committerdate --format='%(committerdate:short) %(refname:short) (objectname:short) %(contents:subject)'
-    track-all-remote-branches = !f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f
-    hew = !git hew-local "$@" && git hew-remote "$@" #
-    hew-dry-run = !git hew-local-dry-run "$@" && git hew-remote-dry-run "$@" #
-    hew-local = !f() { git hew-local-dry-run "$@" | xargs git branch --delete ; }; f "$@"
-    hew-local-dry-run = !f() { commit=${1:-$(git current-branch)}; git branch --merged "$commit" | grep -v "^[[:space:]]*\\*[[:space:]]*$commit$" ; }; f "$@"
-    hew-remote = !f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f "$@"
-    hew-remote-dry-run = !f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f "$@"
+    track-all-remote-branches = "!f() { for x in $(git for-each-ref --format=\"%(refname:short)\" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track \"$x\"; done; }; f"
+    hew = "!git hew-local \"$@\" && git hew-remote \"$@\" #"
+    hew-dry-run = "!git hew-local-dry-run \"$@\" && git hew-remote-dry-run \"$@\" #"
+    hew-local = "!f() { git hew-local-dry-run \"$@\" | xargs git branch --delete ; }; f"
+    hew-local-dry-run = "!f() { commit=${1:-$(git current-branch)}; git branch --merged \"$commit\" | grep -v \"^[[:space:]]*\\\\*[[:space:]]*$commit$\" ; }; f"
+    hew-remote = "!f() { git hew-remote-dry-run \"$@\" | xargs -I% git push origin :% 2>&1 ; }; f"
+    hew-remote-dry-run = "!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged \"$commit\" | grep -v \"^[[:space:]]*origin/$commit$\" | sed 's#[[:space:]]*origin/##' ; }; f"
     branches = branch -a
     recent = branch --sort=-committerdate
     co = checkout
     cong = checkout --no-guess
     cob = checkout -b
     swb = switch --create
-    swi = !f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z "$branch" ] && return; if git switch "$branch"; then echo "Switched to '$branch'."; fi; }; f
+    swi = "!f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z \"$branch\" ] && return; if git switch \"$branch\"; then echo \"Switched to '$branch'.\"; fi; }; f"
     cp = cherry-pick
     cpa = cherry-pick --abort
     cpc = cherry-pick --continue
@@ -59,10 +59,10 @@
     caane = commit --amend --all --no-edit
     ci = commit --interactive
     cm = commit --message
-    commit-parents = !f(){ git cat-file -p "${*:-HEAD}" | sed -n '/0/,/^ *$/{/^parent /p}'; };f
-    commit-is-merge = !f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f
-    commit-message-key-lines = !f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f
-    wip = !git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip
+    commit-parents = "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
+    commit-is-merge = "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
+    commit-message-key-lines = "!f(){ echo \"Commit: $1\"; git log \"$1\" --format=fuller | grep \"^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:\" | sed \"s/^[[:blank:]]*//; s/:[[:blank:]]*/: /\"; }; f"
+    wip = "!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip"
     unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1
     unstage = restore --staged
     discard = restore
@@ -71,19 +71,19 @@
     ds = diff --staged
     dw = diff --word-diff
     dd = diff-deep
-    diff-all = !for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done
+    diff-all = "!for name in $(git diff --name-only \"$1\"); do git difftool \"$1\" \"$name\" & done"
     diff-changes = diff --name-status -r
     diff-stat = diff --stat --ignore-space-change -r
     diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
-    diff-chunk = !f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f
+    diff-chunk = "!f() { git show \"$1:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp1 ; git show \"$2:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f"
     fa = fetch --all
     fav = fetch --all --verbose
     fap = fetch --all --prune
     gn = grep --line-number
     gg = grep-group
-    grep-all = !f() { git rev-list --all | xargs git grep "$@"; }; f
+    grep-all = "!f() { git rev-list --all | xargs git grep \"$@\"; }; f"
     grep-group = grep --break --heading --line-number --color
-    grep-ack = -c color.grep.linenumber="bold yellow" -c color.grep.filename="bold green" -c color.grep.match="reverse yellow" grep --break --heading --line-number
+    grep-ack = "-c color.grep.linenumber=\"bold yellow\" -c color.grep.filename=\"bold green\" -c color.grep.match=\"reverse yellow\" grep --break --heading --line-number"
     lg = log --graph
     lo = log --oneline
     lor = log --oneline --reverse
@@ -95,7 +95,7 @@
     log-fresh = log ORIG_HEAD.. --stat --no-merges
     log-list = log --graph --topo-order --date=short --abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN]%Creset %Cblue%G?%Creset'
     log-list-long = log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'
-    log-my = !git log --author "$(git config user.email)"
+    log-my = "!git log --author \"$(git config user.email)\""
     log-graph = log --graph --all --oneline --decorate
     log-date-first = !git log --date-order --format=%cI | tail -1
     log-date-last = log -1 --date-order --format=%cI
@@ -104,44 +104,44 @@
     log-1-week = log --since=1-week-ago
     log-1-month = log --since=1-month-ago
     log-1-year = log --since=1-year-ago
-    log-my-hour = !git log --author "$(git config user.email)" --since=1-hour-ago
-    log-my-day = !git log --author "$(git config user.email)" --since=1-day-ago
-    log-my-week = !git log --author "$(git config user.email)" --since=1-week-ago
-    log-my-month = !git log --author "$(git config user.email)" --since=1-month-ago
-    log-my-year = !git log --author "$(git config user.email)" --since=1-year-ago
-    log-of-format-and-count = !f() { format="$1"; shift; git log "$@" --format=oneline --format="$format" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) "%"}}' | sort; }; f
-    log-of-count-and-format = !f() { format="$1"; shift; git log "$@" --format=oneline --format="$format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f
-    log-of-format-and-count-with-date = !f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) "%"}}' | sort -r; }; f
-    log-of-count-and-format-with-date = !f() { format="$1"; shift; date_format="$1"; shift; git log "$@" --format=oneline --format="$format" --date=format:"$date_format" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) "%", i}}' | sort -nr; }; f
-    log-of-email-and-count = !f() { git log-of-format-and-count "%aE" "$@"; }; f
-    log-of-count-and-email = !f() { git log-of-count-and-format "%aE" "$@"; }; f
-    log-of-hour-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f
-    log-of-count-and-hour = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f
-    log-of-day-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%d" "$@" ; }; f
-    log-of-count-and-day = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%d" "$@" ; }; f
-    log-of-week-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y#%V" "$@"; }; f
-    log-of-count-and-week = !f() { git log-of-count-and-format-with-date "%ad" "%Y#%V" "$@"; }; f
-    log-of-month-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y-%m" "$@" ; }; f
-    log-of-count-and-month = !f() { git log-of-count-and-format-with-date "%ad" "%Y-%m" "$@" ; }; f
-    log-of-year-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%Y" "$@" ; }; f
-    log-of-count-and-year = !f() { git log-of-count-and-format-with-date "%ad" "%Y" "$@" ; }; f
-    log-of-hour-of-day-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%H" "$@"; }; f
-    log-of-count-and-hour-of-day = !f() { git log-of-count-and-format-with-date "%ad" "%H" "$@"; }; f
-    log-of-day-of-week-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%u" "$@"; }; f
-    log-of-count-and-day-of-week = !f() { git log-of-count-and-format-with-date "%ad" "%u" "$@"; }; f
-    log-of-week-of-year-and-count = !f() { git log-of-format-and-count-with-date "%ad" "%V" "$@"; }; f
-    log-of-count-and-week-of-year = !f() { git log-of-count-and-format-with-date "%ad" "%V" "$@"; }; f
+    log-my-hour = "!git log --author \"$(git config user.email)\" --since=1-hour-ago"
+    log-my-day = "!git log --author \"$(git config user.email)\" --since=1-day-ago"
+    log-my-week = "!git log --author \"$(git config user.email)\" --since=1-week-ago"
+    log-my-month = "!git log --author \"$(git config user.email)\" --since=1-month-ago"
+    log-my-year = "!git log --author \"$(git config user.email)\" --since=1-year-ago"
+    log-of-format-and-count = "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort; }; f"
+    log-of-count-and-format = "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) \"%\", i}}' | sort -nr; }; f"
+    log-of-format-and-count-with-date = "!f() { format=\"$1\"; shift; date_format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" --date=format:\"$date_format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort -r; }; f"
+    log-of-count-and-format-with-date = "!f() { format=\"$1\"; shift; date_format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" --date=format:\"$date_format\" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) \"%\", i}}' | sort -nr; }; f"
+    log-of-email-and-count = "!f() { git log-of-format-and-count \"%aE\" \"$@\"; }; f"
+    log-of-count-and-email = "!f() { git log-of-count-and-format \"%aE\" \"$@\"; }; f"
+    log-of-hour-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%Y-%m-%dT%H\" \"$@\" ; }; f"
+    log-of-count-and-hour = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%Y-%m-%dT%H\" \"$@\" ; }; f"
+    log-of-day-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%Y-%m-%d\" \"$@\" ; }; f"
+    log-of-count-and-day = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%Y-%m-%d\" \"$@\" ; }; f"
+    log-of-week-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%Y#%V\" \"$@\"; }; f"
+    log-of-count-and-week = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%Y#%V\" \"$@\"; }; f"
+    log-of-month-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%Y-%m\" \"$@\" ; }; f"
+    log-of-count-and-month = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%Y-%m\" \"$@\" ; }; f"
+    log-of-year-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%Y\" \"$@\" ; }; f"
+    log-of-count-and-year = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%Y\" \"$@\" ; }; f"
+    log-of-hour-of-day-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%H\" \"$@\"; }; f"
+    log-of-count-and-hour-of-day = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%H\" \"$@\"; }; f"
+    log-of-day-of-week-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%u\" \"$@\"; }; f"
+    log-of-count-and-day-of-week = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%u\" \"$@\"; }; f"
+    log-of-week-of-year-and-count = "!f() { git log-of-format-and-count-with-date \"%ad\" \"%V\" \"$@\"; }; f"
+    log-of-count-and-week-of-year = "!f() { git log-of-count-and-format-with-date \"%ad\" \"%V\" \"$@\"; }; f"
     log-refs = log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
     log-timeline = log --format='%h %an %ar - %s'
     log-local = log --oneline @{upstream}..HEAD
     log-fetched = log --oneline HEAD..@{upstream}
-    chart = !f() { git log --format=oneline --format="%aE %at" --since=6-weeks-ago "$*" | awk ' function time_to_slot(t) { return strftime("%Y-%m-%d", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : "X") : "." } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf("Chart time range %s to %s.\\n", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = ""; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f
-    churn = !f() { git log --all --find-copies --find-renames --name-only --format='format:' "$@" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f
-    summary = !f() { printf "Summary of this branch...\n"; printf "%s\n" "$(git current-branch)"; printf "%s first commit timestamp\n" "$(git log --date-order --format=%cI | tail -1)"; printf "%s last commit timestamp\n" "$(git log -1 --date-order --format=%cI)"; printf "\nSummary of counts...\n"; printf "%d commit count\n" "$(git rev-list --count HEAD)"; printf "%d date count\n" "$(git log --format=oneline --format="%ad" --date=format:"%Y-%m-%d" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d tag count\n" "$(git tag | wc -l)"; printf "%d author count\n" "$(git log --format=oneline --format="%aE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d committer count\n" "$(git log --format=oneline --format="%cE" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')"; printf "%d local branch count\n" "$(git branch | grep -vc " -> ")"; printf "%d remote branch count\n" "$(git branch --remotes | grep -vc " -> ")"; printf "\nSummary of this directory...\n"; printf "%s\n" "$(pwd)"; printf "%d file count via git ls-files\n" "$(git ls-files | wc -l)"; printf "%d file count via find command\n" "$(find . | wc -l)"; printf "%d disk usage\n" "$(du -s | awk '{print $1}')"; printf "\nMost-active authors, with commit count and %%...\n"; if out=$(git log-of-count-and-email 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active dates, with commit count and %%...\n"; if out=$(git log-of-count-and-day 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; printf "\nMost-active files, with churn count\n"; if out=$(git churn 2>/dev/null); then echo "$out" | head -7; else echo "[unavailable]"; fi; }; f
-    whois = !sh -c 'git log --regexp-ignore-case -1 --pretty="format:%an <%ae>\n" --author="$1"' -
+    chart = "!f() { git log --format=oneline --format=\"%aE %at\" --since=6-weeks-ago \"$*\" | awk ' function time_to_slot(t) { return strftime(\"%Y-%m-%d\", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : \"X\") : \".\" } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf(\"Chart time range %s to %s.\\\\n\", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = \"\"; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f"
+    churn = "!f() { git log --all --find-copies --find-renames --name-only --format='format:' \"$@\" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f"
+    summary = "!f() { printf \"Summary of this branch...\\n\"; printf \"%s\\n\" \"$(git current-branch)\"; printf \"%s first commit timestamp\\n\" \"$(git log --date-order --format=%cI | tail -1)\"; printf \"%s last commit timestamp\\n\" \"$(git log -1 --date-order --format=%cI)\"; printf \"\\nSummary of counts...\\n\"; printf \"%d commit count\\n\" \"$(git rev-list --count HEAD)\"; printf \"%d date count\\n\" \"$(git log --format=oneline --format=\"%ad\" --date=format:\"%Y-%m-%d\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d tag count\\n\" \"$(git tag | wc -l)\"; printf \"%d author count\\n\" \"$(git log --format=oneline --format=\"%aE\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d committer count\\n\" \"$(git log --format=oneline --format=\"%cE\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d local branch count\\n\" \"$(git branch | grep -vc \" -> \")\"; printf \"%d remote branch count\\n\" \"$(git branch --remotes | grep -vc \" -> \")\"; printf \"\\nSummary of this directory...\\n\"; printf \"%s\\n\" \"$(pwd)\"; printf \"%d file count via git ls-files\\n\" \"$(git ls-files | wc -l)\"; printf \"%d file count via find command\\n\" \"$(find . | wc -l)\"; printf \"%d disk usage\\n\" \"$(du -s | awk '{print $1}')\"; printf \"\\nMost-active authors, with commit count and %%...\\n\"; if out=$(git log-of-count-and-email 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; printf \"\\nMost-active dates, with commit count and %%...\\n\"; if out=$(git log-of-count-and-day 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; printf \"\\nMost-active files, with churn count\\n\"; if out=$(git churn 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; }; f"
+    whois = "!sh -c 'git log --regexp-ignore-case -1 --pretty=\"format:%an <%ae>\\n\" --author=\"$1\"' -"
     whatis = show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
     who = shortlog --summary --numbered --no-merges
-    issues = !sh -c "git log $1 --oneline | grep -o \\"ISSUE-[0-9]\\+\\" | sort -u"
+    issues = "!sh -c \"git log $1 --oneline | grep -o \\\\\"ISSUE-[0-9]\\\\+\\\\\" | sort -u\""
     ls = ls-files
     lsd = ls-files --debug
     lsfn = ls-files --full-name
@@ -149,13 +149,13 @@
     ma = merge --abort
     mc = merge --continue
     mncnf = merge --no-commit --no-ff
-    merge-span = !f() { echo "$(git log -1 "$2" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 "$2" --merges --pretty=format:%P | cut -d' ' -f2)"; }; f
-    merge-span-log = !git log "$(git merge-span .. "$1")"
-    merge-span-diff = !git diff "$(git merge-span ... "$1")"
-    merge-span-difftool = !git difftool "$(git merge-span ... "$1")"
-    rebase-branch = !f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f
-    ours = !f() { git checkout --ours   "$@" && git add "$@"; }; f
-    theirs = !f() { git checkout --theirs "$@" && git add "$@"; }; f
+    merge-span = "!f() { echo \"$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f2)\"; }; f"
+    merge-span-log = "!git log \"$(git merge-span .. \"$1\")\""
+    merge-span-diff = "!git diff \"$(git merge-span ... \"$1\")\""
+    merge-span-difftool = "!git difftool \"$(git merge-span ... \"$1\")\""
+    rebase-branch = "!f() { git rebase --interactive \"$(git merge-base \"$(git default-branch)\" HEAD)\"; }; f"
+    ours = "!f() { git checkout --ours   \"$@\" && git add \"$@\"; }; f"
+    theirs = "!f() { git checkout --theirs \"$@\" && git add \"$@\"; }; f"
     pf = pull --ff-only
     pr = pull --rebase
     prp = pull --rebase=merges
@@ -165,9 +165,9 @@
     rbs = rebase --skip
     rbi = rebase --interactive
     rbiu = rebase --interactive @{upstream}
-    fixup = !f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f
-    remote-ref = !local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #
-    rebase-recent = !git rebase --interactive "$(git remote-ref)"
+    fixup = "!f() { TARGET=\"$(git rev-parse \"$1\")\"; git commit --fixup=\"$TARGET\" && GIT_EDITOR=true git rebase --interactive --autosquash \"$TARGET\"~; }; f"
+    remote-ref = "!local_ref=\"$(git symbolic-ref HEAD)\"; local_name=\"${local_ref##refs/heads/}\"; remote=\"$(git config branch.\"$local_name\".remote || echo origin)\"; remote_ref=\"$(git config branch.\"$local_name\".merge)\"; remote_name=\"${remote_ref##refs/heads/}\"; echo \"remotes/$remote/$remote_name\" #"
+    rebase-recent = "!git rebase --interactive \"$(git remote-ref)\""
     rl = reflog
     rr = remote
     rrs = remote show
@@ -180,19 +180,19 @@
     reset-commit-hard = reset --hard HEAD~1
     reset-commit-hard-clean = !git reset --hard HEAD~1 && git clean -fd
     reset-to-pristine = !git reset --hard && git clean -ffdx
-    reset-to-upstream = !git reset --hard "$(git upstream-branch)"
+    reset-to-upstream = "!git reset --hard \"$(git upstream-branch)\""
     undo-commit = reset --soft HEAD~1
     undo-commit-hard = reset --hard HEAD~1
     undo-commit-hard-clean = !git reset --hard HEAD~1 && git clean -fd
     undo-to-pristine = !git reset --hard && git clean -ffdx
-    undo-to-upstream = !git reset --hard "$(git upstream-branch)"
+    undo-to-upstream = "!git reset --hard \"$(git upstream-branch)\""
     uncommit = reset --soft HEAD~1
-    unadd = !f() { git restore --staged -- "${@:-.}"; }; f
+    unadd = "!f() { git restore --staged -- \"${@:-.}\"; }; f"
     cleaner = clean -dff
     cleanest = clean -dffx
     cleanout = !git clean -df && git checkout -- .
-    expunge = !f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f
-    show-unreachable = !git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log
+    expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
+    show-unreachable = "!git fsck --unreachable | grep commit | cut -d\" \" -f3 | xargs git log"
     rv = revert
     rvnc = revert --no-commit
     a = add
@@ -208,7 +208,7 @@
     s = status
     w = log --name-status
     sw = switch
-    snapshot = !git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index
+    snapshot = "!git stash push --include-untracked --message \"snapshot: $(date)\" && git stash apply \"stash@{0}\" --index"
     sp = stash push
     sl = stash list
     sd = stash drop
@@ -224,20 +224,20 @@
     smui = submodule update --init
     smuir = submodule update --init --recursive
     last-tag = describe --tags --abbrev=0
-    last-tagged = !git describe --tags "$(git rev-list --tags --max-count=1)"
+    last-tagged = "!git describe --tags \"$(git rev-list --tags --max-count=1)\""
     tags = tag -n1 --list
     topic-base-branch = !git config --get init.topicBaseBranchName || git default-branch
-    topic-start = !f(){ new_branch="$1"; old_branch="$(git topic-base-branch)"; git checkout "$old_branch"; git pull --ff-only; git checkout -b "$new_branch" "$old_branch"; git push --set-upstream origin "$new_branch"; };f
+    topic-start = "!f(){ new_branch=\"$1\"; old_branch=\"$(git topic-base-branch)\"; git checkout \"$old_branch\"; git pull --ff-only; git checkout -b \"$new_branch\" \"$old_branch\"; git push --set-upstream origin \"$new_branch\"; };f"
     topic-begin = topic-start
-    topic-end = !f(){ new_branch="$(git current-branch)"; old_branch="$(git topic-base-branch)"; if [ "$new_branch" = "$old_branch" ]; then printf "You are asking to do git topic-end,\n"; printf "but you are not on a new topic branch;\n"; printf "you are on the base topic branch: %s.\n" "$old_branch"; printf "Please checkout the topic branch that you want,\n"; printf "then retry the git topic-end command.\n"; else git push; git checkout "$old_branch"; git branch --delete "$new_branch"; git push origin ":$new_branch"; fi; };f
+    topic-end = "!f(){ new_branch=\"$(git current-branch)\"; old_branch=\"$(git topic-base-branch)\"; if [ \"$new_branch\" = \"$old_branch\" ]; then printf \"You are asking to do git topic-end,\\n\"; printf \"but you are not on a new topic branch;\\n\"; printf \"you are on the base topic branch: %s.\\n\" \"$old_branch\"; printf \"Please checkout the topic branch that you want,\\n\"; printf \"then retry the git topic-end command.\\n\"; else git push; git checkout \"$old_branch\"; git branch --delete \"$new_branch\"; git push origin \":$new_branch\"; fi; };f"
     topic-finish = topic-end
-    topic-sync = !f(){ new_branch="$(git current-branch)"; old_branch="$(git topic-base-branch)"; if [ "$new_branch" = "$old_branch" ]; then printf "You are asking to do git topic-sync,\n"; printf "but you are not on a new topic branch;\n"; printf "you are on the base topic branch: %s.\n" "$old_branch"; printf "Please checkout the topic branch that you want,\n"; printf "then retry the git topic-sync command.\n"; else git pull; git push; fi; };f
-    topic-move = !f(){ new_branch="$1"; old_branch="$(git current-branch)"; git branch --move "$old_branch" "$new_branch"; git push --set-upstream origin ":$old_branch" "$new_branch"; };f
+    topic-sync = "!f(){ new_branch=\"$(git current-branch)\"; old_branch=\"$(git topic-base-branch)\"; if [ \"$new_branch\" = \"$old_branch\" ]; then printf \"You are asking to do git topic-sync,\\n\"; printf \"but you are not on a new topic branch;\\n\"; printf \"you are on the base topic branch: %s.\\n\" \"$old_branch\"; printf \"Please checkout the topic branch that you want,\\n\"; printf \"then retry the git topic-sync command.\\n\"; else git pull; git push; fi; };f"
+    topic-move = "!f(){ new_branch=\"$1\"; old_branch=\"$(git current-branch)\"; git branch --move \"$old_branch\" \"$new_branch\"; git push --set-upstream origin \":$old_branch\" \"$new_branch\"; };f"
     sb = show-branch
-    alias = !f(){ echo "Git Alias is project that has a collection of git alias commands."; echo "The purpose is to help make git easier, faster, and more capable."; echo "Free open source repository <https://github.com/gitalias/gitalias>."; echo ""; echo "To see your existing git aliases:"; echo "    git aliases"; echo ""; echo "To see your existing git aliases by using git directly:"; echo "    git config --get-regexp ^alias\\."; };f
-    add-alias = !f() { if [ $# != 3 ]; then echo "Usage: git add-alias ( --local | --global ) <alias> <command>"; echo "Error: this command needs 3 arguments."; return 2; fi; if [ -n "$(git config "$1" --get alias."$2")" ]; then echo "Alias '$2' already exists, thus no change happened."; return 3; fi; git config "$1" alias."$2" "$3" && return 0; echo "Usage: git add-alias ( --local | --global ) <alias> <command>"; echo "Error: unknown failure."; return 1; }; f
-    move-alias = !f() { if [ $# != 3 ]; then echo "Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>"; echo "Error: this command needs 3 arguments."; return 2; fi; if [ "$2" = "$3" ]; then echo "The alias names are identical, thus no change happened."; return 3; fi; if [ -z "$(git config "$1" --get alias."$2")" ]; then echo "Alias '$2' does not exist, thus no change happened."; return 4; fi; if [ -n "$(git config "$1" --get alias."$3")" ]; then echo "Alias '$3' already exists, thus no change happened."; return 5; fi; git config "$1" alias."$3" "$(git config "$1" --get alias."$2")" && git config "$1" --unset alias."$2" && return 0; echo "Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>"; echo "Error: unknown failure."; return 1; };f
-    init-empty = !f() { git init && git commit --allow-empty --allow-empty-message --message ''; }; f
+    alias = "!f(){ echo \"Git Alias is project that has a collection of git alias commands.\"; echo \"The purpose is to help make git easier, faster, and more capable.\"; echo \"Free open source repository <https://github.com/gitalias/gitalias>.\"; echo \"\"; echo \"To see your existing git aliases:\"; echo \"    git aliases\"; echo \"\"; echo \"To see your existing git aliases by using git directly:\"; echo \"    git config --get-regexp ^alias\\\\.\"; };f"
+    add-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
+    move-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
+    init-empty = "!f() { git init && git commit --allow-empty --allow-empty-message --message ''; }; f"
     orphans = fsck --full
     rev-list-all-objects-by-size = !git rev-list --all --objects  | awk '{print $1}'| git cat-file --batch-check | grep -F blob | sort -k3nr
     rev-list-all-objects-by-size-and-name = !git rev-list --all --objects | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print substr($0,6)}' | sort --numeric-sort --key=2
@@ -247,49 +247,49 @@
     assume-all = !git status --short | awk '{ print $2 }' | xargs -r git assume
     unassume-all = !git assumed | xargs -r git update-index --no-assume-unchanged
     assumed = !git ls-files -v | grep ^h | cut -c 3-
-    aliases = !git config --get-regexp '^alias\\.' | cut -c 7- | sed 's/ / = /'
+    aliases = "!git config --get-regexp '^alias\\\\.' | cut -c 7- | sed 's/ / = /'"
     stashes = stash list
     top = rev-parse --show-toplevel
     default-branch = config init.defaultBranch
     current-branch = rev-parse --abbrev-ref HEAD
-    upstream-branch = !git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)"
-    upb = rev-parse --abbrev-ref "@{upstream}"
+    upstream-branch = "!git for-each-ref --format='%(upstream:short)' \"$(git symbolic-ref -q HEAD)\""
+    upb = "rev-parse --abbrev-ref \"@{upstream}\""
     exec = ! exec
-    search-commits = !f() { query="$1"; shift; git log -S"$query" "$@"; }; f "$@"
+    search-commits = "!f() { query=\"$1\"; shift; git log -S\"$query\" \"$@\"; }; f"
     debug = !GIT_PAGER='' gdb --args git
-    intercommit = !sh -c 'git show "$1" > .git/commit1 && git show "$2" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -
-    graphviz = !f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' "$@" | sed 's/[0-9a-f][0-9a-f]*/"&"/g' ; echo '}'; }; f
+    intercommit = "!sh -c 'git show \"$1\" > .git/commit1 && git show \"$2\" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -"
+    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
     cloner = clone --recursive
     clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
     panic = !tar cvf ../panic.tar -- *
-    archive = !f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f
+    archive = "!f() { top=\"$(git rev-parse --show-toplevel)\"; cd \"$top\" || exit 1 ; tar cvf \"$top.tar\" \"$top\" ; }; f"
     pushy = push --force-with-lease
     pushy-check = !git log @{upstream}.. && git push --force-with-lease
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
     put = !git commit --all && git push
     put-dry-run = !git diff --cached --stat && git push --dry-run
-    mainly = !f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f
-    ignore = !git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore
-    push1 = !git push origin "$(git current-branch)"
-    pull1 = !git pull origin "$(git current-branch)"
-    track = !f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f
-    untrack = !f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f
-    publish = !f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f
-    unpublish = !f() { git push "${1:-origin}" :"$(git current-branch)"; }; f
-    inbound = !git remote update --prune; git log ..@{upstream}
+    mainly = "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
+    ignore = "!git status | grep -P \"^\\\\t\" | grep -vF .gitignore | sed \"s/^\\\\t//\" >> .gitignore"
+    push1 = "!git push origin \"$(git current-branch)\""
+    pull1 = "!git pull origin \"$(git current-branch)\""
+    track = "!f(){ branch=\"$(git current-branch)\"; cmd=\"git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}\"; echo \"$cmd\"; $cmd; }; f"
+    untrack = "!f(){ branch=\"$(git current-branch)\"; cmd=\"git branch --unset-upstream ${1:-$branch}\"; echo \"$cmd\"; $cmd; }; f"
+    publish = "!f() { git push --set-upstream \"${1:-origin}\" \"$(git current-branch)\"; }; f"
+    unpublish = "!f() { git push \"${1:-origin}\" :\"$(git current-branch)\"; }; f"
+    inbound = "!git remote update --prune; git log ..@{upstream}"
     outbound = log @{upstream}..
-    reincarnate = !f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f
-    pruner = !git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all
+    reincarnate = "!f() { [ $# -gt 0 ] && git checkout \"$1\" && git unpublish && git checkout \"$(git default-branch)\" && git branch --delete --force \"$1\" && git checkout -b \"$1\" && git publish; }; f"
+    pruner = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all"
     repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
-    optimizer = !git pruner; git repacker; git prune-packed
+    optimizer = "!git pruner; git repacker; git prune-packed"
     worktree-add = worktree add
     worktree-list = worktree list
     worktree-remove = worktree remove
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
-    wt-new = !f() { branch="$1"; base="${2:-origin/main}"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add -b "$branch" "$target" "$base"; }; f
-    wt-open = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); mkdir -p ../wt; target="../wt/${repo}-${clean}"; git worktree add "$target" "$branch"; }; f
-    wt-rm = !f() { branch="$1"; repo=$(basename "$(git rev-parse --show-toplevel)"); clean=$(echo "$branch" | tr '/' '-'); target="../wt/${repo}-${clean}"; git worktree remove "$target"; }; f
+    wt-new = "!f() { branch=\"$1\"; base=\"${2:-origin/main}\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
+    wt-open = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add \"$target\" \"$branch\"; }; f"
+    wt-rm = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); target=\"../wt/${repo}-${clean}\"; git worktree remove \"$target\"; }; f"
     wt-list = worktree list
     wt-prune = worktree prune

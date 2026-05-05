@@ -2,20 +2,20 @@
     aa = add --all
     ap = add --patch
     au = add --update
-    add-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
-    add-force-ignored = !f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z "$files" ] || git add --force -- $files; }; f
-    add-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    add-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f
-    edit-cached = !f() { files=$(git ls-files --cached | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-deleted = !f() { files=$(git ls-files --deleted | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-others = !f() { files=$(git ls-files --others | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-ignored = !f() { files=$(git ls-files --ignored | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-killed = !f() { files=$(git ls-files --killed | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-modified = !f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-stage = !f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
-    edit-unmerged = !f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f
+    add-cached = "!f() { files=$(git ls-files --cached | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-deleted = "!f() { files=$(git ls-files --deleted | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-others = "!f() { files=$(git ls-files --others | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
+    add-force-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
+    add-killed = "!f() { files=$(git ls-files --killed | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-stage = "!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    add-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    edit-cached = "!f() { files=$(git ls-files --cached | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-deleted = "!f() { files=$(git ls-files --deleted | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-others = "!f() { files=$(git ls-files --others | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-ignored = "!f() { files=$(git ls-files --ignored | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-killed = "!f() { files=$(git ls-files --killed | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-stage = "!f() { files=$(git ls-files --stage | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    edit-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
