@@ -1,0 +1,473 @@
+name: Test Aliases Functionally
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test-aliases:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate alias configs
+        run: bun run generate
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name  "Test User"
+          git config --global user.email "test@example.com"
+          git config --global init.defaultBranch main
+
+      - name: Install all generated aliases globally
+        run: |
+          for f in "$GITHUB_WORKSPACE"/generated/*.gitconfig; do
+            git config --global --add include.path "$f"
+          done
+
+      - name: Set up test repository with realistic state
+        run: |
+          REPO=/tmp/alias-test-repo
+          mkdir "$REPO" && cd "$REPO"
+          git init
+
+          # --- commits with content for grep and log tests ---
+          mkdir -p src
+          printf 'function hello() {\n  return "Hello, world";\n}\n' > src/main.js
+          echo "Hello, world"  > hello.txt
+          echo "Foo bar baz"   > foo.txt
+          git add .
+          git commit --message "feat: initial commit"
+
+          echo "Second line"   >> hello.txt
+          echo "Another file"  > world.txt
+          git add .
+          git commit --message "feat: second commit"
+
+          echo "Third change"  >> foo.txt
+          git add .
+          git commit --message "fix: third commit"
+
+          # --- tags (lightweight and annotated) ---
+          git tag v1.0.0
+          git tag -a v1.1.0 --message "Release v1.1.0"
+
+          # --- feature branch + merge commit ---
+          # HEAD becomes a merge commit; keep the branch so hew-local-dry-run has output
+          git checkout -b feature/test-branch
+          echo "Feature content" > feature.txt
+          git add feature.txt
+          git commit --message "feat: feature commit"
+          git checkout main
+          git merge feature/test-branch --no-ff --message "Merge feature/test-branch"
+          # ORIG_HEAD is now set (needed for log-fresh)
+
+          # --- branch description (needed for bsd) ---
+          git config branch.main.description "Main integration branch"
+
+          # --- stash entry ---
+          echo "Stashed content" > stash-me.txt
+          git stash push --include-untracked --message "test stash"
+
+          # --- staged change (for dc / ds / unstage) ---
+          echo "Staged change"   >> foo.txt
+          git add foo.txt
+
+          # --- unstaged change (for dw / diff-stat / diff-changes) ---
+          echo "Unstaged change" >> hello.txt
+
+      - name: Smoke-test all aliases
+        working-directory: /tmp/alias-test-repo
+        run: |
+          pass=0; fail=0; skip=0
+          failures=""
+
+          # Run the alias; count pass/fail by exit code.
+          ok() {
+            local name="$1"; shift
+            if git "$name" "$@" > /dev/null 2>&1; then
+              echo "✓  git $name${*:+ $*}"
+              pass=$((pass + 1))
+            else
+              local code=$?
+              echo "✗  git $name${*:+ $*}  (exit $code)"
+              fail=$((fail + 1))
+              failures="$failures\n  git $name${*:+ $*}"
+            fi
+          }
+
+          # Record that an alias is intentionally skipped.
+          skip() {
+            local name="$1" reason="$2"
+            echo "⊘  git $name  — $reason"
+            skip=$((skip + 1))
+          }
+
+          # ── shortcuts ───────────────────────────────────────────────────────
+          ok   b                        # git branch (list)
+          ok   d                        # git diff (unstaged)
+          ok   g    "Hello"             # git grep
+          ok   l                        # git log
+          ok   s                        # git status
+          ok   w                        # git log --name-status
+          skip a    "modifies index"
+          skip c    "requires message argument"
+          skip f    "requires a remote"
+          skip m    "requires a branch argument"
+          skip o    "requires a target ref"
+          skip p    "requires upstream tracking branch"
+          skip sw   "requires a branch argument"
+
+          # ── status ──────────────────────────────────────────────────────────
+          ok   ss
+          ok   ssb
+
+          # ── log ─────────────────────────────────────────────────────────────
+          ok   lg
+          ok   lo
+          ok   lor
+          ok   lp   -2
+          ok   lfp
+          ok   lto
+          ok   ll
+          ok   lll
+          ok   log-list
+          ok   log-list-long
+          ok   log-graph
+          ok   log-date-first
+          ok   log-date-last
+          ok   log-refs
+          ok   log-timeline
+          ok   log-fresh                # ORIG_HEAD is set after the merge above
+          ok   log-1-hour
+          ok   log-1-day
+          ok   log-1-week
+          ok   log-1-month
+          ok   log-1-year
+          ok   log-my
+          ok   log-my-hour
+          ok   log-my-day
+          ok   log-my-week
+          ok   log-my-month
+          ok   log-my-year
+          ok   log-of-format-and-count            "%an"
+          ok   log-of-count-and-format            "%an"
+          ok   log-of-format-and-count-with-date  "%aE" "%Y-%m"
+          ok   log-of-count-and-format-with-date  "%aE" "%Y-%m"
+          ok   log-of-email-and-count
+          ok   log-of-count-and-email
+          ok   log-of-hour-and-count
+          ok   log-of-count-and-hour
+          ok   log-of-day-and-count
+          ok   log-of-count-and-day
+          ok   log-of-week-and-count
+          ok   log-of-count-and-week
+          ok   log-of-month-and-count
+          ok   log-of-count-and-month
+          ok   log-of-year-and-count
+          ok   log-of-count-and-year
+          ok   log-of-hour-of-day-and-count
+          ok   log-of-count-and-hour-of-day
+          ok   log-of-day-of-week-and-count
+          ok   log-of-count-and-day-of-week
+          ok   log-of-week-of-year-and-count
+          ok   log-of-count-and-week-of-year
+          ok   chart
+          ok   churn
+          ok   who
+          ok   whois   "Test User"
+          ok   whatis  HEAD
+          ok   issues  HEAD~1..HEAD
+          ok   summary
+          skip log-local   "requires upstream tracking branch"
+          skip log-fetched "requires upstream tracking branch"
+
+          # ── diff ────────────────────────────────────────────────────────────
+          ok   dc                       # diff --cached (staged change present)
+          ok   ds                       # diff --staged
+          ok   dw                       # diff --word-diff (unstaged change present)
+          ok   dd                       # diff-deep alias chain
+          ok   diff-deep
+          ok   diff-changes  HEAD~1
+          ok   diff-stat     HEAD~1
+          skip diff-all      "opens difftool interactively"
+          skip diff-chunk    "requires two commit SHAs and a function name"
+
+          # ── branch ──────────────────────────────────────────────────────────
+          ok   bm
+          ok   bnm
+          ok   bv
+          ok   bvv
+          ok   branches
+          ok   recent
+          ok   refs-by-date
+          ok   bsd                      # branch.main.description is set
+          ok   branch-commit-first
+          ok   branch-commit-last
+          ok   branch-commit-prev
+          ok   branch-commit-next
+          ok   hew-local-dry-run        # feature/test-branch is merged but not deleted
+          skip bed             "opens editor interactively"
+          skip hew             "deletes merged branches locally and remotely"
+          skip hew-dry-run     "depends on upstream-branch which has no upstream set"
+          skip hew-local       "destructive: deletes locally merged branches"
+          skip hew-remote      "requires a remote"
+          skip hew-remote-dry-run "requires a remote"
+          skip heads           "requires origin remote"
+          skip track-all-remote-branches "requires a remote"
+
+          # ── core ────────────────────────────────────────────────────────────
+          ok   root
+          # Ensure a staged file, unstage it, then re-stage for later tests.
+          git add foo.txt
+          ok   unstage  foo.txt
+          git add foo.txt
+          skip discard "destructive: discards working-tree changes"
+
+          # ── add ─────────────────────────────────────────────────────────────
+          ok   add-cached
+          ok   add-deleted              # no deleted files — no-op, exits 0
+          ok   add-others
+          ok   add-killed               # no killed files — no-op, exits 0
+          ok   add-modified
+          ok   add-stage
+          ok   add-unmerged             # no unmerged files — no-op, exits 0
+          skip aa              "stages all files — keep index stable"
+          skip au              "stages tracked files — keep index stable"
+          skip ap              "interactive patch add"
+          skip add-ignored     "force-adds gitignored files"
+          skip add-force-ignored "force-adds gitignored files"
+          skip edit-cached     "opens editor interactively"
+          skip edit-deleted    "opens editor interactively"
+          skip edit-others     "opens editor interactively"
+          skip edit-ignored    "opens editor interactively"
+          skip edit-killed     "opens editor interactively"
+          skip edit-modified   "opens editor interactively"
+          skip edit-stage      "opens editor interactively"
+          skip edit-unmerged   "opens editor interactively"
+
+          # ── commit ──────────────────────────────────────────────────────────
+          ok   commit-parents          HEAD
+          ok   commit-message-key-lines HEAD
+          ok   commit-is-merge         HEAD  # HEAD is the merge commit from setup
+          skip ca    "amends last commit — modifies history"
+          skip cam   "amends last commit — requires message argument"
+          skip cane  "amends last commit — modifies history"
+          skip caa   "amends last commit — modifies history"
+          skip caam  "modifies history — requires message argument"
+          skip caane "modifies history"
+          skip cm    "modifies history — requires message argument"
+          skip ci    "interactive commit"
+          skip wip   "commits all changes — modifies history"
+          skip unwip "conditionally resets HEAD — modifies history"
+
+          # ── stash ───────────────────────────────────────────────────────────
+          ok   sl
+          ok   ssa                      # shows the stash entry created in setup
+          ok   stashes
+          skip sp       "modifies stash stack"
+          skip spo      "pops stash — destructive for test state"
+          skip sd       "drops stash entry — destructive for test state"
+          skip snapshot "pushes to stash — modifies stash state"
+
+          # ── tag ─────────────────────────────────────────────────────────────
+          ok   tags
+          ok   last-tag
+          ok   last-tagged
+
+          # ── ls ──────────────────────────────────────────────────────────────
+          ok   ls
+          ok   lsd
+          ok   lsfn
+          ok   lsio
+
+          # ── grep ────────────────────────────────────────────────────────────
+          ok   gn          "Hello"
+          ok   gg          "Hello"
+          ok   grep-group  "Hello"
+          ok   grep-ack    "Hello"
+          ok   grep-all    "Hello"
+
+          # ── reflog ──────────────────────────────────────────────────────────
+          ok   rl
+
+          # ── util ────────────────────────────────────────────────────────────
+          ok   sb
+          ok   alias
+          ok   orphans
+          ok   top
+          ok   default-branch
+          ok   current-branch
+          ok   upstream-branch          # exits 0, outputs empty when no upstream
+          ok   aliases
+          ok   stashes
+          ok   assumed
+          ok   rev-list-all-objects-by-size
+          ok   rev-list-all-objects-by-size-and-name
+          ok   search-commits   "feat"
+          ok   graphviz
+          skip upb             "exits non-zero when no upstream is configured"
+          skip add-alias       "modifies git config"
+          skip move-alias      "modifies git config"
+          skip init-empty      "initializes a new repository"
+          skip initer          "initializes a new repository"
+          skip assume          "requires a file argument; side-effect on index"
+          skip unassume        "requires a file argument; side-effect on index"
+          skip assume-all      "side-effect on index"
+          skip unassume-all    "side-effect on index"
+          skip exec            "exec with no args causes a shell error"
+          skip debug           "requires gdb"
+          skip intercommit     "requires interdiff and two commit SHAs"
+          skip serve           "starts a network daemon"
+
+          # ── remote ──────────────────────────────────────────────────────────
+          ok   rr                       # lists remotes (empty — exits 0)
+          skip rrs             "requires a named remote argument"
+          skip rru             "requires a remote"
+          skip rrp             "requires a named remote argument"
+          skip remotes-push    "pushes to all remotes"
+          skip remotes-push-dry-run "requires a remote"
+          skip remotes-prune   "requires a remote"
+
+          # ── fetch ───────────────────────────────────────────────────────────
+          skip fa    "requires a remote"
+          skip fav   "requires a remote"
+          skip fap   "requires a remote"
+
+          # ── pull ────────────────────────────────────────────────────────────
+          skip pf    "requires upstream tracking branch"
+          skip pr    "requires upstream tracking branch"
+          skip prp   "requires upstream tracking branch"
+
+          # ── checkout ────────────────────────────────────────────────────────
+          skip co    "requires a target ref"
+          skip cong  "requires a target ref"
+          skip cob   "requires a new branch name"
+          skip swb   "requires a new branch name"
+          skip swi   "requires fzf installed"
+
+          # ── merge ───────────────────────────────────────────────────────────
+          skip ma    "only valid during an in-progress merge"
+          skip mc    "only valid during an in-progress merge"
+          skip mncnf "requires a branch name argument"
+          skip merge-span          "requires a merge-commit SHA argument"
+          skip merge-span-log      "requires a merge-commit SHA argument"
+          skip merge-span-diff     "requires a merge-commit SHA argument"
+          skip merge-span-difftool "opens difftool interactively"
+          skip rebase-branch       "interactive rebase"
+          skip ours    "only valid during a merge conflict"
+          skip theirs  "only valid during a merge conflict"
+
+          # ── rebase ──────────────────────────────────────────────────────────
+          skip rb    "requires a target branch"
+          skip rba   "only valid during an in-progress rebase"
+          skip rbc   "only valid during an in-progress rebase"
+          skip rbs   "only valid during an in-progress rebase"
+          skip rbi   "interactive rebase"
+          skip rbiu  "interactive rebase — requires upstream"
+          skip fixup "interactive rebase"
+          skip remote-ref     "requires upstream tracking branch"
+          skip rebase-recent  "requires upstream tracking branch"
+
+          # ── cherry-pick ─────────────────────────────────────────────────────
+          skip cp    "requires a commit SHA argument"
+          skip cpa   "only valid during an in-progress cherry-pick"
+          skip cpc   "only valid during an in-progress cherry-pick"
+          skip cpn   "requires a commit SHA argument"
+          skip cpnx  "requires a commit SHA argument"
+          skip cherry-pick-merge "requires a merge-commit SHA argument"
+
+          # ── revert ──────────────────────────────────────────────────────────
+          skip rv    "modifies history — requires a commit SHA argument"
+          skip rvnc  "modifies history — requires a commit SHA argument"
+
+          # ── reset ───────────────────────────────────────────────────────────
+          ok   show-unreachable
+          skip unadd               "would unstage files needed for subsequent tests"
+          skip reset-commit        "modifies commit history"
+          skip reset-commit-hard   "destructive: discards committed changes"
+          skip reset-commit-hard-clean "destructive"
+          skip reset-to-pristine   "destructive: hard-resets and cleans working tree"
+          skip reset-to-upstream   "destructive — requires upstream tracking branch"
+          skip undo-commit         "modifies commit history"
+          skip undo-commit-hard    "destructive: discards committed changes"
+          skip undo-commit-hard-clean "destructive"
+          skip undo-to-pristine    "destructive"
+          skip undo-to-upstream    "destructive — requires upstream tracking branch"
+          skip uncommit    "modifies commit history"
+          skip cleaner     "destructive: removes untracked files"
+          skip cleanest    "destructive: removes untracked files"
+          skip cleanout    "destructive"
+          skip expunge     "requires git-filter-repo; reads from /dev/tty"
+
+          # ── worktree ────────────────────────────────────────────────────────
+          ok   wt-list
+          ok   wt-prune
+          ok   worktree-list
+          skip wt-new          "requires a remote base ref (origin/main)"
+          skip wt-open         "requires an existing branch name"
+          skip wt-rm           "requires an existing worktree to remove"
+          skip worktree-add    "requires a path argument"
+          skip worktree-remove "requires a worktree path"
+
+          # ── submodule ───────────────────────────────────────────────────────
+          ok   sm
+          ok   smu              # no submodules — no-op, exits 0
+          ok   smui
+          ok   smuir
+          skip smi   "requires a submodule URL"
+          skip sma   "requires URL and path arguments"
+          skip sms   "no submodules present"
+
+          # ── workflow ────────────────────────────────────────────────────────
+          ok   pruner
+          ok   repacker
+          ok   optimizer
+          skip outbound        "requires upstream tracking branch"
+          skip inbound         "requires a remote"
+          skip get             "requires a remote"
+          skip put             "requires a message / remote"
+          skip put-dry-run     "push dry-run requires a remote"
+          skip pushy           "requires a remote"
+          skip pushy-check     "requires upstream tracking branch and a remote"
+          skip push1           "requires a remote"
+          skip pull1           "requires a remote"
+          skip track           "requires a remote"
+          skip untrack         "requires upstream tracking branch"
+          skip publish         "requires a remote"
+          skip unpublish       "requires a remote"
+          skip reincarnate     "destructive — requires a remote"
+          skip cloner          "requires a URL argument"
+          skip clone-lean      "requires a URL argument"
+          skip ignore          "modifies .gitignore"
+          skip mainly          "interactive — reads from /dev/tty"
+          skip panic           "creates a tar archive"
+          skip archive         "creates a tar archive"
+          skip sparse-init     "changes sparse-checkout mode"
+          skip sparse-set      "requires sparse-checkout path arguments"
+
+          # ── topic ───────────────────────────────────────────────────────────
+          ok   topic-base-branch
+          skip topic-start   "requires a remote"
+          skip topic-begin   "requires a remote"
+          skip topic-end     "requires a remote"
+          skip topic-finish  "requires a remote"
+          skip topic-sync    "requires a remote"
+          skip topic-move    "requires a remote"
+
+          # ── final report ────────────────────────────────────────────────────
+          printf "\n──────────────────────────────────────────────────────\n"
+          printf "Results: %d passed  %d failed  %d skipped\n" \
+                 "$pass" "$fail" "$skip"
+          if [ "$fail" -gt 0 ]; then
+            printf "\nFailed aliases:%b\n" "$failures"
+            exit 1
+          fi
