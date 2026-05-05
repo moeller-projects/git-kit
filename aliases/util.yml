@@ -135,7 +135,7 @@ aliases:
     risk: medium
 
   search-commits:
-    command: '!f() { query="$1"; shift; git log -S"$query" "$@"; }; f "$@"'
+    command: '!f() { query="$1"; shift; git log -S"$query" "$@"; }; f'
     description: Search commit history for a given string
     category: util
     risk: medium

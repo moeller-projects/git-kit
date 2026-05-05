@@ -79,11 +79,30 @@ function renderSections(sections: GitConfigSection[], hasTrailingNewline: boolea
   return hasTrailingNewline ? `${rendered}${newline}` : rendered;
 }
 
+/**
+ * Quote a gitconfig value so that it is read back verbatim by git.
+ *
+ * In gitconfig, a `"` character outside of a quoted section opens a quoted
+ * section, and `;` / `#` outside of a quoted section start a comment.
+ * Shell aliases frequently contain all of these characters, so values that
+ * contain any of them must be wrapped in outer double quotes with the inner
+ * double quotes and backslashes escaped.
+ *
+ * Alias commands are expected to be single-line; real newlines in a command
+ * string indicate a YAML authoring error and are not handled here.
+ */
+function quoteGitConfigValue(value: string): string {
+  if (/[";\#\\]/.test(value)) {
+    return '"' + value.replace(/\\/g, '\\\\').replace(/"/g, '\\"') + '"';
+  }
+  return value;
+}
+
 export function renderAliasGitConfig(entries: Array<{ name: string; command: string }>): string {
   const lines = ['[alias]'];
 
   for (const entry of entries) {
-    lines.push(`    ${entry.name} = ${entry.command}`);
+    lines.push(`    ${entry.name} = ${quoteGitConfigValue(entry.command)}`);
   }
 
   return `${lines.join('\n')}\n`;

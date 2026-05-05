@@ -1,5 +1,5 @@
 [alias]
-    snapshot = !git stash push --include-untracked --message "snapshot: $(date)" && git stash apply "stash@{0}" --index
+    snapshot = "!git stash push --include-untracked --message \"snapshot: $(date)\" && git stash apply \"stash@{0}\" --index"
     sp = stash push
     sl = stash list
     sd = stash drop

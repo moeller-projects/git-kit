@@ -46,10 +46,10 @@ Generated from `aliases/`.
 | `track-all-remote-branches` | `!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f` | Track all remote branches as local branches | medium |
 | `hew` | `!git hew-local "$@" && git hew-remote "$@" #` | Delete all merged branches locally and remotely | dangerous |
 | `hew-dry-run` | `!git hew-local-dry-run "$@" && git hew-remote-dry-run "$@" #` | Preview branches that would be deleted by hew | medium |
-| `hew-local` | `!f() { git hew-local-dry-run "$@" | xargs git branch --delete ; }; f "$@"` | Delete all locally merged branches | dangerous |
-| `hew-local-dry-run` | `!f() { commit=${1:-$(git current-branch)}; git branch --merged "$commit" | grep -v "^[[:space:]]*\\*[[:space:]]*$commit$" ; }; f "$@"` | Preview locally merged branches to be deleted | medium |
-| `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f "$@"` | Delete all remotely merged branches | dangerous |
-| `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f "$@"` | Preview remotely merged branches to be deleted | medium |
+| `hew-local` | `!f() { git hew-local-dry-run "$@" | xargs git branch --delete ; }; f` | Delete all locally merged branches | dangerous |
+| `hew-local-dry-run` | `!f() { commit=${1:-$(git current-branch)}; git branch --merged "$commit" | grep -v "^[[:space:]]*\\*[[:space:]]*$commit$" ; }; f` | Preview locally merged branches to be deleted | medium |
+| `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f` | Delete all remotely merged branches | dangerous |
+| `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
 | `branches` | `branch -a` | List all local and remote branches | safe |
 | `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
 
@@ -382,7 +382,7 @@ Generated from `aliases/`.
 | `upstream-branch` | `!git for-each-ref --format='%(upstream:short)' "$(git symbolic-ref -q HEAD)"` | Show the upstream branch for the current branch | medium |
 | `upb` | `rev-parse --abbrev-ref "@{upstream}"` | Show the upstream branch (short form) | medium |
 | `exec` | `! exec` | Execute a shell command from the repository root | medium |
-| `search-commits` | `!f() { query="$1"; shift; git log -S"$query" "$@"; }; f "$@"` | Search commit history for a given string | medium |
+| `search-commits` | `!f() { query="$1"; shift; git log -S"$query" "$@"; }; f` | Search commit history for a given string | medium |
 | `debug` | `!GIT_PAGER='' gdb --args git` | Debug a git builtin command using gdb | medium |
 | `intercommit` | `!sh -c 'git show "$1" > .git/commit1 && git show "$2" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -` | Show the diff between two commits using interdiff | medium |
 | `graphviz` | `!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' "$@" | sed 's/[0-9a-f][0-9a-f]*/"&"/g' ; echo '}'; }; f` | Output a digraph of commit history for use with dotty | medium |
