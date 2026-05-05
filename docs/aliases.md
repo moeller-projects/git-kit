@@ -123,8 +123,8 @@ Generated from `aliases/`.
 | `what-changed` | `diff --name-only HEAD` | List files changed since last commit | safe |
 | `what-staged` | `diff --cached --name-only` | List staged files only | safe |
 | `what-unstaged` | `diff --name-only` | List unstaged changes only | safe |
-| `range-diff` | `!f() { git diff "$1".."$2"; }; f` | Diff between two refs | medium |
-| `difftooli` | `!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool "$file"; }; f` | Interactively open difftool for a changed file | medium |
+| `diff-range` | `!f() { git diff "$1".."$2"; }; f` | Diff between two refs | medium |
+| `difftooli` | `!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool -- "$file"; }; f` | Interactively open difftool for a changed file | medium |
 
 ## fetch
 
@@ -421,7 +421,7 @@ Generated from `aliases/`.
 | `serve` | `-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose` | Serve the local repo over the git protocol | medium |
 | `large-files` | `!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,""); print size, $0}' | sort -nr | head -50` | List the 50 largest blobs in the repository by size | medium |
 | `bl` | `blame` | Show file blame | safe |
-| `bli` | `!f() { file=$(git ls-files | fzf); [ -n "$file" ] && git blame "$file"; }; f` | Interactively blame a file | medium |
+| `bli` | `!f() { file=$(git ls-files | fzf); [ -n "$file" ] && git blame -- "$file"; }; f` | Interactively blame a file | medium |
 | `verify` | `fsck --full` | Verify repo integrity | safe |
 
 ## workflow

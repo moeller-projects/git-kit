@@ -28,5 +28,5 @@
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
     large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
     bl = blame
-    bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame \"$file\"; }; f"
+    bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame -- \"$file\"; }; f"
     verify = fsck --full

@@ -107,14 +107,14 @@ aliases:
     category: diff
     risk: safe
 
-  range-diff:
+  diff-range:
     command: '!f() { git diff "$1".."$2"; }; f'
     description: Diff between two refs
     category: diff
     risk: medium
 
   difftooli:
-    command: '!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool "$file"; }; f'
+    command: '!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool -- "$file"; }; f'
     description: Interactively open difftool for a changed file
     category: diff
     risk: medium

@@ -86,8 +86,8 @@
     what-changed = diff --name-only HEAD
     what-staged = diff --cached --name-only
     what-unstaged = diff --name-only
-    range-diff = "!f() { git diff \"$1\"..\"$2\"; }; f"
-    difftooli = "!f() { file=$(git diff --name-only | fzf); [ -n \"$file\" ] && git difftool \"$file\"; }; f"
+    diff-range = "!f() { git diff \"$1\"..\"$2\"; }; f"
+    difftooli = "!f() { file=$(git diff --name-only | fzf); [ -n \"$file\" ] && git difftool -- \"$file\"; }; f"
     fa = fetch --all
     fav = fetch --all --verbose
     fap = fetch --all --prune
@@ -294,7 +294,7 @@
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
     large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
     bl = blame
-    bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame \"$file\"; }; f"
+    bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame -- \"$file\"; }; f"
     verify = fsck --full
     cloner = clone --recursive
     clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout

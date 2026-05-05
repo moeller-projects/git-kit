@@ -216,7 +216,7 @@ jobs:
           ok   what-changed             # diff --name-only HEAD
           ok   what-staged              # diff --cached --name-only
           ok   what-unstaged            # diff --name-only
-          ok   range-diff    HEAD~1 HEAD
+          ok   diff-range    HEAD~1 HEAD
           skip diff-all      "opens difftool interactively"
           skip diff-chunk    "requires two commit SHAs and a function name"
           skip difftooli     "requires interactive fzf and difftool"

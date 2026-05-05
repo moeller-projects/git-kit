@@ -177,7 +177,7 @@ aliases:
     risk: safe
 
   bli:
-    command: '!f() { file=$(git ls-files | fzf); [ -n "$file" ] && git blame "$file"; }; f'
+    command: '!f() { file=$(git ls-files | fzf); [ -n "$file" ] && git blame -- "$file"; }; f'
     description: Interactively blame a file
     category: util
     risk: medium
