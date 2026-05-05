@@ -34,3 +34,21 @@ aliases:
     description: Show the most recent stash entry as a full patch diff
     category: stash
     risk: safe
+
+  spu:
+    command: stash push --include-untracked
+    description: Stash including untracked files
+    category: stash
+    risk: medium
+
+  spp:
+    command: stash push --patch
+    description: Interactively stash changes
+    category: stash
+    risk: medium
+
+  sli:
+    command: '!git stash list | fzf'
+    description: Interactively browse stash entries
+    category: stash
+    risk: medium

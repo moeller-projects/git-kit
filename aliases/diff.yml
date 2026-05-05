@@ -88,3 +88,33 @@ aliases:
     description: List files with unresolved merge conflicts
     category: diff
     risk: safe
+
+  what-changed:
+    command: diff --name-only HEAD
+    description: List files changed since last commit
+    category: diff
+    risk: safe
+
+  what-staged:
+    command: diff --cached --name-only
+    description: List staged files only
+    category: diff
+    risk: safe
+
+  what-unstaged:
+    command: diff --name-only
+    description: List unstaged changes only
+    category: diff
+    risk: safe
+
+  range-diff:
+    command: '!f() { git diff "$1".."$2"; }; f'
+    description: Diff between two refs
+    category: diff
+    risk: medium
+
+  difftooli:
+    command: '!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool "$file"; }; f'
+    description: Interactively open difftool for a changed file
+    category: diff
+    risk: medium

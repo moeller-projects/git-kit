@@ -88,3 +88,9 @@ aliases:
     description: Amend the last commit with currently staged changes, keeping the message
     category: commit
     risk: medium
+
+  again:
+    command: commit --amend --no-edit
+    description: Reuse last commit message
+    category: commit
+    risk: medium

@@ -65,6 +65,7 @@
     unwip = "!f() { msg=\"$(git log -1 --pretty=%s)\"; test \"$msg\" = \"wip\" || { echo \"last commit message is not 'wip' (found: '${msg}')\"; return 1; }; git reset HEAD~1; }; f"
     fixup-no-rebase = "!f() { target=\"$1\"; test -n \"$target\" || { echo \"usage: git fixup-no-rebase <commit>\"; return 2; }; git commit --fixup=\"$target\"; }; f"
     amend-staged = commit --amend --no-edit
+    again = commit --amend --no-edit
     unstage = restore --staged
     root = rev-parse --show-toplevel
     dc = diff --cached
@@ -82,6 +83,11 @@
     staged-files = diff --staged --name-only
     unstaged-files = diff --name-only
     conflicts = diff --name-only --diff-filter=U
+    what-changed = diff --name-only HEAD
+    what-staged = diff --cached --name-only
+    what-unstaged = diff --name-only
+    range-diff = "!f() { git diff \"$1\"..\"$2\"; }; f"
+    difftooli = "!f() { file=$(git diff --name-only | fzf); [ -n \"$file\" ] && git difftool \"$file\"; }; f"
     fa = fetch --all
     fav = fetch --all --verbose
     fap = fetch --all --prune
@@ -148,6 +154,14 @@
     whatis = show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
     who = shortlog --summary --numbered --no-merges
     issues = "!sh -c \"git log $1 --oneline | grep -o \\\\\"ISSUE-[0-9]\\\\+\\\\\" | sort -u\""
+    last = log -1 --oneline
+    commit-search = "!f() { git log --all --grep=\"$1\" --oneline; }; f"
+    commit-files = show --name-only --pretty=format:
+    range-log = "!f() { git log --oneline \"$1\"..\"$2\"; }; f"
+    ahead = rev-list --count @{upstream}..HEAD
+    behind = rev-list --count HEAD..@{upstream}
+    diverged = "!echo \"ahead: $(git ahead) | behind: $(git behind)\""
+    showi = "!f() { commit=$(git log --oneline | fzf | cut -d\" \" -f1); [ -n \"$commit\" ] && git show \"$commit\"; }; f"
     ls = ls-files
     lsd = ls-files --debug
     lsfn = ls-files --full-name
@@ -205,6 +219,8 @@
     discard-file = restore --
     expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     show-unreachable = "!git fsck --unreachable | grep commit | cut -d\" \" -f3 | xargs git log"
+    clean-dry = clean -dffn
+    reset-hard-safe = "!f() { printf \"Reset HARD to %s? [y/N] \" \"${1:-HEAD}\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git reset --hard \"${1:-HEAD}\" ;; *) echo \"Aborted.\" ;; esac; }; f"
     rv = revert
     rvnc = revert --no-commit
     a = add
@@ -226,6 +242,9 @@
     sd = stash drop
     spo = stash pop
     ssa = stash show --patch
+    spu = stash push --include-untracked
+    spp = stash push --patch
+    sli = !git stash list | fzf
     st = status --short --branch
     ss = status --short
     ssb = status --short --branch
@@ -274,6 +293,9 @@
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
     large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
+    bl = blame
+    bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame \"$file\"; }; f"
+    verify = fsck --full
     cloner = clone --recursive
     clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
     panic = !tar cvf ../panic.tar -- *

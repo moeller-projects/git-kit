@@ -5,3 +5,6 @@
     sd = stash drop
     spo = stash pop
     ssa = stash show --patch
+    spu = stash push --include-untracked
+    spp = stash push --patch
+    sli = !git stash list | fzf

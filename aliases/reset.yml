@@ -121,3 +121,15 @@ aliases:
     description: Show log of unreachable commits
     category: reset
     risk: medium
+
+  clean-dry:
+    command: clean -dffn
+    description: Preview what would be deleted by clean
+    category: reset
+    risk: safe
+
+  reset-hard-safe:
+    command: '!f() { printf "Reset HARD to %s? [y/N] " "${1:-HEAD}"; read -r ans </dev/tty; case "$ans" in [yY]*) git reset --hard "${1:-HEAD}" ;; *) echo "Aborted." ;; esac; }; f'
+    description: Confirmed hard reset
+    category: reset
+    risk: dangerous

@@ -14,3 +14,8 @@
     staged-files = diff --staged --name-only
     unstaged-files = diff --name-only
     conflicts = diff --name-only --diff-filter=U
+    what-changed = diff --name-only HEAD
+    what-staged = diff --cached --name-only
+    what-unstaged = diff --name-only
+    range-diff = "!f() { git diff \"$1\"..\"$2\"; }; f"
+    difftooli = "!f() { file=$(git diff --name-only | fzf); [ -n \"$file\" ] && git difftool \"$file\"; }; f"
