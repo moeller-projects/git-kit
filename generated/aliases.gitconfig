@@ -5,7 +5,6 @@
     add-cached = "!f() { files=$(git ls-files --cached | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
     add-deleted = "!f() { files=$(git ls-files --deleted | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
     add-others = "!f() { files=$(git ls-files --others | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
-    add-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
     add-force-ignored = "!f() { files=$(git ls-files --ignored --others --exclude-standard | sort -u); [ -z \"$files\" ] || git add --force -- $files; }; f"
     add-killed = "!f() { files=$(git ls-files --killed | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
     add-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
@@ -62,10 +61,11 @@
     commit-parents = "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
     commit-is-merge = "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
     commit-message-key-lines = "!f(){ echo \"Commit: $1\"; git log \"$1\" --format=fuller | grep \"^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:\" | sed \"s/^[[:blank:]]*//; s/:[[:blank:]]*/: /\"; }; f"
-    wip = "!git add --all; git ls-files --deleted -z | xargs -r -0 git rm; git commit --message=wip"
-    unwip = !git log --max-count=1 | grep -q -c wip && git reset HEAD~1
+    wip = !git add --all && git commit --message=wip
+    unwip = "!f() { msg=\"$(git log -1 --pretty=%s)\"; test \"$msg\" = \"wip\" || { echo \"last commit message is not 'wip' (found: '${msg}')\"; return 1; }; git reset HEAD~1; }; f"
+    fixup-no-rebase = "!f() { target=\"$1\"; test -n \"$target\" || { echo \"usage: git fixup-no-rebase <commit>\"; return 2; }; git commit --fixup=\"$target\"; }; f"
+    amend-staged = commit --amend --no-edit
     unstage = restore --staged
-    discard = restore
     root = rev-parse --show-toplevel
     dc = diff --cached
     ds = diff --staged
@@ -76,6 +76,12 @@
     diff-stat = diff --stat --ignore-space-change -r
     diff-deep = diff --check --dirstat --find-copies --find-renames --histogram --color
     diff-chunk = "!f() { git show \"$1:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp1 ; git show \"$2:$3\" | sed -n \"/^[^ \\t].*$4(/,/^}/p\" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f"
+    staged = diff --staged --stat
+    unstaged = diff --stat
+    changed = diff --name-status
+    staged-files = diff --staged --name-only
+    unstaged-files = diff --name-only
+    conflicts = diff --name-only --diff-filter=U
     fa = fetch --all
     fav = fetch --all --verbose
     fap = fetch --all --prune
@@ -146,6 +152,9 @@
     lsd = ls-files --debug
     lsfn = ls-files --full-name
     lsio = ls-files --ignored --others --exclude-standard
+    untracked = ls-files --others --exclude-standard
+    tracked = ls-files
+    ignored = status --ignored --short
     ma = merge --abort
     mc = merge --continue
     mncnf = merge --no-commit --no-ff
@@ -188,9 +197,12 @@
     undo-to-upstream = "!git reset --hard \"$(git upstream-branch)\""
     uncommit = reset --soft HEAD~1
     unadd = "!f() { git restore --staged -- \"${@:-.}\"; }; f"
-    cleaner = clean -dff
-    cleanest = clean -dffx
-    cleanout = !git clean -df && git checkout -- .
+    clean-force = clean -dff
+    clean-force-ignored = clean -dffx
+    reset-working-tree = !git clean -df && git checkout -- .
+    unstage-all = restore --staged .
+    discard-all = restore .
+    discard-file = restore --
     expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     show-unreachable = "!git fsck --unreachable | grep commit | cut -d\" \" -f3 | xargs git log"
     rv = revert
@@ -214,6 +226,7 @@
     sd = stash drop
     spo = stash pop
     ssa = stash show --patch
+    st = status --short --branch
     ss = status --short
     ssb = status --short --branch
     sm = submodule
@@ -260,6 +273,7 @@
     intercommit = "!sh -c 'git show \"$1\" > .git/commit1 && git show \"$2\" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -"
     graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
+    large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
     cloner = clone --recursive
     clone-lean = clone --depth 1 --filter=combine:blob:none+tree:0 --no-checkout
     panic = !tar cvf ../panic.tar -- *
@@ -267,7 +281,6 @@
     pushy = push --force-with-lease
     pushy-check = !git log @{upstream}.. && git push --force-with-lease
     get = !git fetch --prune && git pull --rebase && git submodule update --init --recursive
-    put = !git commit --all && git push
     put-dry-run = !git diff --cached --stat && git push --dry-run
     mainly = "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
     ignore = "!git status | grep -P \"^\\\\t\" | grep -vF .gitignore | sed \"s/^\\\\t//\" >> .gitignore"
@@ -283,13 +296,17 @@
     pruner = "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all"
     repacker = repack -a -d -f --depth=300 --window=300 --window-memory=1g
     optimizer = "!git pruner; git repacker; git prune-packed"
-    worktree-add = worktree add
-    worktree-list = worktree list
-    worktree-remove = worktree remove
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
-    wt-new = "!f() { branch=\"$1\"; base=\"${2:-origin/main}\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
-    wt-open = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); mkdir -p ../wt; target=\"../wt/${repo}-${clean}\"; git worktree add \"$target\" \"$branch\"; }; f"
-    wt-rm = "!f() { branch=\"$1\"; repo=$(basename \"$(git rev-parse --show-toplevel)\"); clean=$(echo \"$branch\" | tr '/' '-'); target=\"../wt/${repo}-${clean}\"; git worktree remove \"$target\"; }; f"
+    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"$(dirname \"$root\")/${repo}-${clean}\"; }; f"
+    wt-new = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-new <branch> [base]\"; return 2; }; base=\"${2:-$(git default-branch)}\"; target=\"$(git wt-path \"$branch\")\" || return; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
+    wt-open = "!f() { if [ -n \"$1\" ]; then branch=\"$1\"; else command -v fzf >/dev/null 2>&1 || { echo \"fzf is required when no branch is given\"; return 2; }; branch=\"$(git branch -a | grep -v \" -> \" | sed \"s/^[* ]*//;s|remotes/origin/||\" | sort -u | fzf --prompt=\"branch> \")\"; test -n \"$branch\" || return 1; fi; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\"; }; f"
+    wt-rm = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rm <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove \"$target\"; }; f"
+    wt-rmf = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-rmf <branch>\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree remove --force \"$target\"; }; f"
+    wt-rmi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"fzf is required\"; return 2; }; path=\"$(git worktree list --porcelain | awk \"/^worktree /{print substr(\\$0,10)}\" | fzf --prompt=\"remove worktree> \")\"; test -n \"$path\" || return 1; git worktree remove \"$path\"; }; f"
+    wt-cd = wt-path
     wt-list = worktree list
+    wt-list-v = worktree list --verbose
     wt-prune = worktree prune
+    wt-prune-v = worktree prune --verbose
+    branch-in-worktree = "!f() { branch=\"${1:-$(git current-branch)}\"; git worktree list --porcelain | grep -A2 \"^worktree \" | grep -Fq \"branch refs/heads/$branch\"; }; f"

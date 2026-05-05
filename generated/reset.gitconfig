@@ -11,8 +11,11 @@
     undo-to-upstream = "!git reset --hard \"$(git upstream-branch)\""
     uncommit = reset --soft HEAD~1
     unadd = "!f() { git restore --staged -- \"${@:-.}\"; }; f"
-    cleaner = clean -dff
-    cleanest = clean -dffx
-    cleanout = !git clean -df && git checkout -- .
+    clean-force = clean -dff
+    clean-force-ignored = clean -dffx
+    reset-working-tree = !git clean -df && git checkout -- .
+    unstage-all = restore --staged .
+    discard-all = restore .
+    discard-file = restore --
     expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     show-unreachable = "!git fsck --unreachable | grep commit | cut -d\" \" -f3 | xargs git log"

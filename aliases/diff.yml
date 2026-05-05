@@ -52,3 +52,39 @@ aliases:
     description: Diff a single function or chunk between two commits
     category: diff
     risk: medium
+
+  staged:
+    command: diff --staged --stat
+    description: Show a stat summary of staged changes
+    category: diff
+    risk: safe
+
+  unstaged:
+    command: diff --stat
+    description: Show a stat summary of unstaged changes
+    category: diff
+    risk: safe
+
+  changed:
+    command: diff --name-status
+    description: Show names and status of changed files
+    category: diff
+    risk: safe
+
+  staged-files:
+    command: diff --staged --name-only
+    description: List file names of staged changes
+    category: diff
+    risk: safe
+
+  unstaged-files:
+    command: diff --name-only
+    description: List file names of unstaged changes
+    category: diff
+    risk: safe
+
+  conflicts:
+    command: diff --name-only --diff-filter=U
+    description: List files with unresolved merge conflicts
+    category: diff
+    risk: safe

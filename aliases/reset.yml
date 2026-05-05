@@ -74,23 +74,41 @@ aliases:
     risk: medium
     since_version: "2.23"
 
-  cleaner:
+  clean-force:
     command: clean -dff
     description: Clean working tree with force options
     category: reset
     risk: dangerous
 
-  cleanest:
+  clean-force-ignored:
     command: clean -dffx
-    description: Clean working tree with the most aggressive options
+    description: Clean working tree including ignored files with the most aggressive options
     category: reset
     risk: dangerous
 
-  cleanout:
+  reset-working-tree:
     command: '!git clean -df && git checkout -- .'
-    description: Clean and checkout to restore working tree
+    description: Clean untracked files and restore working tree to HEAD
     category: reset
     risk: dangerous
+
+  unstage-all:
+    command: restore --staged .
+    description: Unstage all staged changes
+    category: reset
+    risk: medium
+
+  discard-all:
+    command: restore .
+    description: Discard all unstaged changes in the working tree
+    category: reset
+    risk: medium
+
+  discard-file:
+    command: restore --
+    description: "Discard unstaged changes in a specific file; usage: git discard-file <filename>"
+    category: reset
+    risk: medium
 
   expunge:
     command: "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"

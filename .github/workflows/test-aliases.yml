@@ -127,6 +127,7 @@ jobs:
           skip sw   "requires a branch argument"
 
           # ── status ──────────────────────────────────────────────────────────
+          ok   st
           ok   ss
           ok   ssb
 
@@ -198,6 +199,12 @@ jobs:
           ok   diff-deep
           ok   diff-changes  HEAD~1
           ok   diff-stat     HEAD~1
+          ok   staged                   # diff --staged --stat (staged change present)
+          ok   unstaged                 # diff --stat (unstaged change present)
+          ok   changed                  # diff --name-status
+          ok   staged-files             # diff --staged --name-only
+          ok   unstaged-files           # diff --name-only
+          ok   conflicts                # no conflicts — exits 0, empty output
           skip diff-all      "opens difftool interactively"
           skip diff-chunk    "requires two commit SHAs and a function name"
 
@@ -230,7 +237,6 @@ jobs:
           git add foo.txt
           ok   unstage  foo.txt
           git add foo.txt
-          skip discard "destructive: discards working-tree changes"
 
           # ── add ─────────────────────────────────────────────────────────────
           ok   add-cached
@@ -243,7 +249,6 @@ jobs:
           skip aa              "stages all files — keep index stable"
           skip au              "stages tracked files — keep index stable"
           skip ap              "interactive patch add"
-          skip add-ignored     "force-adds gitignored files"
           skip add-force-ignored "force-adds gitignored files"
           skip edit-cached     "opens editor interactively"
           skip edit-deleted    "opens editor interactively"
@@ -266,8 +271,10 @@ jobs:
           skip caane "modifies history"
           skip cm    "modifies history — requires message argument"
           skip ci    "interactive commit"
-          skip wip   "commits all changes — modifies history"
-          skip unwip "conditionally resets HEAD — modifies history"
+          skip wip              "commits all changes — modifies history"
+          skip unwip            "conditionally resets HEAD — modifies history"
+          skip fixup-no-rebase  "modifies history — requires a target commit"
+          skip amend-staged     "amends last commit — modifies history"
 
           # ── stash ───────────────────────────────────────────────────────────
           ok   sl
@@ -288,6 +295,9 @@ jobs:
           ok   lsd
           ok   lsfn
           ok   lsio
+          ok   untracked            # ls-files --others (no untracked files — exits 0)
+          ok   tracked              # ls-files
+          ok   ignored              # status --ignored --short (exits 0)
 
           # ── grep ────────────────────────────────────────────────────────────
           ok   gn          "Hello"
@@ -312,6 +322,7 @@ jobs:
           ok   assumed
           ok   rev-list-all-objects-by-size
           ok   rev-list-all-objects-by-size-and-name
+          ok   large-files
           ok   search-commits   "feat"
           ok   graphviz
           skip upb             "exits non-zero when no upstream is configured"
@@ -391,6 +402,7 @@ jobs:
 
           # ── reset ───────────────────────────────────────────────────────────
           ok   show-unreachable
+          ok   unstage-all              # restore --staged . (unstages foo.txt staged above)
           skip unadd               "would unstage files needed for subsequent tests"
           skip reset-commit        "modifies commit history"
           skip reset-commit-hard   "destructive: discards committed changes"
@@ -403,20 +415,26 @@ jobs:
           skip undo-to-pristine    "destructive"
           skip undo-to-upstream    "destructive — requires upstream tracking branch"
           skip uncommit    "modifies commit history"
-          skip cleaner     "destructive: removes untracked files"
-          skip cleanest    "destructive: removes untracked files"
-          skip cleanout    "destructive"
+          skip clean-force         "destructive: removes untracked files"
+          skip clean-force-ignored "destructive: removes untracked and ignored files"
+          skip reset-working-tree  "destructive: cleans and restores working tree"
+          skip discard-all         "destructive: discards all working-tree changes"
+          skip discard-file        "destructive: discards working-tree changes to a file"
           skip expunge     "requires git-filter-repo; reads from /dev/tty"
 
           # ── worktree ────────────────────────────────────────────────────────
+          ok   wt-path          main    # prints canonical path, exits 0
+          ok   wt-cd            main    # delegates to wt-path, exits 0
           ok   wt-list
+          ok   wt-list-v
           ok   wt-prune
-          ok   worktree-list
-          skip wt-new          "requires a remote base ref (origin/main)"
-          skip wt-open         "requires an existing branch name"
+          ok   wt-prune-v
+          ok   branch-in-worktree      # current branch (main) is in the main worktree
+          skip wt-new          "creates a worktree — requires filesystem side-effects"
+          skip wt-open         "creates a worktree (filesystem side effect); may require interactive fzf when no branch is given"
           skip wt-rm           "requires an existing worktree to remove"
-          skip worktree-add    "requires a path argument"
-          skip worktree-remove "requires a worktree path"
+          skip wt-rmf          "destructive: force-removes a worktree"
+          skip wt-rmi          "requires fzf installed"
 
           # ── submodule ───────────────────────────────────────────────────────
           ok   sm
@@ -434,7 +452,6 @@ jobs:
           skip outbound        "requires upstream tracking branch"
           skip inbound         "requires a remote"
           skip get             "requires a remote"
-          skip put             "requires a message / remote"
           skip put-dry-run     "push dry-run requires a remote"
           skip pushy           "requires a remote"
           skip pushy-check     "requires upstream tracking branch and a remote"
