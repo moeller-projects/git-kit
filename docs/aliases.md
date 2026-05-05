@@ -89,7 +89,7 @@ Generated from `aliases/`.
 | `commit-is-merge` | `!f(){ [ -n "$(git commit-parents "$*" | sed '0,/^parent /d')" ];};f` | Exit 0 if the commit is a merge, else exit 1 | medium |
 | `commit-message-key-lines` | `!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f` | Show keyword-tagged lines from a commit message | medium |
 | `wip` | `!git add --all && git commit --message=wip` | Stage all changes and commit with message "wip" | medium |
-| `unwip` | `!f() { test "$(git log -1 --pretty=%s)" = "wip" || { echo "last commit is not wip"; return 1; }; git reset HEAD~1; }; f` | Undo the last commit only if its message is exactly "wip" | medium |
+| `unwip` | `!f() { msg="$(git log -1 --pretty=%s)"; test "$msg" = "wip" || { echo "last commit message is not 'wip' (found: '${msg}')"; return 1; }; git reset HEAD~1; }; f` | Undo the last commit only if its message is exactly "wip" | medium |
 | `fixup-no-rebase` | `!f() { target="$1"; test -n "$target" || { echo "usage: git fixup-no-rebase <commit>"; return 2; }; git commit --fixup="$target"; }; f` | Create a fixup commit for a given commit without triggering autosquash rebase | medium |
 | `amend-staged` | `commit --amend --no-edit` | Amend the last commit with currently staged changes, keeping the message | medium |
 
@@ -289,7 +289,7 @@ Generated from `aliases/`.
 | `reset-working-tree` | `!git clean -df && git checkout -- .` | Clean untracked files and restore working tree to HEAD | dangerous |
 | `unstage-all` | `restore --staged .` | Unstage all staged changes | medium |
 | `discard-all` | `restore .` | Discard all unstaged changes in the working tree | medium |
-| `discard-file` | `restore --` | Discard unstaged changes in a specific file | medium |
+| `discard-file` | `restore --` | Discard unstaged changes in a specific file; usage: git discard-file <filename> | medium |
 | `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
 

@@ -106,7 +106,7 @@ aliases:
 
   discard-file:
     command: restore --
-    description: Discard unstaged changes in a specific file
+    description: "Discard unstaged changes in a specific file; usage: git discard-file <filename>"
     category: reset
     risk: medium
 

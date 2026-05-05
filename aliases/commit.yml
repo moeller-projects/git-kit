@@ -72,7 +72,7 @@ aliases:
     risk: medium
 
   unwip:
-    command: '!f() { test "$(git log -1 --pretty=%s)" = "wip" || { echo "last commit is not wip"; return 1; }; git reset HEAD~1; }; f'
+    command: "!f() { msg=\"$(git log -1 --pretty=%s)\"; test \"$msg\" = \"wip\" || { echo \"last commit message is not 'wip' (found: '${msg}')\"; return 1; }; git reset HEAD~1; }; f"
     description: Undo the last commit only if its message is exactly "wip"
     category: commit
     risk: medium
