@@ -14,3 +14,4 @@
     unwip = "!f() { msg=\"$(git log -1 --pretty=%s)\"; test \"$msg\" = \"wip\" || { echo \"last commit message is not 'wip' (found: '${msg}')\"; return 1; }; git reset HEAD~1; }; f"
     fixup-no-rebase = "!f() { target=\"$1\"; test -n \"$target\" || { echo \"usage: git fixup-no-rebase <commit>\"; return 2; }; git commit --fixup=\"$target\"; }; f"
     amend-staged = commit --amend --no-edit
+    again = commit --amend --no-edit

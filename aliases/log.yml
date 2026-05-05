@@ -367,3 +367,52 @@ aliases:
     description: List issue IDs mentioned in commits between a range
     category: log
     risk: medium
+
+  last:
+    command: log -1 --oneline
+    description: Show last commit
+    category: log
+    risk: safe
+
+  commit-search:
+    command: '!f() { git log --all --grep="$1" --oneline; }; f'
+    description: Search commits by message
+    category: log
+    risk: medium
+
+  commit-files:
+    command: 'show --name-only --pretty=format:'
+    description: Show files affected by a commit
+    category: log
+    risk: safe
+
+  range-log:
+    command: '!f() { git log --oneline "$1".."$2"; }; f'
+    description: Log between two refs
+    category: log
+    risk: medium
+
+  ahead:
+    command: rev-list --count @{upstream}..HEAD
+    description: Number of commits ahead of upstream
+    category: log
+    risk: safe
+
+  behind:
+    command: rev-list --count HEAD..@{upstream}
+    description: Number of commits behind upstream
+    category: log
+    risk: safe
+
+  diverged:
+    command: '!echo "ahead: $(git ahead) | behind: $(git behind)"'
+    description: Show divergence from upstream
+    category: log
+    risk: medium
+    depends_on: [ahead, behind]
+
+  showi:
+    command: '!f() { commit=$(git log --oneline | fzf | cut -d" " -f1); [ -n "$commit" ] && git show "$commit"; }; f'
+    description: Interactively select and show a commit
+    category: log
+    risk: medium

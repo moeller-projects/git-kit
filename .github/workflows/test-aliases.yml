@@ -190,6 +190,14 @@ jobs:
           ok   summary
           skip log-local   "requires upstream tracking branch"
           skip log-fetched "requires upstream tracking branch"
+          ok   last
+          ok   commit-search    "feat"
+          ok   commit-files     HEAD
+          ok   range-log        HEAD~1 HEAD
+          skip ahead    "requires upstream tracking branch"
+          skip behind   "requires upstream tracking branch"
+          skip diverged "requires upstream tracking branch"
+          skip showi    "requires interactive fzf"
 
           # ── diff ────────────────────────────────────────────────────────────
           ok   dc                       # diff --cached (staged change present)
@@ -205,8 +213,13 @@ jobs:
           ok   staged-files             # diff --staged --name-only
           ok   unstaged-files           # diff --name-only
           ok   conflicts                # no conflicts — exits 0, empty output
+          ok   what-changed             # diff --name-only HEAD
+          ok   what-staged              # diff --cached --name-only
+          ok   what-unstaged            # diff --name-only
+          ok   diff-range    HEAD~1 HEAD
           skip diff-all      "opens difftool interactively"
           skip diff-chunk    "requires two commit SHAs and a function name"
+          skip difftooli     "requires interactive fzf and difftool"
 
           # ── branch ──────────────────────────────────────────────────────────
           ok   bm
@@ -275,6 +288,7 @@ jobs:
           skip unwip            "conditionally resets HEAD — modifies history"
           skip fixup-no-rebase  "modifies history — requires a target commit"
           skip amend-staged     "amends last commit — modifies history"
+          skip again            "amends last commit — modifies history"
 
           # ── stash ───────────────────────────────────────────────────────────
           ok   sl
@@ -284,6 +298,9 @@ jobs:
           skip spo      "pops stash — destructive for test state"
           skip sd       "drops stash entry — destructive for test state"
           skip snapshot "pushes to stash — modifies stash state"
+          skip spu      "modifies stash stack"
+          skip spp      "interactive patch stash"
+          skip sli      "requires interactive fzf"
 
           # ── tag ─────────────────────────────────────────────────────────────
           ok   tags
@@ -325,6 +342,9 @@ jobs:
           ok   large-files
           ok   search-commits   "feat"
           ok   graphviz
+          ok   bl               src/main.js
+          ok   verify
+          skip bli             "requires interactive fzf"
           skip upb             "exits non-zero when no upstream is configured"
           skip add-alias       "modifies git config"
           skip move-alias      "modifies git config"
@@ -402,6 +422,7 @@ jobs:
 
           # ── reset ───────────────────────────────────────────────────────────
           ok   show-unreachable
+          ok   clean-dry                # preview of what would be deleted
           ok   unstage-all              # restore --staged . (unstages foo.txt staged above)
           skip unadd               "would unstage files needed for subsequent tests"
           skip reset-commit        "modifies commit history"
@@ -421,6 +442,7 @@ jobs:
           skip discard-all         "destructive: discards all working-tree changes"
           skip discard-file        "destructive: discards working-tree changes to a file"
           skip expunge     "requires git-filter-repo; reads from /dev/tty"
+          skip reset-hard-safe "reads from /dev/tty"
 
           # ── worktree ────────────────────────────────────────────────────────
           ok   wt-path          main    # prints canonical path, exits 0

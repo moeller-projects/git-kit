@@ -57,3 +57,11 @@
     whatis = show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
     who = shortlog --summary --numbered --no-merges
     issues = "!sh -c \"git log $1 --oneline | grep -o \\\\\"ISSUE-[0-9]\\\\+\\\\\" | sort -u\""
+    last = log -1 --oneline
+    commit-search = "!f() { git log --all --grep=\"$1\" --oneline; }; f"
+    commit-files = show --name-only --pretty=format:
+    range-log = "!f() { git log --oneline \"$1\"..\"$2\"; }; f"
+    ahead = rev-list --count @{upstream}..HEAD
+    behind = rev-list --count HEAD..@{upstream}
+    diverged = "!echo \"ahead: $(git ahead) | behind: $(git behind)\""
+    showi = "!f() { commit=$(git log --oneline | fzf | cut -d\" \" -f1); [ -n \"$commit\" ] && git show \"$commit\"; }; f"

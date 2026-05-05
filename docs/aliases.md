@@ -92,6 +92,7 @@ Generated from `aliases/`.
 | `unwip` | `!f() { msg="$(git log -1 --pretty=%s)"; test "$msg" = "wip" || { echo "last commit message is not 'wip' (found: '${msg}')"; return 1; }; git reset HEAD~1; }; f` | Undo the last commit only if its message is exactly "wip" | medium |
 | `fixup-no-rebase` | `!f() { target="$1"; test -n "$target" || { echo "usage: git fixup-no-rebase <commit>"; return 2; }; git commit --fixup="$target"; }; f` | Create a fixup commit for a given commit without triggering autosquash rebase | medium |
 | `amend-staged` | `commit --amend --no-edit` | Amend the last commit with currently staged changes, keeping the message | medium |
+| `again` | `commit --amend --no-edit` | Reuse last commit message | medium |
 
 ## core
 
@@ -119,6 +120,11 @@ Generated from `aliases/`.
 | `staged-files` | `diff --staged --name-only` | List file names of staged changes | safe |
 | `unstaged-files` | `diff --name-only` | List file names of unstaged changes | safe |
 | `conflicts` | `diff --name-only --diff-filter=U` | List files with unresolved merge conflicts | safe |
+| `what-changed` | `diff --name-only HEAD` | List files changed since last commit | safe |
+| `what-staged` | `diff --cached --name-only` | List staged files only | safe |
+| `what-unstaged` | `diff --name-only` | List unstaged changes only | safe |
+| `diff-range` | `!f() { git diff "$1".."$2"; }; f` | Diff between two refs | medium |
+| `difftooli` | `!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool -- "$file"; }; f` | Interactively open difftool for a changed file | medium |
 
 ## fetch
 
@@ -200,6 +206,14 @@ Generated from `aliases/`.
 | `whatis` | `show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short` | Briefly describe any git object | safe |
 | `who` | `shortlog --summary --numbered --no-merges` | Show commit counts per contributor | safe |
 | `issues` | `!sh -c "git log $1 --oneline | grep -o \\"ISSUE-[0-9]\\+\\" | sort -u"` | List issue IDs mentioned in commits between a range | medium |
+| `last` | `log -1 --oneline` | Show last commit | safe |
+| `commit-search` | `!f() { git log --all --grep="$1" --oneline; }; f` | Search commits by message | medium |
+| `commit-files` | `show --name-only --pretty=format:` | Show files affected by a commit | safe |
+| `range-log` | `!f() { git log --oneline "$1".."$2"; }; f` | Log between two refs | medium |
+| `ahead` | `rev-list --count @{upstream}..HEAD` | Number of commits ahead of upstream | safe |
+| `behind` | `rev-list --count HEAD..@{upstream}` | Number of commits behind upstream | safe |
+| `diverged` | `!echo "ahead: $(git ahead) | behind: $(git behind)"` | Show divergence from upstream | medium |
+| `showi` | `!f() { commit=$(git log --oneline | fzf | cut -d" " -f1); [ -n "$commit" ] && git show "$commit"; }; f` | Interactively select and show a commit | medium |
 
 ## ls
 
@@ -292,6 +306,8 @@ Generated from `aliases/`.
 | `discard-file` | `restore --` | Discard unstaged changes in a specific file; usage: git discard-file <filename> | medium |
 | `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `show-unreachable` | `!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log` | Show log of unreachable commits | medium |
+| `clean-dry` | `clean -dffn` | Preview what would be deleted by clean | safe |
+| `reset-hard-safe` | `!f() { printf "Reset HARD to %s? [y/N] " "${1:-HEAD}"; read -r ans </dev/tty; case "$ans" in [yY]*) git reset --hard "${1:-HEAD}" ;; *) echo "Aborted." ;; esac; }; f` | Confirmed hard reset | dangerous |
 
 ## revert
 
@@ -328,6 +344,9 @@ Generated from `aliases/`.
 | `sd` | `stash drop` | Drop the most recent stash entry | medium |
 | `spo` | `stash pop` | Pop and apply the most recent stash entry | medium |
 | `ssa` | `stash show --patch` | Show the most recent stash entry as a full patch diff | safe |
+| `spu` | `stash push --include-untracked` | Stash including untracked files | medium |
+| `spp` | `stash push --patch` | Interactively stash changes | medium |
+| `sli` | `!git stash list | fzf` | Interactively browse stash entries | medium |
 
 ## status
 
@@ -401,6 +420,9 @@ Generated from `aliases/`.
 | `graphviz` | `!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' "$@" | sed 's/[0-9a-f][0-9a-f]*/"&"/g' ; echo '}'; }; f` | Output a digraph of commit history for use with dotty | medium |
 | `serve` | `-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose` | Serve the local repo over the git protocol | medium |
 | `large-files` | `!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,""); print size, $0}' | sort -nr | head -50` | List the 50 largest blobs in the repository by size | medium |
+| `bl` | `blame` | Show file blame | safe |
+| `bli` | `!f() { file=$(git ls-files | fzf); [ -n "$file" ] && git blame -- "$file"; }; f` | Interactively blame a file | medium |
+| `verify` | `fsck --full` | Verify repo integrity | safe |
 
 ## workflow
 
