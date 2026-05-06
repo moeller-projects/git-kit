@@ -445,7 +445,7 @@ jobs:
           skip reset-hard-safe "reads from /dev/tty"
 
           # ── worktree ────────────────────────────────────────────────────────
-          ok   wt-path          main    # prints canonical path, exits 0
+          ok   wt-path          main    # prints canonical path ../<repo>-main, exits 0
           ok   wt-cd            main    # delegates to wt-path, exits 0
           ok   wt-list
           ok   wt-list-v
@@ -503,8 +503,8 @@ jobs:
           skip topic-move    "requires a remote"
 
           # ── flow ─────────────────────────────────────────────────────────────
-          ok   flow-task-start   testtask   # creates /tmp/testtask worktree with branch task/testtask
-          ok   flow-task-done    testtask   # removes /tmp/testtask worktree and deletes task/testtask branch
+          ok   flow-task-start   testtask   # creates ../<repo>-task-testtask worktree with branch task/testtask
+          ok   flow-task-done    testtask   # removes ../<repo>-task-testtask worktree and deletes task/testtask branch
           skip flow-feature-start "creates a worktree — filesystem side-effect"
           skip flow-feature-finish "merges branch and removes worktree — modifies history"
           skip flow-hotfix-start  "creates a worktree — filesystem side-effect"

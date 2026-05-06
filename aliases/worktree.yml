@@ -1,7 +1,7 @@
 aliases:
   wt-path:
-    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${clean}"; }; f'
-    description: Print the absolute worktree path for a branch using ../<branch>
+    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f'
+    description: Print the absolute worktree path for a branch using ../<repo>-<branch>
     category: worktree
     risk: medium
 
