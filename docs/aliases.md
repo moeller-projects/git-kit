@@ -134,6 +134,17 @@ Generated from `aliases/`.
 | `fav` | `fetch --all --verbose` | Fetch from all remotes with verbose output | safe |
 | `fap` | `fetch --all --prune` | Fetch from all remotes and prune deleted branches | safe |
 
+## flow
+
+| Alias | Command | Description | Risk |
+| --- | --- | --- | --- |
+| `task-start` | `!f() { name="$1"; test -n "$name" || { echo "usage: git task-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree add -b "task/$name" "$path" "$base"; }; f` | Start a task in a sibling worktree at ../<name> with branch task/<name> | medium |
+| `task-done` | `!f() { name="$1"; test -n "$name" || { echo "usage: git task-done <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree remove "$path" && git branch --delete "task/$name"; }; f` | Remove the task worktree and delete the task branch once merged | medium |
+| `flow-feature-start` | `!f() { name="$1"; test -n "$name" || { echo "usage: git flow-feature-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/feature-$name"; git worktree add -b "feature/$name" "$path" "$base"; }; f` | Start a feature branch in a sibling worktree at ../feature-<name> | medium |
+| `flow-feature-finish` | `!f() { name="$1"; test -n "$name" || { echo "usage: git flow-feature-finish <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; base="$(git default-branch)"; path="$(dirname "$root")/feature-$name"; git checkout "$base" && git merge --no-ff "feature/$name" && git worktree remove "$path" && git branch --delete "feature/$name"; }; f` | Merge a feature branch into default, remove its worktree, and delete the branch | medium |
+| `flow-hotfix-start` | `!f() { name="$1"; test -n "$name" || { echo "usage: git flow-hotfix-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/hotfix-$name"; git worktree add -b "hotfix/$name" "$path" "$base"; }; f` | Start a hotfix branch in a sibling worktree at ../hotfix-<name> | medium |
+| `flow-release-start` | `!f() { name="$1"; test -n "$name" || { echo "usage: git flow-release-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/release-$name"; git worktree add -b "release/$name" "$path" "$base"; }; f` | Start a release branch in a sibling worktree at ../release-<name> | medium |
+
 ## grep
 
 | Alias | Command | Description | Risk |
@@ -457,7 +468,7 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f` | Print the absolute worktree path for a branch using <parent>/<repo>-<branch> | medium |
+| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${clean}"; }; f` | Print the absolute worktree path for a branch using ../<branch> | medium |
 | `wt-new` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-new <branch> [base]"; return 2; }; base="${2:-$(git default-branch)}"; target="$(git wt-path "$branch")" || return; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree with a new branch from a base (default from default-branch) | medium |
 | `wt-open` | `!f() { if [ -n "$1" ]; then branch="$1"; else command -v fzf >/dev/null 2>&1 || { echo "fzf is required when no branch is given"; return 2; }; branch="$(git branch -a | grep -v " -> " | sed "s/^[* ]*//;s|remotes/origin/||" | sort -u | fzf --prompt="branch> ")"; test -n "$branch" || return 1; fi; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree; uses fzf to select branch when none given | medium |
 | `wt-rm` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-rm <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree remove "$target"; }; f` | Remove a worktree by branch name | medium |

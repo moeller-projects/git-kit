@@ -502,6 +502,14 @@ jobs:
           skip topic-sync    "requires a remote"
           skip topic-move    "requires a remote"
 
+          # ── flow ─────────────────────────────────────────────────────────────
+          ok   task-start   testtask   # creates /tmp/testtask worktree with branch task/testtask
+          ok   task-done    testtask   # removes /tmp/testtask worktree and deletes task/testtask branch
+          skip flow-feature-start "creates a worktree — filesystem side-effect"
+          skip flow-feature-finish "merges branch and removes worktree — modifies history"
+          skip flow-hotfix-start  "creates a worktree — filesystem side-effect"
+          skip flow-release-start "creates a worktree — filesystem side-effect"
+
           # ── final report ────────────────────────────────────────────────────
           printf "\n──────────────────────────────────────────────────────\n"
           printf "Results: %d passed  %d failed  %d skipped\n" \

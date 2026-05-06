@@ -1,0 +1,41 @@
+aliases:
+  task-start:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git task-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree add -b "task/$name" "$path" "$base"; }; f'
+    description: Start a task in a sibling worktree at ../<name> with branch task/<name>
+    category: flow
+    risk: medium
+    depends_on: [default-branch]
+
+  task-done:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git task-done <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree remove "$path" && git branch --delete "task/$name"; }; f'
+    description: Remove the task worktree and delete the task branch once merged
+    category: flow
+    risk: medium
+
+  flow-feature-start:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-feature-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/feature-$name"; git worktree add -b "feature/$name" "$path" "$base"; }; f'
+    description: Start a feature branch in a sibling worktree at ../feature-<name>
+    category: flow
+    risk: medium
+    depends_on: [default-branch]
+
+  flow-feature-finish:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-feature-finish <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; base="$(git default-branch)"; path="$(dirname "$root")/feature-$name"; git checkout "$base" && git merge --no-ff "feature/$name" && git worktree remove "$path" && git branch --delete "feature/$name"; }; f'
+    description: Merge a feature branch into default, remove its worktree, and delete the branch
+    category: flow
+    risk: medium
+    depends_on: [default-branch]
+
+  flow-hotfix-start:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-hotfix-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/hotfix-$name"; git worktree add -b "hotfix/$name" "$path" "$base"; }; f'
+    description: Start a hotfix branch in a sibling worktree at ../hotfix-<name>
+    category: flow
+    risk: medium
+    depends_on: [default-branch]
+
+  flow-release-start:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-release-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/release-$name"; git worktree add -b "release/$name" "$path" "$base"; }; f'
+    description: Start a release branch in a sibling worktree at ../release-<name>
+    category: flow
+    risk: medium
+    depends_on: [default-branch]
