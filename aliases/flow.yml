@@ -1,13 +1,13 @@
 aliases:
-  task-start:
-    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git task-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree add -b "task/$name" "$path" "$base"; }; f'
+  flow-task-start:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-task-start <name> [base]"; return 2; }; base="${2:-$(git default-branch)}"; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree add -b "task/$name" "$path" "$base"; }; f'
     description: Start a task in a sibling worktree at ../<name> with branch task/<name>
     category: flow
     risk: medium
     depends_on: [default-branch]
 
-  task-done:
-    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git task-done <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree remove "$path" && git branch --delete "task/$name"; }; f'
+  flow-task-done:
+    command: '!f() { name="$1"; test -n "$name" || { echo "usage: git flow-task-done <name>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; path="$(dirname "$root")/$name"; git worktree remove "$path" && git branch --delete "task/$name"; }; f'
     description: Remove the task worktree and delete the task branch (branch must be fully merged; git branch --delete enforces this)
     category: flow
     risk: medium
