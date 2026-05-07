@@ -1,2 +1,2 @@
 [alias]
-    remotes-prune = !git remote | xargs -r -n 1 git remote prune
+    remotes-prune = "!git remote | while read -r remote; do git remote prune \"$remote\"; done"

@@ -136,7 +136,7 @@ jobs:
           ok   commit-files     HEAD
           skip ahead   "requires upstream tracking branch"
           skip behind  "requires upstream tracking branch"
-          ok   diverged || true
+          ok   diverged
           ok   log-changed      hello.txt
           skip log-local   "requires upstream tracking branch"
           skip log-fetched "requires upstream tracking branch"
@@ -174,7 +174,7 @@ jobs:
           git add foo.txt
 
           # ── add ─────────────────────────────────────────────────────────────
-          ok   au
+          skip au              "stages all updated files — would mutate the index"
           skip aa              "stages all files — keep index stable"
           skip ap              "interactive patch add"
 

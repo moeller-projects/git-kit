@@ -103,8 +103,8 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `add-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f` | Add all unmerged files to the index (useful during conflict resolution) | medium |
-| `edit-modified` | `!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all modified files in the editor | medium |
+| `add-unmerged` | `!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do git add -- "$f"; done; }; f` | Add all unmerged files to the index (useful during conflict resolution) | medium |
+| `edit-modified` | `!f() { git ls-files --modified | while IFS= read -r f; do "$(git var GIT_EDITOR)" "$f"; done; }; f` | Open all modified files in the editor | medium |
 | `branch-commit-first` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's first commit hash | medium |
 | `branch-commit-last` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's last commit hash | medium |
 | `branch-clean` | `!f() { git branch | grep -v "^\*" | fzf -m --prompt="delete branches> " | xargs -r git branch -d; }; f` | Interactively select and safely delete local branches using fzf (requires fzf) | dangerous |
@@ -140,7 +140,7 @@ Generated from `aliases/`.
 | `serve` | `-c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose` | Start a local git daemon for LAN repository sharing | medium |
 | `archive` | `!f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f` | Create a tar archive of the entire repository root | medium |
 | `put-dry-run` | `!git diff --cached --stat && git push --dry-run` | Preview staged changes and a push dry-run before committing and pushing | medium |
-| `reincarnate` | `!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f` | Delete and recreate a branch on origin (destructive — useful for resetting a PR branch) | dangerous |
+| `reincarnate` | `!f() { [ $# -gt 0 ] || return 1; branch="$1"; remote="${2:-origin}"; git checkout "$branch" && git push "$remote" :"$branch" && git checkout "$(git symbolic-ref --short refs/remotes/"$remote"/HEAD 2>/dev/null | sed "s#$remote/##" || echo main)" && git branch --delete --force "$branch" && git checkout -b "$branch" && git push --set-upstream "$remote" "$branch"; }; f` | Delete and recreate a branch on origin (destructive — useful for resetting a PR branch) | dangerous |
 
 ## fetch
 
@@ -233,7 +233,7 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `remotes-prune` | `!git remote | xargs -r -n 1 git remote prune` | Prune all stale references for every remote | medium |
+| `remotes-prune` | `!git remote | while read -r remote; do git remote prune "$remote"; done` | Prune all stale references for every remote | medium |
 
 ## reset
 
@@ -358,7 +358,7 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "../${repo}-${clean}"; }; f` | Print worktree path using ../<repo>-<branch> | medium |
+| `wt-path` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f` | Print absolute worktree path using <parent>/<repo>-<branch> | medium |
 | `wt-new` | `!f() { branch="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$branch" || { echo "usage: git wt-new <branch> [base]"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree add -b "$branch" "$target" "$base"; }; f` | Create a new worktree branch from a base | medium |
 | `wt-open` | `!f() { branch="$1"; if test -z "$branch"; then command -v fzf >/dev/null 2>&1 || { echo "usage: git wt-open <branch> # or install fzf for interactive mode"; return 2; }; branch="$(git branch --all --format="%(refname:short)" | sed "s#^origin/##" | grep -v "^HEAD$" | sort -u | fzf --prompt="open worktree branch> ")"; fi; test -n "$branch" || return 1; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch"; }; f` | Open an existing branch in a new worktree; uses fzf when no branch is given | medium |
 | `wt-open-cd` | `!f() { branch="$1"; if test -z "$branch"; then command -v fzf >/dev/null 2>&1 || { echo "usage: git wt-open-cd <branch> # or install fzf"; return 2; }; branch="$(git branch --all --format="%(refname:short)" | sed "s#^origin/##" | grep -v "^HEAD$" | sort -u | fzf --prompt="open+cd branch> ")"; fi; test -n "$branch" || return 1; target="$(git wt-path "$branch")" || return; git worktree add "$target" "$branch" && printf "%s\n" "$target"; }; f` | Open a branch in a new worktree and print the worktree path; uses fzf when no branch is given | medium |

@@ -56,8 +56,8 @@
     what-changed = diff --name-only HEAD
     what-staged = diff --cached --name-only
     difftooli = "!f() { file=$(git diff --name-only | fzf); [ -n \"$file\" ] && git difftool -- \"$file\"; }; f"
-    add-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
-    edit-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    add-unmerged = "!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do git add -- \"$f\"; done; }; f"
+    edit-modified = "!f() { git ls-files --modified | while IFS= read -r f; do \"$(git var GIT_EDITOR)\" \"$f\"; done; }; f"
     branch-commit-first = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --reverse --pretty=%H \"$branch\" | head -\"$count\"; }; f"
     branch-commit-last = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --pretty=%H \"$branch\" | head -\"$count\"; }; f"
     branch-clean = "!f() { git branch | grep -v \"^\\*\" | fzf -m --prompt=\"delete branches> \" | xargs -r git branch -d; }; f"
@@ -93,7 +93,7 @@
     serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
     archive = "!f() { top=\"$(git rev-parse --show-toplevel)\"; cd \"$top\" || exit 1 ; tar cvf \"$top.tar\" \"$top\" ; }; f"
     put-dry-run = !git diff --cached --stat && git push --dry-run
-    reincarnate = "!f() { [ $# -gt 0 ] && git checkout \"$1\" && git unpublish && git checkout \"$(git default-branch)\" && git branch --delete --force \"$1\" && git checkout -b \"$1\" && git publish; }; f"
+    reincarnate = "!f() { [ $# -gt 0 ] || return 1; branch=\"$1\"; remote=\"${2:-origin}\"; git checkout \"$branch\" && git push \"$remote\" :\"$branch\" && git checkout \"$(git symbolic-ref --short refs/remotes/\"$remote\"/HEAD 2>/dev/null | sed \"s#$remote/##\" || echo main)\" && git branch --delete --force \"$branch\" && git checkout -b \"$branch\" && git push --set-upstream \"$remote\" \"$branch\"; }; f"
     fa = fetch --all
     fap = fetch --all --prune
     grep-all = "!f() { git rev-list --all | xargs git grep \"$@\"; }; f"
@@ -141,7 +141,7 @@
     remote-ref = "!local_ref=\"$(git symbolic-ref HEAD)\"; local_name=\"${local_ref##refs/heads/}\"; remote=\"$(git config branch.\"$local_name\".remote || echo origin)\"; remote_ref=\"$(git config branch.\"$local_name\".merge)\"; remote_name=\"${remote_ref##refs/heads/}\"; echo \"remotes/$remote/$remote_name\" #"
     rebase-recent = "!git rebase --interactive \"$(git remote-ref)\""
     rl = reflog
-    remotes-prune = !git remote | xargs -r -n 1 git remote prune
+    remotes-prune = "!git remote | while read -r remote; do git remote prune \"$remote\"; done"
     uncommit = reset --soft HEAD~1
     unadd = "!f() { git restore --staged -- \"${@:-.}\"; }; f"
     unstage-all = restore --staged .
@@ -211,7 +211,7 @@
     sync = "!f() { branch=\"${1:-$(git default-branch)}\"; git switch \"$branch\" && git pull --ff-only; }; f"
     pr-ready = !git rebase-recent && git task-ready
     task-ready = !git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD
-    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"../${repo}-${clean}\"; }; f"
+    wt-path = "!f() { branch=\"$1\"; test -n \"$branch\" || { echo \"usage: git wt-path <branch>\"; return 2; }; root=\"$(git rev-parse --show-toplevel)\" || return; repo=\"$(basename \"$root\")\"; clean=\"$(printf \"%s\" \"$branch\" | tr \"/\" \"-\")\"; printf \"%s\\n\" \"$(dirname \"$root\")/${repo}-${clean}\"; }; f"
     wt-new = "!f() { branch=\"$1\"; base=\"${2:-origin/$(git default-branch)}\"; test -n \"$branch\" || { echo \"usage: git wt-new <branch> [base]\"; return 2; }; target=\"$(git wt-path \"$branch\")\" || return; git worktree add -b \"$branch\" \"$target\" \"$base\"; }; f"
     wt-open = "!f() { branch=\"$1\"; if test -z \"$branch\"; then command -v fzf >/dev/null 2>&1 || { echo \"usage: git wt-open <branch> # or install fzf for interactive mode\"; return 2; }; branch=\"$(git branch --all --format=\"%(refname:short)\" | sed \"s#^origin/##\" | grep -v \"^HEAD$\" | sort -u | fzf --prompt=\"open worktree branch> \")\"; fi; test -n \"$branch\" || return 1; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\"; }; f"
     wt-open-cd = "!f() { branch=\"$1\"; if test -z \"$branch\"; then command -v fzf >/dev/null 2>&1 || { echo \"usage: git wt-open-cd <branch> # or install fzf\"; return 2; }; branch=\"$(git branch --all --format=\"%(refname:short)\" | sed \"s#^origin/##\" | grep -v \"^HEAD$\" | sort -u | fzf --prompt=\"open+cd branch> \")\"; fi; test -n \"$branch\" || return 1; target=\"$(git wt-path \"$branch\")\" || return; git worktree add \"$target\" \"$branch\" && printf \"%s\\n\" \"$target\"; }; f"

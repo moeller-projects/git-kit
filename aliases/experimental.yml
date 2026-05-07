@@ -4,13 +4,13 @@
 aliases:
   # ── add ───────────────────────────────────────────────────────────────────
   add-unmerged:
-    command: '!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || git add -- $files; }; f'
+    command: '!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do git add -- "$f"; done; }; f'
     description: Add all unmerged files to the index (useful during conflict resolution)
     category: experimental
     risk: medium
 
   edit-modified:
-    command: '!f() { files=$(git ls-files --modified | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f'
+    command: '!f() { git ls-files --modified | while IFS= read -r f; do "$(git var GIT_EDITOR)" "$f"; done; }; f'
     description: Open all modified files in the editor
     category: experimental
     risk: medium
@@ -239,7 +239,7 @@ aliases:
     risk: medium
 
   reincarnate:
-    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
+    command: '!f() { [ $# -gt 0 ] || return 1; branch="$1"; remote="${2:-origin}"; git checkout "$branch" && git push "$remote" :"$branch" && git checkout "$(git symbolic-ref --short refs/remotes/"$remote"/HEAD 2>/dev/null | sed "s#$remote/##" || echo main)" && git branch --delete --force "$branch" && git checkout -b "$branch" && git push --set-upstream "$remote" "$branch"; }; f'
     description: Delete and recreate a branch on origin (destructive — useful for resetting a PR branch)
     category: experimental
     risk: dangerous
