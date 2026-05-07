@@ -551,15 +551,15 @@ jobs:
 
           git checkout -b pr-case main
           git push -u origin pr-case
-          echo "local pr line" >> README.md
-          git add README.md
+          echo "local pr line" > pr-local.txt
+          git add pr-local.txt
           git commit -m "feat: pr local commit"
 
           cd "$PEER"
           git fetch origin
           git checkout -B pr-case origin/pr-case
-          echo "remote pr line" >> README.md
-          git add README.md
+          echo "remote pr line" > pr-remote.txt
+          git add pr-remote.txt
           git commit -m "feat: pr remote commit"
           git push origin pr-case
 
