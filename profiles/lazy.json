@@ -3,12 +3,18 @@
   "description": "Comfortable aliases for everyday development",
   "includes": [
     "core.gitconfig",
-    "shortcuts.gitconfig",
     "status.gitconfig",
+    "shortcuts.gitconfig",
+    "util.gitconfig",
     "branch.gitconfig",
     "commit.gitconfig",
-    "log.gitconfig",
     "diff.gitconfig",
-    "stash.gitconfig"
+    "fetch.gitconfig",
+    "log.gitconfig",
+    "pull.gitconfig",
+    "rebase.gitconfig",
+    "reset.gitconfig",
+    "stash.gitconfig",
+    "workflow.gitconfig"
   ]
 }

@@ -5,12 +5,6 @@ aliases:
     category: fetch
     risk: safe
 
-  fav:
-    command: fetch --all --verbose
-    description: Fetch from all remotes with verbose output
-    category: fetch
-    risk: safe
-
   fap:
     command: fetch --all --prune
     description: Fetch from all remotes and prune deleted branches

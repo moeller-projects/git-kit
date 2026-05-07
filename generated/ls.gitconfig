@@ -1,8 +1,4 @@
 [alias]
-    ls = ls-files
-    lsd = ls-files --debug
-    lsfn = ls-files --full-name
-    lsio = ls-files --ignored --others --exclude-standard
     untracked = ls-files --others --exclude-standard
     tracked = ls-files
     ignored = status --ignored --short

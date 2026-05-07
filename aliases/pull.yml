@@ -10,10 +10,3 @@ aliases:
     description: Pull with rebase for a cleaner linear history
     category: pull
     risk: medium
-
-  prp:
-    command: pull --rebase=merges
-    description: Pull with rebase preserving merge commits (replaces deprecated --rebase=preserve, requires git >= 2.18)
-    category: pull
-    risk: medium
-    since_version: "2.18"

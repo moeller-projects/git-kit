@@ -17,51 +17,9 @@ aliases:
     category: commit
     risk: medium
 
-  caa:
-    command: commit --amend --all
-    description: Amend the tip, staging all modified and deleted files
-    category: commit
-    risk: medium
-
-  caam:
-    command: commit --amend --all --message
-    description: Amend the tip, staging all files, with a new message
-    category: commit
-    risk: medium
-
-  caane:
-    command: commit --amend --all --no-edit
-    description: Amend the tip, staging all files, without editing the message
-    category: commit
-    risk: medium
-
-  ci:
-    command: commit --interactive
-    description: Commit using the interactive interface
-    category: commit
-    risk: medium
-
   cm:
     command: commit --message
     description: Commit with a message
-    category: commit
-    risk: medium
-
-  commit-parents:
-    command: "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
-    description: Show a commit's parent hashes
-    category: commit
-    risk: medium
-
-  commit-is-merge:
-    command: "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
-    description: Exit 0 if the commit is a merge, else exit 1
-    category: commit
-    risk: medium
-
-  commit-message-key-lines:
-    command: '!f(){ echo "Commit: $1"; git log "$1" --format=fuller | grep "^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:" | sed "s/^[[:blank:]]*//; s/:[[:blank:]]*/: /"; }; f'
-    description: Show keyword-tagged lines from a commit message
     category: commit
     risk: medium
 
@@ -77,24 +35,6 @@ aliases:
     category: commit
     risk: medium
 
-  fixup-no-rebase:
-    command: '!f() { target="$1"; test -n "$target" || { echo "usage: git fixup-no-rebase <commit>"; return 2; }; git commit --fixup="$target"; }; f'
-    description: Create a fixup commit for a given commit without triggering autosquash rebase
-    category: commit
-    risk: medium
-
-  amend-staged:
-    command: commit --amend --no-edit
-    description: Amend the last commit with currently staged changes, keeping the message
-    category: commit
-    risk: medium
-
-  again:
-    command: commit --amend --no-edit
-    description: Reuse last commit message
-    category: commit
-    risk: medium
-    
   save:
     command: '!f() { msg="${1:-wip}"; git add --all && git commit --message "$msg"; }; f'
     description: Stage all changes and commit with a message defaulting to wip
@@ -106,4 +46,3 @@ aliases:
     description: Patch-stage changes and commit with a message defaulting to wip
     category: commit
     risk: medium
-

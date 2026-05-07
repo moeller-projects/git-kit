@@ -1,0 +1,10 @@
+{
+  "name": "worktree",
+  "description": "Git worktree workflow aliases",
+  "includes": [
+    "util.gitconfig",
+    "rebase.gitconfig",
+    "workflow.gitconfig",
+    "worktree.gitconfig"
+  ]
+}

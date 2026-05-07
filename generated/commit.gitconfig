@@ -2,16 +2,8 @@
     ca = commit --amend
     cam = commit --amend --message
     cane = commit --amend --no-edit
-    caa = commit --amend --all
-    caam = commit --amend --all --message
-    caane = commit --amend --all --no-edit
-    ci = commit --interactive
     cm = commit --message
-    commit-parents = "!f(){ git cat-file -p \"${*:-HEAD}\" | sed -n '/0/,/^ *$/{/^parent /p}'; };f"
-    commit-is-merge = "!f(){ [ -n \"$(git commit-parents \"$*\" | sed '0,/^parent /d')\" ];};f"
-    commit-message-key-lines = "!f(){ echo \"Commit: $1\"; git log \"$1\" --format=fuller | grep \"^[[:blank:]]*[[:alnum:]][-[:alnum:]]*:\" | sed \"s/^[[:blank:]]*//; s/:[[:blank:]]*/: /\"; }; f"
     wip = !git add --all && git commit --message=wip
     unwip = "!f() { msg=\"$(git log -1 --pretty=%s)\"; test \"$msg\" = \"wip\" || { echo \"last commit message is not 'wip' (found: '${msg}')\"; return 1; }; git reset HEAD~1; }; f"
-    fixup-no-rebase = "!f() { target=\"$1\"; test -n \"$target\" || { echo \"usage: git fixup-no-rebase <commit>\"; return 2; }; git commit --fixup=\"$target\"; }; f"
-    amend-staged = commit --amend --no-edit
-    again = commit --amend --no-edit
+    save = "!f() { msg=\"${1:-wip}\"; git add --all && git commit --message \"$msg\"; }; f"
+    savep = "!f() { msg=\"${1:-wip}\"; git add --patch && git commit --message \"$msg\"; }; f"

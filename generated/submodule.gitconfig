@@ -1,8 +1,5 @@
 [alias]
-    sm = submodule
     smi = submodule init
-    sma = submodule add
-    sms = submodule sync
     smu = submodule update
     smui = submodule update --init
     smuir = submodule update --init --recursive

@@ -11,23 +11,18 @@ aliases:
     category: workflow
     risk: medium
 
-  panic:
-    command: '!tar cvf ../panic.tar -- *'
-    description: Archive working tree as a tar file for emergency backup
-    category: workflow
-    risk: medium
-
-  archive:
-    command: '!f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f'
-    description: Create a tar archive of the entire repository
-    category: workflow
-    risk: medium
-
   pushy:
     command: push --force-with-lease
     description: Force-push using --force-with-lease for safety
     category: workflow
     risk: dangerous
+
+  push-safe:
+    command: push --force-with-lease --force-if-includes
+    description: Force-push with --force-with-lease and --force-if-includes for maximum safety (requires git >= 2.30)
+    category: workflow
+    risk: dangerous
+    since_version: "2.30"
 
   pushy-check:
     command: '!git log @{upstream}.. && git push --force-with-lease'
@@ -41,66 +36,35 @@ aliases:
     category: workflow
     risk: medium
 
-  put-dry-run:
-    command: '!git diff --cached --stat && git push --dry-run'
-    description: Show staged changes that put would commit (via diff --cached --stat) and a push dry-run against current HEAD; note the push dry-run reflects the pre-commit state, not the post-commit push
-    category: workflow
-    risk: medium
-
   mainly:
     command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
     description: Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset)
     category: workflow
     risk: dangerous
-    depends_on: [default-branch]
-
-  ignore:
-    command: '!git status | grep -P "^\\t" | grep -vF .gitignore | sed "s/^\\t//" >> .gitignore'
-    description: Append all untracked files to .gitignore
-    category: workflow
-    risk: medium
-
-  push1:
-    command: '!git push origin "$(git current-branch)"'
-    description: Push the current branch to origin
-    category: workflow
-    risk: medium
-    depends_on: [current-branch]
-
-  pull1:
-    command: '!git pull origin "$(git current-branch)"'
-    description: Pull the current branch from origin
-    category: workflow
-    risk: medium
-    depends_on: [current-branch]
 
   track:
     command: '!f(){ branch="$(git current-branch)"; cmd="git branch $branch --set-upstream-to=${1:-origin}/${2:-$branch}"; echo "$cmd"; $cmd; }; f'
     description: Set the upstream tracking branch
     category: workflow
     risk: medium
-    depends_on: [current-branch]
 
   untrack:
     command: '!f(){ branch="$(git current-branch)"; cmd="git branch --unset-upstream ${1:-$branch}"; echo "$cmd"; $cmd; }; f'
     description: Remove the upstream tracking branch
     category: workflow
     risk: medium
-    depends_on: [current-branch]
 
   publish:
     command: '!f() { git push --set-upstream "${1:-origin}" "$(git current-branch)"; }; f'
     description: Push current branch and set upstream
     category: workflow
     risk: medium
-    depends_on: [current-branch]
 
   unpublish:
     command: '!f() { git push "${1:-origin}" :"$(git current-branch)"; }; f'
     description: Delete the remote version of the current branch
     category: workflow
     risk: dangerous
-    depends_on: [current-branch]
 
   inbound:
     command: '!git remote update --prune; git log ..@{upstream}'
@@ -113,13 +77,6 @@ aliases:
     description: Show outgoing commits not yet pushed
     category: workflow
     risk: safe
-
-  reincarnate:
-    command: '!f() { [ $# -gt 0 ] && git checkout "$1" && git unpublish && git checkout "$(git default-branch)" && git branch --delete --force "$1" && git checkout -b "$1" && git publish; }; f'
-    description: Delete and recreate a branch based on main
-    category: workflow
-    risk: dangerous
-    depends_on: [current-branch, default-branch, unpublish, publish]
 
   pruner:
     command: '!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all'
@@ -138,7 +95,6 @@ aliases:
     description: Run pruner, repacker, and prune-packed to optimize the repo
     category: workflow
     risk: medium
-    depends_on: [pruner, repacker]
 
   sparse-init:
     command: sparse-checkout init
@@ -159,10 +115,15 @@ aliases:
     description: Switch to a branch and fast-forward it; defaults to the configured default branch
     category: workflow
     risk: medium
-    depends_on: [default-branch]
+
+  pr-ready:
+    command: '!git rebase-recent && git task-ready'
+    description: Interactively rebase unpushed commits then run pre-PR status checks
+    category: workflow
+    risk: medium
 
   task-ready:
-    command: '!git ssb && git diff --check && git log --oneline @{upstream}..HEAD'
+    command: '!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD'
     description: Show status, whitespace issues, and outgoing commits before creating a PR
     category: workflow
-    risk: safe
+    risk: medium

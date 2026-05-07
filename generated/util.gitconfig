@@ -1,31 +1,14 @@
 [alias]
-    sb = show-branch
-    alias = "!f(){ echo \"Git Alias is project that has a collection of git alias commands.\"; echo \"The purpose is to help make git easier, faster, and more capable.\"; echo \"Free open source repository <https://github.com/gitalias/gitalias>.\"; echo \"\"; echo \"To see your existing git aliases:\"; echo \"    git aliases\"; echo \"\"; echo \"To see your existing git aliases by using git directly:\"; echo \"    git config --get-regexp ^alias\\\\.\"; };f"
-    add-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
-    move-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
     init-empty = "!f() { git init && git commit --allow-empty --allow-empty-message --message ''; }; f"
-    orphans = fsck --full
-    rev-list-all-objects-by-size = !git rev-list --all --objects  | awk '{print $1}'| git cat-file --batch-check | grep -F blob | sort -k3nr
-    rev-list-all-objects-by-size-and-name = !git rev-list --all --objects | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print substr($0,6)}' | sort --numeric-sort --key=2
-    initer = init-empty
     assume = update-index --assume-unchanged
     unassume = update-index --no-assume-unchanged
-    assume-all = !git status --short | awk '{ print $2 }' | xargs -r git assume
     unassume-all = !git assumed | xargs -r git update-index --no-assume-unchanged
     assumed = !git ls-files -v | grep ^h | cut -c 3-
-    aliases = "!git config --get-regexp '^alias\\\\.' | cut -c 7- | sed 's/ / = /'"
-    stashes = stash list
-    top = rev-parse --show-toplevel
+    aliases = "!git config --get-regexp '^alias\\.' | cut -c 7- | sed 's/ / = /'"
     default-branch = config init.defaultBranch
     current-branch = rev-parse --abbrev-ref HEAD
     upstream-branch = "!git for-each-ref --format='%(upstream:short)' \"$(git symbolic-ref -q HEAD)\""
-    upb = "rev-parse --abbrev-ref \"@{upstream}\""
-    exec = ! exec
-    search-commits = "!f() { query=\"$1\"; shift; git log -S\"$query\" \"$@\"; }; f"
-    debug = !GIT_PAGER='' gdb --args git
-    intercommit = "!sh -c 'git show \"$1\" > .git/commit1 && git show \"$2\" > .git/commit2 && interdiff .git/commit[12] | less -FRS' -"
-    graphviz = "!f() { echo 'digraph git {' ; git log --pretty='format:  %h -> { %p }' \"$@\" | sed 's/[0-9a-f][0-9a-f]*/\"&\"/g' ; echo '}'; }; f"
-    serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
+    rev-list-all-objects-by-size-and-name = !git rev-list --all --objects | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {print substr($0,6)}' | sort --numeric-sort --key=2
     large-files = "!git rev-list --objects --all | git cat-file --batch-check='%(objecttype) %(objectname) %(objectsize) %(rest)' | awk '/^blob/ {size=$3; sub(/^[^ ]+ [^ ]+ [^ ]+ /,\"\"); print size, $0}' | sort -nr | head -50"
     bl = blame
     bli = "!f() { file=$(git ls-files | fzf); [ -n \"$file\" ] && git blame -- \"$file\"; }; f"

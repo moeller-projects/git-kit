@@ -1,4 +1,3 @@
 [alias]
     pf = pull --ff-only
     pr = pull --rebase
-    prp = pull --rebase=merges

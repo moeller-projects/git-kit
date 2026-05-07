@@ -1,9 +1,9 @@
 aliases:
   wt-path:
-    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "../${repo}-${clean}"; }; f'
-    description: Print worktree path using ../<repo>-<branch>
+    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-path <branch>"; return 2; }; root="$(git rev-parse --show-toplevel)" || return; repo="$(basename "$root")"; clean="$(printf "%s" "$branch" | tr "/" "-")"; printf "%s\n" "$(dirname "$root")/${repo}-${clean}"; }; f'
+    description: Print absolute worktree path using <parent>/<repo>-<branch>
     category: worktree
-    risk: safe
+    risk: medium
 
   wt-new:
     command: '!f() { branch="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$branch" || { echo "usage: git wt-new <branch> [base]"; return 2; }; target="$(git wt-path "$branch")" || return; git worktree add -b "$branch" "$target" "$base"; }; f'
@@ -56,6 +56,12 @@ aliases:
   wt-prune:
     command: worktree prune
     description: Prune stale worktree references
+    category: worktree
+    risk: medium
+
+  wt-sync:
+    command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-sync <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git -C "$target" pull --ff-only; }; f'
+    description: Fast-forward sync a named worktree from outside it by branch name
     category: worktree
     risk: medium
 

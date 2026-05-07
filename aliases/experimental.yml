@@ -1,0 +1,245 @@
+# Experimental / optional aliases — niche, context-specific, or fzf-dependent.
+# These are REVIEW-verdict aliases that may be valuable in specific workflows
+# but have higher maintenance cost or narrower applicability than core aliases.
+aliases:
+  # ── add ───────────────────────────────────────────────────────────────────
+  add-unmerged:
+    command: '!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do git add -- "$f"; done; }; f'
+    description: Add all unmerged files to the index (useful during conflict resolution)
+    category: experimental
+    risk: medium
+
+  edit-modified:
+    command: '!f() { git ls-files --modified | while IFS= read -r f; do "$(git var GIT_EDITOR)" "$f"; done; }; f'
+    description: Open all modified files in the editor
+    category: experimental
+    risk: medium
+
+  # ── branch ────────────────────────────────────────────────────────────────
+  branch-commit-first:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f'
+    description: Show a branch's first commit hash
+    category: experimental
+    risk: medium
+
+  branch-commit-last:
+    command: '!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f'
+    description: Show a branch's last commit hash
+    category: experimental
+    risk: medium
+
+  branch-clean:
+    command: '!f() { git branch | grep -v "^\*" | fzf -m --prompt="delete branches> " | xargs -r git branch -d; }; f'
+    description: Interactively select and safely delete local branches using fzf (requires fzf)
+    category: experimental
+    risk: dangerous
+
+  track-all-remote-branches:
+    command: '!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f'
+    description: Track all remote branches as local branches (use with caution in large repos)
+    category: experimental
+    risk: medium
+
+  # ── checkout ──────────────────────────────────────────────────────────────
+  cob:
+    command: checkout -b
+    description: Create and checkout a new branch (legacy; prefer swb with git >= 2.23)
+    category: experimental
+    risk: medium
+
+  # ── cherry-pick ───────────────────────────────────────────────────────────
+  cpn:
+    command: cherry-pick --no-commit
+    description: Cherry-pick without committing — stages changes only
+    category: experimental
+    risk: medium
+
+  cherry-pick-merge:
+    command: "!sh -c 'git cherry-pick --no-commit --mainline 1 $0 && git log -1 --pretty=%P $0 | cut -b 42- > .git/MERGE_HEAD && git commit --verbose'"
+    description: Cherry-pick a merge commit by manually constructing MERGE_HEAD
+    category: experimental
+    risk: medium
+
+  # ── diff ──────────────────────────────────────────────────────────────────
+  diff-all:
+    command: '!f() { for name in $(git diff --name-only "$1"); do git difftool "$1" "$name"; done; }; f'
+    description: Open difftool for every changed file (requires a configured difftool)
+    category: experimental
+    risk: medium
+
+  diff-range:
+    command: '!f() { git diff "$1".."$2"; }; f'
+    description: Diff between two refs; usage git diff-range <from> <to>
+    category: experimental
+    risk: medium
+
+  # ── grep ──────────────────────────────────────────────────────────────────
+  grep-ack:
+    command: -c color.grep.linenumber="bold yellow" -c color.grep.filename="bold green" -c color.grep.match="reverse yellow" grep --break --heading --line-number
+    description: Find text with ack-style color formatting
+    category: experimental
+    risk: safe
+
+  # ── log ───────────────────────────────────────────────────────────────────
+  lor:
+    command: log --oneline --reverse
+    description: Log with one line per commit in chronological (reverse) order
+    category: experimental
+    risk: safe
+
+  lfp:
+    command: log --first-parent
+    description: Log following only the first parent (useful in merge-heavy repos)
+    category: experimental
+    risk: safe
+
+  log-list-long:
+    command: log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'
+    description: Full-detail log list with ISO-8601 dates, full SHAs, and email addresses
+    category: experimental
+    risk: safe
+
+  lll:
+    command: log-list-long
+    description: Short alias for log-list-long
+    category: experimental
+    risk: safe
+
+  log-1-hour:
+    command: log --since=1-hour-ago
+    description: Show commits from the past hour
+    category: experimental
+    risk: safe
+
+  log-1-month:
+    command: log --since=1-month-ago
+    description: Show commits from the past month
+    category: experimental
+    risk: safe
+
+  log-my-month:
+    command: '!git log --author "$(git config user.email)" --since=1-month-ago'
+    description: Show my commits from the past month
+    category: experimental
+    risk: medium
+
+  issues:
+    command: '!sh -c "git log $1 --oneline | grep -o \"ISSUE-[0-9]\+\" | sort -u"'
+    description: List ISSUE-NNN ticket IDs mentioned in commits in a range (requires consistent commit discipline)
+    category: experimental
+    risk: medium
+
+  # ── merge ─────────────────────────────────────────────────────────────────
+  mncnf:
+    command: merge --no-commit --no-ff
+    description: Merge without auto-commit and without fast-forward (inspect before committing)
+    category: experimental
+    risk: medium
+
+  merge-span:
+    command: "!f() { echo \"$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f2)\"; }; f"
+    description: Compute the commit range introduced by a merge commit (primitive for merge-span-log/diff)
+    category: experimental
+    risk: medium
+
+  merge-span-log:
+    command: '!git log "$(git merge-span .. "$1")"'
+    description: Show commits introduced by a merge commit
+    category: experimental
+    risk: medium
+
+  merge-span-diff:
+    command: '!git diff "$(git merge-span ... "$1")"'
+    description: Show the diff introduced by a merge commit
+    category: experimental
+    risk: medium
+
+  # ── pull ──────────────────────────────────────────────────────────────────
+  prp:
+    command: pull --rebase=merges
+    description: Pull with rebase preserving merge commits (requires git >= 2.18)
+    category: experimental
+    risk: medium
+    since_version: "2.18"
+
+  # ── remote ────────────────────────────────────────────────────────────────
+  remotes-push-dry-run:
+    command: '!git remote | xargs -I% -n1 git push % --dry-run'
+    description: Dry-run push to every configured remote
+    category: experimental
+    risk: medium
+
+  # ── reset ─────────────────────────────────────────────────────────────────
+  show-unreachable:
+    command: '!git fsck --unreachable | grep commit | cut -d" " -f3 | xargs git log'
+    description: Show log of unreachable (orphaned) commits for recovery archaeology
+    category: experimental
+    risk: medium
+
+  undo-commit-hard:
+    command: reset --hard HEAD~1
+    description: Hard-reset HEAD back one commit, discarding the commit and its changes permanently
+    category: experimental
+    risk: dangerous
+
+  undo-to-upstream:
+    command: '!git reset --hard "$(git upstream-branch)"'
+    description: Hard-reset to match the upstream tracking branch (destructive — requires upstream set)
+    category: experimental
+    risk: dangerous
+
+  clean-force:
+    command: clean -dff
+    description: Remove untracked files and directories with double-force; use clean-dry first to preview
+    category: experimental
+    risk: dangerous
+
+  # ── util ──────────────────────────────────────────────────────────────────
+  add-alias:
+    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
+    description: Add a git alias to local or global config
+    category: experimental
+    risk: medium
+
+  move-alias:
+    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
+    description: Rename a git alias in local or global config
+    category: experimental
+    risk: medium
+
+  rev-list-all-objects-by-size:
+    command: '!git rev-list --all --objects  | awk ''{print $1}''| git cat-file --batch-check | grep -F blob | sort -k3nr'
+    description: List all blobs in history sorted by size (without filenames; prefer rev-list-all-objects-by-size-and-name)
+    category: experimental
+    risk: medium
+
+  assume-all:
+    command: '!git status --short | awk ''{ print $2 }'' | xargs -r git assume'
+    description: Mark all currently dirty files as assume-unchanged (silences all dirty-file warnings — use with care)
+    category: experimental
+    risk: medium
+
+  serve:
+    command: -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
+    description: Start a local git daemon for LAN repository sharing
+    category: experimental
+    risk: medium
+
+  # ── workflow ──────────────────────────────────────────────────────────────
+  archive:
+    command: '!f() { top="$(git rev-parse --show-toplevel)"; cd "$top" || exit 1 ; tar cvf "$top.tar" "$top" ; }; f'
+    description: Create a tar archive of the entire repository root
+    category: experimental
+    risk: medium
+
+  put-dry-run:
+    command: '!git diff --cached --stat && git push --dry-run'
+    description: Preview staged changes and a push dry-run before committing and pushing
+    category: experimental
+    risk: medium
+
+  reincarnate:
+    command: '!f() { [ $# -gt 0 ] || return 1; branch="$1"; remote="${2:-origin}"; git checkout "$branch" && git push "$remote" :"$branch" && git checkout "$(git symbolic-ref --short refs/remotes/"$remote"/HEAD 2>/dev/null | sed "s#$remote/##" || echo main)" && git branch --delete --force "$branch" && git checkout -b "$branch" && git push --set-upstream "$remote" "$branch"; }; f'
+    description: Delete and recreate a branch on origin (destructive — useful for resetting a PR branch)
+    category: experimental
+    risk: dangerous

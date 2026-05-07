@@ -1,4 +1,2 @@
 [alias]
     st = status --short --branch
-    ss = status --short
-    ssb = status --short --branch
