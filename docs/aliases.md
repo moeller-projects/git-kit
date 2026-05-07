@@ -351,7 +351,7 @@ Generated from `aliases/`.
 | `sparse-set` | `sparse-checkout set` | Set the sparse-checkout path patterns (requires git >= 2.25) | medium |
 | `sync` | `!f() { branch="${1:-$(git default-branch)}"; git switch "$branch" && git pull --ff-only; }; f` | Switch to a branch and fast-forward it; defaults to the configured default branch | medium |
 | `pr-ready` | `!git rebase-recent && git task-ready` | Interactively rebase unpushed commits then run pre-PR status checks | medium |
-| `task-ready` | `!git st && git diff --check && git log --oneline @{upstream}..HEAD` | Show status, whitespace issues, and outgoing commits before creating a PR | medium |
+| `task-ready` | `!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD` | Show status, whitespace issues, and outgoing commits before creating a PR | medium |
 
 ## worktree
 
@@ -367,6 +367,7 @@ Generated from `aliases/`.
 | `wt-list` | `worktree list` | List all worktrees for this repository | safe |
 | `wt-prune` | `worktree prune` | Prune stale worktree references | medium |
 | `wt-sync` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-sync <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git -C "$target" pull --ff-only; }; f` | Fast-forward sync a named worktree from outside it by branch name | medium |
+| `wt-feature` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-feature <ado-id-short-title> [base]"; return 2; }; branch="feature/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow feature worktree for an Azure DevOps task | medium |
 | `wt-bugfix` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-bugfix <ado-id-short-title> [base]"; return 2; }; branch="bugfix/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow bugfix worktree for an Azure DevOps task | medium |
 | `wt-hotfix` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-hotfix <ado-id-short-title> [base]"; return 2; }; branch="hotfix/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow hotfix worktree for urgent production work | medium |
 | `wt-release` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-release <version-or-name> [base]"; return 2; }; branch="release/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow release worktree | medium |

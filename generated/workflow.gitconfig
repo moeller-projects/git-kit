@@ -19,4 +19,4 @@
     sparse-set = sparse-checkout set
     sync = "!f() { branch=\"${1:-$(git default-branch)}\"; git switch \"$branch\" && git pull --ff-only; }; f"
     pr-ready = !git rebase-recent && git task-ready
-    task-ready = !git st && git diff --check && git log --oneline @{upstream}..HEAD
+    task-ready = !git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD

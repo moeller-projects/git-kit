@@ -123,7 +123,7 @@ aliases:
     risk: medium
 
   task-ready:
-    command: '!git st && git diff --check && git log --oneline @{upstream}..HEAD'
+    command: '!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD'
     description: Show status, whitespace issues, and outgoing commits before creating a PR
     category: workflow
     risk: medium
