@@ -153,3 +153,16 @@ aliases:
     category: workflow
     risk: medium
     since_version: "2.25"
+
+  sync:
+    command: '!f() { branch="${1:-$(git default-branch)}"; git switch "$branch" && git pull --ff-only; }; f'
+    description: Switch to a branch and fast-forward it; defaults to the configured default branch
+    category: workflow
+    risk: medium
+    depends_on: [default-branch]
+
+  task-ready:
+    command: '!git ssb && git diff --check && git log --oneline @{upstream}..HEAD'
+    description: Show status, whitespace issues, and outgoing commits before creating a PR
+    category: workflow
+    risk: safe

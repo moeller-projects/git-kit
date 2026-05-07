@@ -94,3 +94,16 @@ aliases:
     description: Reuse last commit message
     category: commit
     risk: medium
+    
+  save:
+    command: '!f() { msg="${1:-wip}"; git add --all && git commit --message "$msg"; }; f'
+    description: Stage all changes and commit with a message defaulting to wip
+    category: commit
+    risk: medium
+
+  savep:
+    command: '!f() { msg="${1:-wip}"; git add --patch && git commit --message "$msg"; }; f'
+    description: Patch-stage changes and commit with a message defaulting to wip
+    category: commit
+    risk: medium
+
