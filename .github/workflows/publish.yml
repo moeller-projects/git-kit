@@ -1,10 +1,9 @@
 name: Publish package
 
 on:
-  # Disabled — re-enable by restoring the push trigger below.
-  # push:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       confirm:
@@ -41,6 +40,6 @@ jobs:
           fi
 
       - if: steps.package-version.outputs.published == 'false'
-        run: npm publish --access public
+        run: bun publish --access public
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
