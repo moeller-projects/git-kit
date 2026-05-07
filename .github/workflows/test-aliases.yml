@@ -15,7 +15,7 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
@@ -411,3 +411,233 @@ jobs:
             printf "\nFailed aliases:%b\n" "$failures"
             exit 1
           fi
+
+  test-aliases-with-remote:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v6
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Generate alias configs
+        run: bun run generate
+
+      - name: Configure git identity
+        run: |
+          git config --global user.name  "Test User"
+          git config --global user.email "test@example.com"
+          git config --global init.defaultBranch main
+
+      - name: Install generated aliases globally
+        run: git config --global --add include.path "$GITHUB_WORKSPACE/generated/aliases.gitconfig"
+
+      - name: Set up remote-enabled fixture repositories
+        run: |
+          set -euo pipefail
+
+          BASE=/tmp/alias-remote-fixture
+          ORIGIN="$BASE/origin.git"
+          SEED="$BASE/seed"
+          WORK="$BASE/work"
+          PEER="$BASE/peer"
+
+          rm -rf "$BASE"
+          mkdir -p "$BASE"
+
+          git init --bare "$ORIGIN"
+
+          git clone "$ORIGIN" "$SEED"
+          cd "$SEED"
+          git config user.name "Test User"
+          git config user.email "test@example.com"
+          echo "initial" > README.md
+          git add README.md
+          git commit -m "feat: initial"
+          git branch -M main
+          git push -u origin main
+
+          git clone "$ORIGIN" "$WORK"
+          git clone "$ORIGIN" "$PEER"
+
+          git -C "$WORK" config user.name "Test User"
+          git -C "$WORK" config user.email "test@example.com"
+          git -C "$PEER" config user.name "Peer User"
+          git -C "$PEER" config user.email "peer@example.com"
+
+          git -C "$WORK" checkout main
+          git -C "$PEER" checkout main
+
+      - name: Test remote and upstream aliases with assertions
+        run: |
+          set -euo pipefail
+
+          BASE=/tmp/alias-remote-fixture
+          REPO="$BASE/work"
+          PEER="$BASE/peer"
+
+          assert_upstream() {
+            local expected="$1"
+            local actual
+            actual="$(git rev-parse --abbrev-ref --symbolic-full-name @{upstream})"
+            [ "$actual" = "$expected" ] || {
+              echo "expected upstream '$expected' but got '$actual'"
+              exit 1
+            }
+          }
+
+          assert_no_upstream() {
+            if git rev-parse --abbrev-ref --symbolic-full-name @{upstream} >/dev/null 2>&1; then
+              echo "expected no upstream on current branch"
+              exit 1
+            fi
+          }
+
+          assert_remote_branch_exists() {
+            local branch="$1"
+            git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null
+          }
+
+          assert_remote_branch_missing() {
+            local branch="$1"
+            if git ls-remote --exit-code origin "refs/heads/$branch" >/dev/null 2>&1; then
+              echo "expected origin/$branch to be missing"
+              exit 1
+            fi
+          }
+
+          cd "$REPO"
+          git checkout main
+
+          # fetch aliases: fa and fap (with prune assertion)
+          git checkout -b stale-prune-test main
+          echo "stale branch seed" > stale.txt
+          git add stale.txt
+          git commit -m "feat: stale branch seed"
+          git push -u origin stale-prune-test
+
+          git checkout main
+          git branch -D stale-prune-test
+          git fa
+          git show-ref --verify --quiet refs/remotes/origin/stale-prune-test
+          git push origin --delete stale-prune-test
+          git fap
+          if git show-ref --verify --quiet refs/remotes/origin/stale-prune-test; then
+            echo "expected stale remote-tracking ref to be pruned"
+            exit 1
+          fi
+
+          # pull aliases: pf and pr
+          cd "$PEER"
+          git checkout main
+          echo "pf remote update" >> README.md
+          git add README.md
+          git commit -m "feat: pf remote commit"
+          git push origin main
+
+          cd "$REPO"
+          git checkout main
+          before_pf="$(git rev-parse HEAD)"
+          git pf
+          after_pf="$(git rev-parse HEAD)"
+          [ "$before_pf" != "$after_pf" ] || {
+            echo "expected pf to fast-forward local main"
+            exit 1
+          }
+
+          git checkout -b pr-case main
+          git push -u origin pr-case
+          echo "local pr line" > pr-local.txt
+          git add pr-local.txt
+          git commit -m "feat: pr local commit"
+
+          cd "$PEER"
+          git fetch origin
+          git checkout -B pr-case origin/pr-case
+          echo "remote pr line" > pr-remote.txt
+          git add pr-remote.txt
+          git commit -m "feat: pr remote commit"
+          git push origin pr-case
+
+          cd "$REPO"
+          git checkout pr-case
+          git pr
+          assert_upstream "origin/pr-case"
+          [ "$(git rev-list --count HEAD..@{upstream})" -eq 0 ]
+          [ "$(git rev-list --count @{upstream}..HEAD)" -eq 1 ]
+
+          # workflow aliases: track / untrack / publish / unpublish
+          git checkout -b publish-case main
+          git publish
+          assert_upstream "origin/publish-case"
+          assert_remote_branch_exists "publish-case"
+          git untrack
+          assert_no_upstream
+          git track
+          assert_upstream "origin/publish-case"
+          git unpublish
+          assert_remote_branch_missing "publish-case"
+
+          # workflow aliases: inbound / outbound / pushy-check
+          git checkout -b sync-case main
+          git push -u origin sync-case
+          echo "sync local commit" >> sync.txt
+          git add sync.txt
+          git commit -m "feat: sync local commit"
+          git outbound | grep -q "sync local commit"
+
+          cd "$PEER"
+          git fetch origin
+          git checkout -B sync-case origin/sync-case
+          echo "sync remote commit" >> remote.txt
+          git add remote.txt
+          git commit -m "feat: sync remote commit"
+          git push origin sync-case
+
+          cd "$REPO"
+          git checkout sync-case
+          git inbound | grep -q "sync remote commit"
+          git pushy-check
+          git fetch origin sync-case
+          [ "$(git rev-list --count HEAD..@{upstream})" -eq 0 ]
+
+          # topic aliases: topic-start / topic-sync / topic-move / topic-end
+          git checkout main
+          git topic-start topic-demo
+          assert_upstream "origin/topic-demo"
+          assert_remote_branch_exists "topic-demo"
+          echo "topic local change" > topic.txt
+          git add topic.txt
+          git commit -m "feat: topic local change"
+          git topic-sync
+          assert_remote_branch_exists "topic-demo"
+          git topic-move topic-demo-renamed
+          assert_upstream "origin/topic-demo-renamed"
+          assert_remote_branch_missing "topic-demo"
+          assert_remote_branch_exists "topic-demo-renamed"
+          git topic-end
+          git rev-parse --abbrev-ref HEAD | grep -q "^main$"
+          assert_remote_branch_missing "topic-demo-renamed"
+          if git show-ref --verify --quiet refs/heads/topic-demo-renamed; then
+            echo "expected local topic branch to be deleted by topic-end"
+            exit 1
+          fi
+
+          # branch aliases: hew-remote-dry-run / hew-remote
+          git checkout -b merged-remote main
+          echo "merged remote branch" > merged-remote.txt
+          git add merged-remote.txt
+          git commit -m "feat: merged remote branch"
+          git push -u origin merged-remote
+
+          git checkout main
+          git merge --no-ff merged-remote -m "merge merged-remote into main"
+          git push origin main
+
+          git hew-remote-dry-run main | grep -q "merged-remote"
+          git hew-remote main
+          assert_remote_branch_missing "merged-remote"

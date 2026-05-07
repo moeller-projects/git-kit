@@ -14,7 +14,7 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           # Use a token that allows pushing back to the repo.
           # Either use a PAT stored as a secret, or the default GITHUB_TOKEN

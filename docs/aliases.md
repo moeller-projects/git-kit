@@ -45,7 +45,7 @@ Generated from `aliases/`.
 | `hew-local` | `!f() { git hew-local-dry-run "$@" | xargs git branch --delete ; }; f` | Delete all locally merged branches | dangerous |
 | `hew-local-dry-run` | `!f() { commit=${1:-$(git current-branch)}; git branch --merged "$commit" | grep -v "^[[:space:]]*\\*[[:space:]]*$commit$" ; }; f` | Preview locally merged branches to be deleted | medium |
 | `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f` | Delete all remotely merged branches | dangerous |
-| `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
+| `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "HEAD" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
 | `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
 
 ## checkout
