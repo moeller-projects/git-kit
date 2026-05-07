@@ -65,7 +65,8 @@
     cob = checkout -b
     cpn = cherry-pick --no-commit
     cherry-pick-merge = !sh -c 'git cherry-pick --no-commit --mainline 1 $0 && git log -1 --pretty=%P $0 | cut -b 42- > .git/MERGE_HEAD && git commit --verbose'
-    diff-all = "!for name in $(git diff --name-only \"$1\"); do git difftool \"$1\" \"$name\" & done"
+    diff-all = "!f() { for name in $(git diff --name-only \"$1\"); do git difftool \"$1\" \"$name\"; done; }; f"
+    diff-range = "!f() { git diff \"$1\"..\"$2\"; }; f"
     grep-ack = "-c color.grep.linenumber=\"bold yellow\" -c color.grep.filename=\"bold green\" -c color.grep.match=\"reverse yellow\" grep --break --heading --line-number"
     lor = log --oneline --reverse
     lfp = log --first-parent
@@ -140,7 +141,7 @@
     remote-ref = "!local_ref=\"$(git symbolic-ref HEAD)\"; local_name=\"${local_ref##refs/heads/}\"; remote=\"$(git config branch.\"$local_name\".remote || echo origin)\"; remote_ref=\"$(git config branch.\"$local_name\".merge)\"; remote_name=\"${remote_ref##refs/heads/}\"; echo \"remotes/$remote/$remote_name\" #"
     rebase-recent = "!git rebase --interactive \"$(git remote-ref)\""
     rl = reflog
-    remotes-prune = !git remote | xargs -n 1 git remote prune
+    remotes-prune = !git remote | xargs -r -n 1 git remote prune
     uncommit = reset --soft HEAD~1
     unadd = "!f() { git restore --staged -- \"${@:-.}\"; }; f"
     unstage-all = restore --staged .

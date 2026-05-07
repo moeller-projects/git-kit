@@ -62,8 +62,14 @@ aliases:
 
   # ── diff ──────────────────────────────────────────────────────────────────
   diff-all:
-    command: '!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done'
-    description: Open difftool for every changed file in the background (can flood the desktop)
+    command: '!f() { for name in $(git diff --name-only "$1"); do git difftool "$1" "$name"; done; }; f'
+    description: Open difftool for every changed file (requires a configured difftool)
+    category: experimental
+    risk: medium
+
+  diff-range:
+    command: '!f() { git diff "$1".."$2"; }; f'
+    description: Diff between two refs; usage git diff-range <from> <to>
     category: experimental
     risk: medium
 

@@ -1,2 +1,2 @@
 [alias]
-    remotes-prune = !git remote | xargs -n 1 git remote prune
+    remotes-prune = !git remote | xargs -r -n 1 git remote prune

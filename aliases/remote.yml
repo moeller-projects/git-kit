@@ -1,6 +1,6 @@
 aliases:
   remotes-prune:
-    command: '!git remote | xargs -n 1 git remote prune'
+    command: '!git remote | xargs -r -n 1 git remote prune'
     description: Prune all stale references for every remote
     category: remote
     risk: medium

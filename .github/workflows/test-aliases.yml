@@ -134,8 +134,8 @@ jobs:
           ok   last
           ok   commit-search    "feat"
           ok   commit-files     HEAD
-          ok   ahead    || true         # exits non-zero when no upstream
-          ok   behind   || true
+          skip ahead   "requires upstream tracking branch"
+          skip behind  "requires upstream tracking branch"
           ok   diverged || true
           ok   log-changed      hello.txt
           skip log-local   "requires upstream tracking branch"
@@ -370,7 +370,7 @@ jobs:
           ok   log-my-month
           ok   grep-ack    "Hello"
           ok   grep-group  "Hello"
-          ok   diff-all    HEAD        || true      # opens difftool in background — ok to skip failures
+          skip diff-all    "requires configured difftool"
           ok   branch-commit-first
           ok   branch-commit-last
           ok   rev-list-all-objects-by-size

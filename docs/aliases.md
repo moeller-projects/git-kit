@@ -112,7 +112,8 @@ Generated from `aliases/`.
 | `cob` | `checkout -b` | Create and checkout a new branch (legacy; prefer swb with git >= 2.23) | medium |
 | `cpn` | `cherry-pick --no-commit` | Cherry-pick without committing — stages changes only | medium |
 | `cherry-pick-merge` | `!sh -c 'git cherry-pick --no-commit --mainline 1 $0 && git log -1 --pretty=%P $0 | cut -b 42- > .git/MERGE_HEAD && git commit --verbose'` | Cherry-pick a merge commit by manually constructing MERGE_HEAD | medium |
-| `diff-all` | `!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done` | Open difftool for every changed file in the background (can flood the desktop) | medium |
+| `diff-all` | `!f() { for name in $(git diff --name-only "$1"); do git difftool "$1" "$name"; done; }; f` | Open difftool for every changed file (requires a configured difftool) | medium |
+| `diff-range` | `!f() { git diff "$1".."$2"; }; f` | Diff between two refs; usage git diff-range <from> <to> | medium |
 | `grep-ack` | `-c color.grep.linenumber="bold yellow" -c color.grep.filename="bold green" -c color.grep.match="reverse yellow" grep --break --heading --line-number` | Find text with ack-style color formatting | safe |
 | `lor` | `log --oneline --reverse` | Log with one line per commit in chronological (reverse) order | safe |
 | `lfp` | `log --first-parent` | Log following only the first parent (useful in merge-heavy repos) | safe |
@@ -232,7 +233,7 @@ Generated from `aliases/`.
 
 | Alias | Command | Description | Risk |
 | --- | --- | --- | --- |
-| `remotes-prune` | `!git remote | xargs -n 1 git remote prune` | Prune all stale references for every remote | medium |
+| `remotes-prune` | `!git remote | xargs -r -n 1 git remote prune` | Prune all stale references for every remote | medium |
 
 ## reset
 
