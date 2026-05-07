@@ -1,0 +1,8 @@
+{
+  "name": "analytics",
+  "description": "Repository analytics and reporting aliases (opt-in add-on)",
+  "includes": [
+    "util.gitconfig",
+    "analytics.gitconfig"
+  ]
+}

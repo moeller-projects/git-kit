@@ -11,27 +11,9 @@ aliases:
     category: log
     risk: safe
 
-  lor:
-    command: log --oneline --reverse
-    description: Log with one line per commit in reverse order
-    category: log
-    risk: safe
-
   lp:
     command: log --patch
     description: Log with patch generation
-    category: log
-    risk: safe
-
-  lfp:
-    command: log --first-parent
-    description: Log following only the first parent
-    category: log
-    risk: safe
-
-  lto:
-    command: log --topo-order
-    description: Log in topological order
     category: log
     risk: safe
 
@@ -40,14 +22,6 @@ aliases:
     description: Log list with preferred options (a.k.a. log-list)
     category: log
     risk: safe
-    depends_on: [log-list]
-
-  lll:
-    command: log-list-long
-    description: Log list with long format (a.k.a. log-list-long)
-    category: log
-    risk: safe
-    depends_on: [log-list-long]
 
   log-fresh:
     command: log ORIG_HEAD.. --stat --no-merges
@@ -61,41 +35,11 @@ aliases:
     category: log
     risk: safe
 
-  log-list-long:
-    command: log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'
-    description: Preferred log list with full ISO dates and emails
-    category: log
-    risk: safe
-
   log-my:
     command: '!git log --author "$(git config user.email)"'
     description: Show only commits by the current user email
     category: log
     risk: medium
-
-  log-graph:
-    command: log --graph --all --oneline --decorate
-    description: Show log as a decorated graph
-    category: log
-    risk: safe
-
-  log-date-first:
-    command: '!git log --date-order --format=%cI | tail -1'
-    description: Show the date of the earliest commit
-    category: log
-    risk: medium
-
-  log-date-last:
-    command: log -1 --date-order --format=%cI
-    description: Show the date of the most recent commit
-    category: log
-    risk: safe
-
-  log-1-hour:
-    command: log --since=1-hour-ago
-    description: Show commits from the past hour
-    category: log
-    risk: safe
 
   log-1-day:
     command: log --since=1-day-ago
@@ -109,24 +53,6 @@ aliases:
     category: log
     risk: safe
 
-  log-1-month:
-    command: log --since=1-month-ago
-    description: Show commits from the past month
-    category: log
-    risk: safe
-
-  log-1-year:
-    command: log --since=1-year-ago
-    description: Show commits from the past year
-    category: log
-    risk: safe
-
-  log-my-hour:
-    command: '!git log --author "$(git config user.email)" --since=1-hour-ago'
-    description: Show my commits from the past hour
-    category: log
-    risk: medium
-
   log-my-day:
     command: '!git log --author "$(git config user.email)" --since=1-day-ago'
     description: Show my commits from the past day
@@ -139,177 +65,9 @@ aliases:
     category: log
     risk: medium
 
-  log-my-month:
-    command: '!git log --author "$(git config user.email)" --since=1-month-ago'
-    description: Show my commits from the past month
-    category: log
-    risk: medium
-
-  log-my-year:
-    command: '!git log --author "$(git config user.email)" --since=1-year-ago'
-    description: Show my commits from the past year
-    category: log
-    risk: medium
-
-  log-of-format-and-count:
-    command: "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort; }; f"
-    description: Count log entries grouped by a format string
-    category: log
-    risk: medium
-
-  log-of-count-and-format:
-    command: "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) \"%\", i}}' | sort -nr; }; f"
-    description: Count log entries grouped by a format string (descending)
-    category: log
-    risk: medium
-
-  log-of-format-and-count-with-date:
-    command: "!f() { format=\"$1\"; shift; date_format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" --date=format:\"$date_format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort -r; }; f"
-    description: Count log entries by format and date
-    category: log
-    risk: medium
-
-  log-of-count-and-format-with-date:
-    command: "!f() { format=\"$1\"; shift; date_format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" --date=format:\"$date_format\" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) \"%\", i}}' | sort -nr; }; f"
-    description: Count log entries by format and date (descending)
-    category: log
-    risk: medium
-
-  log-of-email-and-count:
-    command: '!f() { git log-of-format-and-count "%aE" "$@"; }; f'
-    description: Count commits per author email; thin wrapper around log-of-format-and-count
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count]
-
-  log-of-count-and-email:
-    command: '!f() { git log-of-count-and-format "%aE" "$@"; }; f'
-    description: Count commits per author email (descending); thin wrapper around log-of-count-and-format
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format]
-
-  log-of-hour-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f'
-    description: Count commits per hour; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-hour:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%dT%H" "$@" ; }; f'
-    description: Count commits per hour (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-day-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m-%d" "$@" ; }; f'
-    description: Count commits per day; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-day:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m-%d" "$@" ; }; f'
-    description: Count commits per day (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-week-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%Y#%V" "$@"; }; f'
-    description: Count commits per week; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-week:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%Y#%V" "$@"; }; f'
-    description: Count commits per week (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-month-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%Y-%m" "$@" ; }; f'
-    description: Count commits per month; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-month:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%Y-%m" "$@" ; }; f'
-    description: Count commits per month (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-year-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%Y" "$@" ; }; f'
-    description: Count commits per year; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-year:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%Y" "$@" ; }; f'
-    description: Count commits per year (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-hour-of-day-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%H" "$@"; }; f'
-    description: Count commits by hour of day; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-hour-of-day:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%H" "$@"; }; f'
-    description: Count commits by hour of day (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-day-of-week-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%u" "$@"; }; f'
-    description: Count commits by day of week; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-day-of-week:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%u" "$@"; }; f'
-    description: Count commits by day of week (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
-  log-of-week-of-year-and-count:
-    command: '!f() { git log-of-format-and-count-with-date "%ad" "%V" "$@"; }; f'
-    description: Count commits by week of year; thin wrapper around log-of-format-and-count-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-format-and-count-with-date]
-
-  log-of-count-and-week-of-year:
-    command: '!f() { git log-of-count-and-format-with-date "%ad" "%V" "$@"; }; f'
-    description: Count commits by week of year (descending); thin wrapper around log-of-count-and-format-with-date
-    category: log
-    risk: medium
-    depends_on: [log-of-count-and-format-with-date]
-
   log-refs:
     command: log --all --graph --decorate --oneline --simplify-by-decoration --no-merges
     description: Show decorated simplified graph of all refs
-    category: log
-    risk: safe
-
-  log-timeline:
-    command: log --format='%h %an %ar - %s'
-    description: Show log with author and relative age
     category: log
     risk: safe
 
@@ -325,48 +83,11 @@ aliases:
     category: log
     risk: safe
 
-  chart:
-    command: "!f() { git log --format=oneline --format=\"%aE %at\" --since=6-weeks-ago \"$*\" | awk ' function time_to_slot(t) { return strftime(\"%Y-%m-%d\", t, true) } function count_to_char(i) { return (i > 0) ? ((i < 10) ? i : \"X\") : \".\" } BEGIN { time_min = systime(); time_max = 0; SECONDS_PER_DAY=86400; } { item = $1; time = 0 + $2; if (time > time_max){ time_max = time } else if (time < time_min){ time_min = time }; slot = time_to_slot(time); items[item]++; slots[slot]++; views[item, slot]++; } END{ printf(\"Chart time range %s to %s.\\\\n\", time_to_slot(time_min), time_to_slot(time_max)); time_max_add = time_max += SECONDS_PER_DAY; for(item in items){ row = \"\"; for(time = time_min; time < time_max_add; time += SECONDS_PER_DAY) { slot = time_to_slot(time); count = views[item, slot]; row = row count_to_char(count); } print row, item; } }'; }; f"
-    description: Show a per-author activity chart for the past 6 weeks
-    category: log
-    risk: medium
-
-  churn:
-    command: "!f() { git log --all --find-copies --find-renames --name-only --format='format:' \"$@\" | awk 'NF{a[$0]++}END{for(i in a){print a[i], i}}' | sort -rn;};f"
-    description: Show files sorted by how frequently they change
-    category: log
-    risk: medium
-
-  summary:
-    command: "!f() { printf \"Summary of this branch...\\n\"; printf \"%s\\n\" \"$(git current-branch)\"; printf \"%s first commit timestamp\\n\" \"$(git log --date-order --format=%cI | tail -1)\"; printf \"%s last commit timestamp\\n\" \"$(git log -1 --date-order --format=%cI)\"; printf \"\\nSummary of counts...\\n\"; printf \"%d commit count\\n\" \"$(git rev-list --count HEAD)\"; printf \"%d date count\\n\" \"$(git log --format=oneline --format=\"%ad\" --date=format:\"%Y-%m-%d\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d tag count\\n\" \"$(git tag | wc -l)\"; printf \"%d author count\\n\" \"$(git log --format=oneline --format=\"%aE\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d committer count\\n\" \"$(git log --format=oneline --format=\"%cE\" | awk '{a[$0]=1}END{for(i in a){n++;} print n}')\"; printf \"%d local branch count\\n\" \"$(git branch | grep -vc \" -> \")\"; printf \"%d remote branch count\\n\" \"$(git branch --remotes | grep -vc \" -> \")\"; printf \"\\nSummary of this directory...\\n\"; printf \"%s\\n\" \"$(pwd)\"; printf \"%d file count via git ls-files\\n\" \"$(git ls-files | wc -l)\"; printf \"%d file count via find command\\n\" \"$(find . | wc -l)\"; printf \"%d disk usage\\n\" \"$(du -s | awk '{print $1}')\"; printf \"\\nMost-active authors, with commit count and %%...\\n\"; if out=$(git log-of-count-and-email 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; printf \"\\nMost-active dates, with commit count and %%...\\n\"; if out=$(git log-of-count-and-day 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; printf \"\\nMost-active files, with churn count\\n\"; if out=$(git churn 2>/dev/null); then echo \"$out\" | head -7; else echo \"[unavailable]\"; fi; }; f"
-    description: Print a helpful summary of repo metrics
-    category: log
-    risk: medium
-    depends_on: [current-branch, log-of-count-and-email, log-of-count-and-day, churn]
-
-  whois:
-    command: "!sh -c 'git log --regexp-ignore-case -1 --pretty=\"format:%an <%ae>\\n\" --author=\"$1\"' -"
-    description: Look up a contributor by name or email substring
-    category: log
-    risk: medium
-
   whatis:
     command: show --no-patch --pretty='tformat:%h (%s, %ad)' --date=short
     description: Briefly describe any git object
     category: log
     risk: safe
-
-  who:
-    command: shortlog --summary --numbered --no-merges
-    description: Show commit counts per contributor
-    category: log
-    risk: safe
-
-  issues:
-    command: '!sh -c "git log $1 --oneline | grep -o \\"ISSUE-[0-9]\\+\\" | sort -u"'
-    description: List issue IDs mentioned in commits between a range
-    category: log
-    risk: medium
 
   last:
     command: log -1 --oneline
@@ -386,12 +107,6 @@ aliases:
     category: log
     risk: safe
 
-  range-log:
-    command: '!f() { git log --oneline "$1".."$2"; }; f'
-    description: Log between two refs
-    category: log
-    risk: medium
-
   ahead:
     command: rev-list --count @{upstream}..HEAD
     description: Number of commits ahead of upstream
@@ -409,10 +124,15 @@ aliases:
     description: Show divergence from upstream
     category: log
     risk: medium
-    depends_on: [ahead, behind]
 
   showi:
     command: '!f() { commit=$(git log --oneline | fzf | cut -d" " -f1); [ -n "$commit" ] && git show "$commit"; }; f'
     description: Interactively select and show a commit
     category: log
     risk: medium
+
+  log-changed:
+    command: log --follow -p --
+    description: Show full history of a single file including renames; usage git log-changed <path>
+    category: log
+    risk: safe

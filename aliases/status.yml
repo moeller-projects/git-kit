@@ -4,15 +4,3 @@ aliases:
     description: Status with short format and branch info
     category: status
     risk: safe
-
-  ss:
-    command: status --short
-    description: Status with short format
-    category: status
-    risk: safe
-
-  ssb:
-    command: status --short --branch
-    description: Status with short format and branch info
-    category: status
-    risk: safe

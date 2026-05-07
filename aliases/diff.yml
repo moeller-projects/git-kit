@@ -5,39 +5,9 @@ aliases:
     category: diff
     risk: safe
 
-  ds:
-    command: diff --staged
-    description: Show changes about to be committed
-    category: diff
-    risk: safe
-
   dw:
     command: diff --word-diff
     description: Show changes but by word, not line
-    category: diff
-    risk: safe
-
-  dd:
-    command: diff-deep
-    description: Show changes with our preferred options; a.k.a
-    category: diff
-    risk: safe
-
-  diff-all:
-    command: '!for name in $(git diff --name-only "$1"); do git difftool "$1" "$name" & done'
-    description: Open difftool for all changed files
-    category: diff
-    risk: medium
-
-  diff-changes:
-    command: diff --name-status -r
-    description: Show changed file names and status
-    category: diff
-    risk: safe
-
-  diff-stat:
-    command: diff --stat --ignore-space-change -r
-    description: Show a stat summary ignoring whitespace
     category: diff
     risk: safe
 
@@ -46,12 +16,6 @@ aliases:
     description: Diff with extra checks, stats, and rename detection
     category: diff
     risk: safe
-
-  diff-chunk:
-    command: '!f() { git show "$1:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp1 ; git show "$2:$3" | sed -n "/^[^ \t].*$4(/,/^}/p" > .tmp2 ; git diff --no-index .tmp1 .tmp2 ; }; f'
-    description: Diff a single function or chunk between two commits
-    category: diff
-    risk: medium
 
   staged:
     command: diff --staged --stat
@@ -68,18 +32,6 @@ aliases:
   changed:
     command: diff --name-status
     description: Show names and status of changed files
-    category: diff
-    risk: safe
-
-  staged-files:
-    command: diff --staged --name-only
-    description: List file names of staged changes
-    category: diff
-    risk: safe
-
-  unstaged-files:
-    command: diff --name-only
-    description: List file names of unstaged changes
     category: diff
     risk: safe
 
@@ -100,18 +52,6 @@ aliases:
     description: List staged files only
     category: diff
     risk: safe
-
-  what-unstaged:
-    command: diff --name-only
-    description: List unstaged changes only
-    category: diff
-    risk: safe
-
-  diff-range:
-    command: '!f() { git diff "$1".."$2"; }; f'
-    description: Diff between two refs
-    category: diff
-    risk: medium
 
   difftooli:
     command: '!f() { file=$(git diff --name-only | fzf); [ -n "$file" ] && git difftool -- "$file"; }; f'

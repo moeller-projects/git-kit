@@ -3,7 +3,8 @@
   "description": "Essential day-to-day aliases only",
   "includes": [
     "core.gitconfig",
+    "status.gitconfig",
     "shortcuts.gitconfig",
-    "status.gitconfig"
+    "util.gitconfig"
   ]
 }

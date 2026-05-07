@@ -1,28 +1,4 @@
 aliases:
-  ls:
-    command: ls-files
-    description: List files in the index (like Unix ls)
-    category: ls
-    risk: safe
-
-  lsd:
-    command: ls-files --debug
-    description: List files with debug information
-    category: ls
-    risk: safe
-
-  lsfn:
-    command: ls-files --full-name
-    description: List files with full name
-    category: ls
-    risk: safe
-
-  lsio:
-    command: ls-files --ignored --others --exclude-standard
-    description: List files ignored by git
-    category: ls
-    risk: safe
-
   untracked:
     command: ls-files --others --exclude-standard
     description: List untracked files not ignored by git

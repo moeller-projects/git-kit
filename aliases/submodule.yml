@@ -1,25 +1,7 @@
 aliases:
-  sm:
-    command: submodule
-    description: Manage submodules
-    category: submodule
-    risk: safe
-
   smi:
     command: submodule init
     description: Initialize submodules
-    category: submodule
-    risk: medium
-
-  sma:
-    command: submodule add
-    description: Add a submodule
-    category: submodule
-    risk: medium
-
-  sms:
-    command: submodule sync
-    description: Sync submodule URLs
     category: submodule
     risk: medium
 

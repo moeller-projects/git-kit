@@ -1,0 +1,9 @@
+{
+  "name": "worktree",
+  "description": "Git worktree workflow aliases",
+  "includes": [
+    "util.gitconfig",
+    "workflow.gitconfig",
+    "worktree.gitconfig"
+  ]
+}

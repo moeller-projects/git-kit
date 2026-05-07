@@ -1,0 +1,9 @@
+{
+  "name": "experimental",
+  "description": "Optional and niche aliases for advanced or context-specific workflows",
+  "includes": [
+    "util.gitconfig",
+    "analytics.gitconfig",
+    "experimental.gitconfig"
+  ]
+}

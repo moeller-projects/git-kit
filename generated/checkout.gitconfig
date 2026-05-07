@@ -1,6 +1,4 @@
 [alias]
     co = checkout
-    cong = checkout --no-guess
-    cob = checkout -b
     swb = switch --create
     swi = "!f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z \"$branch\" ] && return; if git switch \"$branch\"; then echo \"Switched to '$branch'.\"; fi; }; f"

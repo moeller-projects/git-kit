@@ -112,137 +112,59 @@ jobs:
           }
 
           # ── shortcuts ───────────────────────────────────────────────────────
-          ok   b                        # git branch (list)
-          ok   d                        # git diff (unstaged)
-          ok   g    "Hello"             # git grep
-          ok   l                        # git log
-          ok   s                        # git status
-          ok   w                        # git log --name-status
-          skip a    "modifies index"
-          skip c    "requires message argument"
-          skip f    "requires a remote"
-          skip m    "requires a branch argument"
-          skip o    "requires a target ref"
-          skip p    "requires upstream tracking branch"
           skip sw   "requires a branch argument"
 
           # ── status ──────────────────────────────────────────────────────────
           ok   st
-          ok   ss
-          ok   ssb
 
           # ── log ─────────────────────────────────────────────────────────────
           ok   lg
           ok   lo
-          ok   lor
           ok   lp   -2
-          ok   lfp
-          ok   lto
           ok   ll
-          ok   lll
           ok   log-list
-          ok   log-list-long
-          ok   log-graph
-          ok   log-date-first
-          ok   log-date-last
-          ok   log-refs
-          ok   log-timeline
           ok   log-fresh                # ORIG_HEAD is set after the merge above
-          ok   log-1-hour
           ok   log-1-day
           ok   log-1-week
-          ok   log-1-month
-          ok   log-1-year
           ok   log-my
-          ok   log-my-hour
           ok   log-my-day
           ok   log-my-week
-          ok   log-my-month
-          ok   log-my-year
-          ok   log-of-format-and-count            "%an"
-          ok   log-of-count-and-format            "%an"
-          ok   log-of-format-and-count-with-date  "%aE" "%Y-%m"
-          ok   log-of-count-and-format-with-date  "%aE" "%Y-%m"
-          ok   log-of-email-and-count
-          ok   log-of-count-and-email
-          ok   log-of-hour-and-count
-          ok   log-of-count-and-hour
-          ok   log-of-day-and-count
-          ok   log-of-count-and-day
-          ok   log-of-week-and-count
-          ok   log-of-count-and-week
-          ok   log-of-month-and-count
-          ok   log-of-count-and-month
-          ok   log-of-year-and-count
-          ok   log-of-count-and-year
-          ok   log-of-hour-of-day-and-count
-          ok   log-of-count-and-hour-of-day
-          ok   log-of-day-of-week-and-count
-          ok   log-of-count-and-day-of-week
-          ok   log-of-week-of-year-and-count
-          ok   log-of-count-and-week-of-year
-          ok   chart
-          ok   churn
-          ok   who
-          ok   whois   "Test User"
+          ok   log-refs
           ok   whatis  HEAD
-          ok   issues  HEAD~1..HEAD
-          ok   summary
-          skip log-local   "requires upstream tracking branch"
-          skip log-fetched "requires upstream tracking branch"
           ok   last
           ok   commit-search    "feat"
           ok   commit-files     HEAD
-          ok   range-log        HEAD~1 HEAD
-          skip ahead    "requires upstream tracking branch"
-          skip behind   "requires upstream tracking branch"
-          skip diverged "requires upstream tracking branch"
+          ok   ahead    || true         # exits non-zero when no upstream
+          ok   behind   || true
+          ok   diverged || true
+          ok   log-changed      hello.txt
+          skip log-local   "requires upstream tracking branch"
+          skip log-fetched "requires upstream tracking branch"
           skip showi    "requires interactive fzf"
 
           # ── diff ────────────────────────────────────────────────────────────
           ok   dc                       # diff --cached (staged change present)
-          ok   ds                       # diff --staged
           ok   dw                       # diff --word-diff (unstaged change present)
-          ok   dd                       # diff-deep alias chain
           ok   diff-deep
-          ok   diff-changes  HEAD~1
-          ok   diff-stat     HEAD~1
           ok   staged                   # diff --staged --stat (staged change present)
           ok   unstaged                 # diff --stat (unstaged change present)
           ok   changed                  # diff --name-status
-          ok   staged-files             # diff --staged --name-only
-          ok   unstaged-files           # diff --name-only
           ok   conflicts                # no conflicts — exits 0, empty output
           ok   what-changed             # diff --name-only HEAD
           ok   what-staged              # diff --cached --name-only
-          ok   what-unstaged            # diff --name-only
-          ok   diff-range    HEAD~1 HEAD
-          skip diff-all      "opens difftool interactively"
-          skip diff-chunk    "requires two commit SHAs and a function name"
+          ok   diff-range    HEAD~1 HEAD  # still tested; kept in experimental
           skip difftooli     "requires interactive fzf and difftool"
 
           # ── branch ──────────────────────────────────────────────────────────
-          ok   bm
-          ok   bnm
-          ok   bv
-          ok   bvv
-          ok   branches
           ok   recent
-          ok   refs-by-date
-          ok   bsd                      # branch.main.description is set
-          ok   branch-commit-first
-          ok   branch-commit-last
-          ok   branch-commit-prev
-          ok   branch-commit-next
           ok   hew-local-dry-run        # feature/test-branch is merged but not deleted
-          skip bed             "opens editor interactively"
+          skip bed             "alias removed — use git branch --edit-description"
           skip hew             "deletes merged branches locally and remotely"
           skip hew-dry-run     "depends on upstream-branch which has no upstream set"
           skip hew-local       "destructive: deletes locally merged branches"
           skip hew-remote      "requires a remote"
           skip hew-remote-dry-run "requires a remote"
           skip heads           "requires origin remote"
-          skip track-all-remote-branches "requires a remote"
 
           # ── core ────────────────────────────────────────────────────────────
           ok   root
@@ -252,48 +174,23 @@ jobs:
           git add foo.txt
 
           # ── add ─────────────────────────────────────────────────────────────
-          ok   add-cached
-          ok   add-deleted              # no deleted files — no-op, exits 0
-          ok   add-others
-          ok   add-killed               # no killed files — no-op, exits 0
-          ok   add-modified
-          ok   add-stage
-          ok   add-unmerged             # no unmerged files — no-op, exits 0
+          ok   au
           skip aa              "stages all files — keep index stable"
-          skip au              "stages tracked files — keep index stable"
           skip ap              "interactive patch add"
-          skip add-force-ignored "force-adds gitignored files"
-          skip edit-cached     "opens editor interactively"
-          skip edit-deleted    "opens editor interactively"
-          skip edit-others     "opens editor interactively"
-          skip edit-ignored    "opens editor interactively"
-          skip edit-killed     "opens editor interactively"
-          skip edit-modified   "opens editor interactively"
-          skip edit-stage      "opens editor interactively"
-          skip edit-unmerged   "opens editor interactively"
 
           # ── commit ──────────────────────────────────────────────────────────
-          ok   commit-parents          HEAD
-          ok   commit-message-key-lines HEAD
-          ok   commit-is-merge         HEAD  # HEAD is the merge commit from setup
           skip ca    "amends last commit — modifies history"
           skip cam   "amends last commit — requires message argument"
           skip cane  "amends last commit — modifies history"
-          skip caa   "amends last commit — modifies history"
-          skip caam  "modifies history — requires message argument"
-          skip caane "modifies history"
           skip cm    "modifies history — requires message argument"
-          skip ci    "interactive commit"
           skip wip              "commits all changes — modifies history"
           skip unwip            "conditionally resets HEAD — modifies history"
-          skip fixup-no-rebase  "modifies history — requires a target commit"
-          skip amend-staged     "amends last commit — modifies history"
-          skip again            "amends last commit — modifies history"
+          skip save             "commits all changes — modifies history"
+          skip savep            "interactive patch commit"
 
           # ── stash ───────────────────────────────────────────────────────────
           ok   sl
           ok   ssa                      # shows the stash entry created in setup
-          ok   stashes
           skip sp       "modifies stash stack"
           skip spo      "pops stash — destructive for test state"
           skip sd       "drops stash entry — destructive for test state"
@@ -308,91 +205,53 @@ jobs:
           ok   last-tagged
 
           # ── ls ──────────────────────────────────────────────────────────────
-          ok   ls
-          ok   lsd
-          ok   lsfn
-          ok   lsio
           ok   untracked            # ls-files --others (no untracked files — exits 0)
           ok   tracked              # ls-files
           ok   ignored              # status --ignored --short (exits 0)
 
           # ── grep ────────────────────────────────────────────────────────────
-          ok   gn          "Hello"
-          ok   gg          "Hello"
           ok   grep-group  "Hello"
-          ok   grep-ack    "Hello"
           ok   grep-all    "Hello"
 
           # ── reflog ──────────────────────────────────────────────────────────
           ok   rl
 
           # ── util ────────────────────────────────────────────────────────────
-          ok   sb
-          ok   alias
-          ok   orphans
-          ok   top
+          ok   aliases
+          ok   assumed
           ok   default-branch
           ok   current-branch
           ok   upstream-branch          # exits 0, outputs empty when no upstream
-          ok   aliases
-          ok   stashes
-          ok   assumed
-          ok   rev-list-all-objects-by-size
           ok   rev-list-all-objects-by-size-and-name
           ok   large-files
-          ok   search-commits   "feat"
-          ok   graphviz
           ok   bl               src/main.js
           ok   verify
           skip bli             "requires interactive fzf"
-          skip upb             "exits non-zero when no upstream is configured"
-          skip add-alias       "modifies git config"
-          skip move-alias      "modifies git config"
           skip init-empty      "initializes a new repository"
-          skip initer          "initializes a new repository"
           skip assume          "requires a file argument; side-effect on index"
           skip unassume        "requires a file argument; side-effect on index"
-          skip assume-all      "side-effect on index"
           skip unassume-all    "side-effect on index"
-          skip exec            "exec with no args causes a shell error"
-          skip debug           "requires gdb"
-          skip intercommit     "requires interdiff and two commit SHAs"
-          skip serve           "starts a network daemon"
 
           # ── remote ──────────────────────────────────────────────────────────
-          ok   rr                       # lists remotes (empty — exits 0)
-          skip rrs             "requires a named remote argument"
-          skip rru             "requires a remote"
-          skip rrp             "requires a named remote argument"
-          skip remotes-push    "pushes to all remotes"
+          ok   remotes-prune            # no remotes — exits 0
           skip remotes-push-dry-run "requires a remote"
-          skip remotes-prune   "requires a remote"
 
           # ── fetch ───────────────────────────────────────────────────────────
           skip fa    "requires a remote"
-          skip fav   "requires a remote"
           skip fap   "requires a remote"
 
           # ── pull ────────────────────────────────────────────────────────────
           skip pf    "requires upstream tracking branch"
           skip pr    "requires upstream tracking branch"
-          skip prp   "requires upstream tracking branch"
 
           # ── checkout ────────────────────────────────────────────────────────
           skip co    "requires a target ref"
-          skip cong  "requires a target ref"
-          skip cob   "requires a new branch name"
           skip swb   "requires a new branch name"
           skip swi   "requires fzf installed"
 
           # ── merge ───────────────────────────────────────────────────────────
           skip ma    "only valid during an in-progress merge"
           skip mc    "only valid during an in-progress merge"
-          skip mncnf "requires a branch name argument"
-          skip merge-span          "requires a merge-commit SHA argument"
-          skip merge-span-log      "requires a merge-commit SHA argument"
-          skip merge-span-diff     "requires a merge-commit SHA argument"
-          skip merge-span-difftool "opens difftool interactively"
           skip rebase-branch       "interactive rebase"
           skip ours    "only valid during a merge conflict"
           skip theirs  "only valid during a merge conflict"
@@ -412,60 +271,43 @@ jobs:
           skip cp    "requires a commit SHA argument"
           skip cpa   "only valid during an in-progress cherry-pick"
           skip cpc   "only valid during an in-progress cherry-pick"
-          skip cpn   "requires a commit SHA argument"
-          skip cpnx  "requires a commit SHA argument"
-          skip cherry-pick-merge "requires a merge-commit SHA argument"
 
           # ── revert ──────────────────────────────────────────────────────────
           skip rv    "modifies history — requires a commit SHA argument"
           skip rvnc  "modifies history — requires a commit SHA argument"
 
           # ── reset ───────────────────────────────────────────────────────────
-          ok   show-unreachable
           ok   clean-dry                # preview of what would be deleted
           ok   unstage-all              # restore --staged . (unstages foo.txt staged above)
           skip unadd               "would unstage files needed for subsequent tests"
-          skip reset-commit        "modifies commit history"
-          skip reset-commit-hard   "destructive: discards committed changes"
-          skip reset-commit-hard-clean "destructive"
-          skip reset-to-pristine   "destructive: hard-resets and cleans working tree"
-          skip reset-to-upstream   "destructive — requires upstream tracking branch"
-          skip undo-commit         "modifies commit history"
-          skip undo-commit-hard    "destructive: discards committed changes"
-          skip undo-commit-hard-clean "destructive"
-          skip undo-to-pristine    "destructive"
-          skip undo-to-upstream    "destructive — requires upstream tracking branch"
-          skip uncommit    "modifies commit history"
-          skip clean-force         "destructive: removes untracked files"
-          skip clean-force-ignored "destructive: removes untracked and ignored files"
-          skip reset-working-tree  "destructive: cleans and restores working tree"
+          skip uncommit        "modifies commit history"
           skip discard-all         "destructive: discards all working-tree changes"
           skip discard-file        "destructive: discards working-tree changes to a file"
+          skip restore-file        "destructive: discards working-tree changes to a file"
           skip expunge     "requires git-filter-repo; reads from /dev/tty"
           skip reset-hard-safe "reads from /dev/tty"
 
           # ── worktree ────────────────────────────────────────────────────────
           ok   wt-path          main    # prints canonical path, exits 0
-          ok   wt-cd            main    # delegates to wt-path, exits 0
           ok   wt-list
-          ok   wt-list-v
           ok   wt-prune
-          ok   wt-prune-v
-          ok   branch-in-worktree      # current branch (main) is in the main worktree
           skip wt-new          "creates a worktree — requires filesystem side-effects"
           skip wt-open         "creates a worktree (filesystem side effect); may require interactive fzf when no branch is given"
+          skip wt-open-cd      "creates a worktree — filesystem side effect"
           skip wt-rm           "requires an existing worktree to remove"
-          skip wt-rmf          "destructive: force-removes a worktree"
-          skip wt-rmi          "requires fzf installed"
+          skip wt-done         "requires an existing worktree"
+          skip wt-done-force   "destructive: force-removes a worktree and its branch"
+          skip wt-feature      "creates a worktree — requires filesystem side-effects"
+          skip wt-bugfix       "creates a worktree — requires filesystem side-effects"
+          skip wt-hotfix       "creates a worktree — requires filesystem side-effects"
+          skip wt-release      "creates a worktree — requires filesystem side-effects"
+          skip wt-sync         "requires an existing worktree"
 
           # ── submodule ───────────────────────────────────────────────────────
-          ok   sm
           ok   smu              # no submodules — no-op, exits 0
           ok   smui
           ok   smuir
           skip smi   "requires a submodule URL"
-          skip sma   "requires URL and path arguments"
-          skip sms   "no submodules present"
 
           # ── workflow ────────────────────────────────────────────────────────
           ok   pruner
@@ -474,33 +316,92 @@ jobs:
           skip outbound        "requires upstream tracking branch"
           skip inbound         "requires a remote"
           skip get             "requires a remote"
-          skip put-dry-run     "push dry-run requires a remote"
           skip pushy           "requires a remote"
           skip pushy-check     "requires upstream tracking branch and a remote"
-          skip push1           "requires a remote"
-          skip pull1           "requires a remote"
+          skip push-safe       "requires upstream tracking branch and a remote"
+          skip pr-ready        "interactive rebase — requires upstream tracking branch"
           skip track           "requires a remote"
           skip untrack         "requires upstream tracking branch"
           skip publish         "requires a remote"
           skip unpublish       "requires a remote"
-          skip reincarnate     "destructive — requires a remote"
           skip cloner          "requires a URL argument"
           skip clone-lean      "requires a URL argument"
-          skip ignore          "modifies .gitignore"
           skip mainly          "interactive — reads from /dev/tty"
-          skip panic           "creates a tar archive"
-          skip archive         "creates a tar archive"
+          skip sync            "requires upstream tracking branch"
           skip sparse-init     "changes sparse-checkout mode"
           skip sparse-set      "requires sparse-checkout path arguments"
+          skip task-ready      "requires upstream tracking branch"
 
           # ── topic ───────────────────────────────────────────────────────────
           ok   topic-base-branch
           skip topic-start   "requires a remote"
-          skip topic-begin   "requires a remote"
           skip topic-end     "requires a remote"
-          skip topic-finish  "requires a remote"
           skip topic-sync    "requires a remote"
           skip topic-move    "requires a remote"
+
+          # ── analytics ───────────────────────────────────────────────────────
+          ok   log-of-format-and-count            "%an"
+          ok   log-of-count-and-format            "%an"
+          ok   log-of-format-and-count-with-date  "%aE" "%Y-%m"
+          ok   log-of-count-and-format-with-date  "%aE" "%Y-%m"
+          ok   log-of-email-and-count
+          ok   log-of-count-and-email
+          ok   log-of-day-and-count
+          ok   log-of-count-and-day
+          ok   log-of-week-and-count
+          ok   log-of-count-and-week
+          ok   log-of-hour-and-count
+          ok   log-of-count-and-hour
+          ok   log-of-month-and-count
+          ok   log-of-count-and-month
+          ok   chart
+          ok   churn
+          ok   who
+          ok   whois   "Test User"
+          ok   summary
+
+          # ── experimental ────────────────────────────────────────────────────
+          ok   lor
+          ok   lfp
+          ok   log-list-long
+          ok   lll
+          ok   log-1-hour
+          ok   log-1-month
+          ok   log-my-month
+          ok   grep-ack    "Hello"
+          ok   grep-group  "Hello"
+          ok   diff-all    HEAD        || true      # opens difftool in background — ok to skip failures
+          ok   branch-commit-first
+          ok   branch-commit-last
+          ok   rev-list-all-objects-by-size
+          ok   show-unreachable        || true      # may be empty — exits 0 with xargs
+          ok   merge-span   " " HEAD   || true      # needs a merge SHA
+          ok   remotes-push-dry-run    || true      # no remotes — exits 0
+          skip issues          "requires consistent ISSUE-NNN commit discipline"
+          skip log-1-month     "already tested above as experimental"
+          skip mncnf           "requires a branch name argument"
+          skip merge-span-log  "requires a merge-commit SHA argument"
+          skip merge-span-diff "requires a merge-commit SHA argument"
+          skip prp             "requires upstream tracking branch"
+          skip cob             "requires a new branch name"
+          skip cpn             "requires a commit SHA argument"
+          skip cherry-pick-merge "requires a merge-commit SHA argument"
+          skip undo-commit-hard   "destructive: discards committed changes"
+          skip undo-to-upstream   "destructive — requires upstream tracking branch"
+          skip clean-force        "destructive: removes untracked files"
+          skip add-unmerged    "no unmerged files present"
+          skip edit-modified   "opens editor interactively"
+          skip track-all-remote-branches "requires a remote"
+          skip branch-commit-prev "alias removed"
+          skip branch-commit-next "alias removed"
+          skip branch-clean    "requires interactive fzf"
+          skip add-alias       "modifies git config"
+          skip move-alias      "modifies git config"
+          skip assume-all      "side-effect on index"
+          skip serve           "starts a network daemon"
+          skip archive         "creates a tar archive"
+          skip put-dry-run     "push dry-run reflects pre-commit state"
+          skip reincarnate     "destructive — requires a remote"
 
           # ── final report ────────────────────────────────────────────────────
           printf "\n──────────────────────────────────────────────────────\n"

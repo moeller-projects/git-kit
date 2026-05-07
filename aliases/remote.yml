@@ -1,40 +1,4 @@
 aliases:
-  rr:
-    command: remote
-    description: Manage the set of tracked remote repositories
-    category: remote
-    risk: safe
-
-  rrs:
-    command: remote show
-    description: Show information about a named remote
-    category: remote
-    risk: safe
-
-  rru:
-    command: remote update
-    description: Fetch updates for all configured remotes
-    category: remote
-    risk: safe
-
-  rrp:
-    command: remote prune
-    description: Prune stale remote-tracking branches for a remote
-    category: remote
-    risk: medium
-
-  remotes-push:
-    command: '!git remote | xargs -I% -n1 git push %'
-    description: Push to every configured remote
-    category: remote
-    risk: dangerous
-
-  remotes-push-dry-run:
-    command: '!git remote | xargs -I% -n1 git push % --dry-run'
-    description: Preview what remotes-push would push to every remote without making any changes
-    category: remote
-    risk: medium
-
   remotes-prune:
     command: '!git remote | xargs -n 1 git remote prune'
     description: Prune all stale references for every remote

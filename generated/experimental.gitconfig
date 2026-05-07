@@ -1,0 +1,38 @@
+[alias]
+    add-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || git add -- $files; }; f"
+    edit-modified = "!f() { files=$(git ls-files --modified | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
+    branch-commit-first = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --reverse --pretty=%H \"$branch\" | head -\"$count\"; }; f"
+    branch-commit-last = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --pretty=%H \"$branch\" | head -\"$count\"; }; f"
+    branch-clean = "!f() { git branch | grep -v \"^\\*\" | fzf -m --prompt=\"delete branches> \" | xargs -r git branch -d; }; f"
+    track-all-remote-branches = "!f() { for x in $(git for-each-ref --format=\"%(refname:short)\" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track \"$x\"; done; }; f"
+    cob = checkout -b
+    cpn = cherry-pick --no-commit
+    cherry-pick-merge = !sh -c 'git cherry-pick --no-commit --mainline 1 $0 && git log -1 --pretty=%P $0 | cut -b 42- > .git/MERGE_HEAD && git commit --verbose'
+    diff-all = "!for name in $(git diff --name-only \"$1\"); do git difftool \"$1\" \"$name\" & done"
+    grep-ack = "-c color.grep.linenumber=\"bold yellow\" -c color.grep.filename=\"bold green\" -c color.grep.match=\"reverse yellow\" grep --break --heading --line-number"
+    lor = log --oneline --reverse
+    lfp = log --first-parent
+    log-list-long = log --graph --topo-order --date=iso8601-strict --no-abbrev-commit --decorate --all --boundary --pretty=format:'%Cblue%ad %C(auto)%h%Creset -%C(auto)%d%Creset %s %Cblue[%aN <%aE>]%Creset %Cblue%G?%Creset'
+    lll = log-list-long
+    log-1-hour = log --since=1-hour-ago
+    log-1-month = log --since=1-month-ago
+    log-my-month = "!git log --author \"$(git config user.email)\" --since=1-month-ago"
+    issues = "!sh -c \"git log $1 --oneline | grep -o \\\"ISSUE-[0-9]\\+\\\" | sort -u\""
+    mncnf = merge --no-commit --no-ff
+    merge-span = "!f() { echo \"$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f2)\"; }; f"
+    merge-span-log = "!git log \"$(git merge-span .. \"$1\")\""
+    merge-span-diff = "!git diff \"$(git merge-span ... \"$1\")\""
+    prp = pull --rebase=merges
+    remotes-push-dry-run = !git remote | xargs -I% -n1 git push % --dry-run
+    show-unreachable = "!git fsck --unreachable | grep commit | cut -d\" \" -f3 | xargs git log"
+    undo-commit-hard = reset --hard HEAD~1
+    undo-to-upstream = "!git reset --hard \"$(git upstream-branch)\""
+    clean-force = clean -dff
+    add-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
+    move-alias = "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
+    rev-list-all-objects-by-size = !git rev-list --all --objects  | awk '{print $1}'| git cat-file --batch-check | grep -F blob | sort -k3nr
+    assume-all = !git status --short | awk '{ print $2 }' | xargs -r git assume
+    serve = -c daemon.receivepack=true daemon --base-path=. --export-all --reuseaddr --verbose
+    archive = "!f() { top=\"$(git rev-parse --show-toplevel)\"; cd \"$top\" || exit 1 ; tar cvf \"$top.tar\" \"$top\" ; }; f"
+    put-dry-run = !git diff --cached --stat && git push --dry-run
+    reincarnate = "!f() { [ $# -gt 0 ] && git checkout \"$1\" && git unpublish && git checkout \"$(git default-branch)\" && git branch --delete --force \"$1\" && git checkout -b \"$1\" && git publish; }; f"

@@ -5,18 +5,6 @@ aliases:
     category: checkout
     risk: medium
 
-  cong:
-    command: checkout --no-guess
-    description: Checkout without guessing branch names
-    category: checkout
-    risk: medium
-
-  cob:
-    command: checkout -b
-    description: Create and checkout a new branch
-    category: checkout
-    risk: medium
-
   swb:
     command: switch --create
     description: Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23)
