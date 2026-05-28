@@ -160,6 +160,62 @@ export function addIncludePath(content: string, includePath: string, platform: N
   return { changed: true, content: `${trimmed}${newline}${newline}${includeBlock}` };
 }
 
+/**
+ * Remove every [include] path entry whose resolved path lives under the given
+ * managed config directory.  Used during install/uninstall to keep a single
+ * git-kit include active at a time.
+ *
+ * Returns the filtered content together with the raw path strings that were
+ * removed (as they appeared in the file).
+ */
+export function removeAllManagedIncludePaths(
+  content: string,
+  managedDirectory: string,
+  platform: NodeJS.Platform = process.platform,
+): { changed: boolean; content: string; removedPaths: string[] } {
+  const dirForward = managedDirectory.replace(/\\/g, '/');
+  const dirNorm = (platform === 'win32' ? dirForward.toLowerCase() : dirForward).replace(/\/+$/, '') + '/';
+
+  const newline = detectNewline(content);
+  const hasTrailingNewline = content.endsWith('\r\n') || content.endsWith('\n');
+  const removedPaths: string[] = [];
+
+  const sections = splitSections(content)
+    .map((section) => {
+      if (section.header == null || !isIncludeHeader(section.header)) {
+        return section;
+      }
+
+      let removedFromSection = 0;
+      const filteredLines = section.lines.filter((line) => {
+        const configuredPath = parsePathLine(line);
+        if (configuredPath == null) return true;
+        const forward = configuredPath.replace(/\\/g, '/');
+        const norm = platform === 'win32' ? forward.toLowerCase() : forward;
+        if (norm.startsWith(dirNorm)) {
+          removedPaths.push(configuredPath);
+          removedFromSection += 1;
+          return false;
+        }
+        return true;
+      });
+
+      const hasOnlyWhitespace = filteredLines.every((line) => line.trim().length === 0);
+      if (removedFromSection > 0 && hasOnlyWhitespace) {
+        return null;
+      }
+
+      return { header: section.header, lines: filteredLines };
+    })
+    .filter((section): section is GitConfigSection => section != null);
+
+  return {
+    changed: removedPaths.length > 0,
+    content: renderSections(sections, hasTrailingNewline, newline),
+    removedPaths,
+  };
+}
+
 export function removeIncludePath(content: string, includePath: string, platform: NodeJS.Platform = process.platform): { changed: boolean; content: string; removedCount: number } {
   const expectedPath = normalizeConfigValue(includePath, platform);
   const newline = detectNewline(content);

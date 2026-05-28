@@ -8,7 +8,8 @@ A modular Git alias distribution toolkit. Installs a curated set of Git aliases 
 
 - Installs Git aliases through a managed include file, not by overwriting your config
 - Supports profiles (`minimal`, `lazy`, `power`) for different alias sets
-- Safe uninstall that only removes the `git-kit`-managed include
+- Switching profiles or targets automatically replaces the previous include — only one git-kit include is ever active at a time
+- Safe uninstall that only removes the `git-kit`-managed include; `--all` cleans up everything at once
 - Cross-platform: macOS, Linux, and Windows
 
 ## Requirements
@@ -98,6 +99,12 @@ Uninstall a specific profile:
 
 ```bash
 git-kit uninstall --profile minimal
+```
+
+Remove **all** git-kit-managed includes and every managed file at once:
+
+```bash
+git-kit uninstall --all
 ```
 
 ### Generate configs and docs

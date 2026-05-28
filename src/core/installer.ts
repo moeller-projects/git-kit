@@ -1,9 +1,9 @@
-import { access, copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, copyFile, mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { constants as fsConstants } from 'node:fs';
 import path from 'node:path';
 import type { AliasEntry } from './aliases.js';
 import { loadAliasesFromDirectory, loadAliasesFromFile } from './aliases.js';
-import { addIncludePath, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
+import { addIncludePath, removeAllManagedIncludePaths, removeIncludePath, renderAliasGitConfig, resolveGlobalGitConfigPath } from './gitconfig.js';
 import { getManagedAliasesPath, getManagedConfigDirectory, resolvePackagePath, resolveProfilePath } from './paths.js';
 import { loadProfile, loadAliasesForProfile } from './profile.js';
 import { ensureAliasEntries } from './validator.js';
@@ -19,6 +19,7 @@ export interface UninstallOptions {
   profile?: string;
   managedConfigDirectory?: string;
   globalGitConfigPath?: string;
+  all?: boolean;
 }
 
 export interface InstallResult {
@@ -34,6 +35,7 @@ export interface UninstallResult {
   includeRemoved: boolean;
   removedManagedFile: boolean;
   backupPath?: string;
+  removedAllFiles?: string[];
 }
 
 function createBackupTimestamp(date: Date = new Date()): string {
@@ -126,7 +128,29 @@ export async function installAliases(options: InstallOptions = {}): Promise<Inst
   let globalContent = globalConfigExists ? await readFile(globalGitConfigPath, 'utf8') : '';
   let anyChanged = false;
 
-  // Add the managed aliases include.
+  // Remove any OTHER git-kit-managed includes so only one is ever active at a time.
+  // We only act when there are managed includes pointing to a different file; this
+  // preserves idempotency when re-installing the same target.
+  const targetForward = managedAliasesPath.replace(/\\/g, '/');
+  const targetNorm = process.platform === 'win32' ? targetForward.toLowerCase() : targetForward;
+  const scanResult = removeAllManagedIncludePaths(globalContent, managedConfigDirectory);
+  const otherManagedPaths = scanResult.removedPaths.filter((p) => {
+    const pForward = p.replace(/\\/g, '/');
+    const pNorm = process.platform === 'win32' ? pForward.toLowerCase() : pForward;
+    return pNorm !== targetNorm;
+  });
+
+  if (otherManagedPaths.length > 0) {
+    // Strip all managed includes (removeAllManagedIncludePaths already did this
+    // for the target too) and delete the orphaned files.
+    globalContent = scanResult.content;
+    anyChanged = true;
+    for (const orphanedPath of otherManagedPaths) {
+      await rm(path.normalize(orphanedPath), { force: true });
+    }
+  }
+
+  // Add the managed aliases include (idempotent — skipped if already present).
   const managedResult = addIncludePath(globalContent, managedAliasesPath);
   if (managedResult.changed) {
     globalContent = managedResult.content;
@@ -152,6 +176,48 @@ export async function uninstallAliases(options: UninstallOptions = {}): Promise<
   const managedConfigDirectory = options.managedConfigDirectory ?? getManagedConfigDirectory();
   const managedAliasesPath = getManagedAliasesPath(managedConfigDirectory, options.profile);
   const globalGitConfigPath = options.globalGitConfigPath ?? resolveGlobalGitConfigPath(undefined, managedAliasesPath);
+
+  if (options.all) {
+    // Remove every git-kit-managed include from the global config.
+    const globalConfigExists = await fileExists(globalGitConfigPath);
+    let includeRemoved = false;
+    let backupPath: string | undefined;
+
+    if (globalConfigExists) {
+      const existingGlobalConfig = await readFile(globalGitConfigPath, 'utf8');
+      const removeResult = removeAllManagedIncludePaths(existingGlobalConfig, managedConfigDirectory);
+      if (removeResult.changed) {
+        backupPath = await backupIfNeeded(globalGitConfigPath);
+        await writeFile(globalGitConfigPath, removeResult.content, 'utf8');
+        includeRemoved = true;
+      }
+    }
+
+    // Delete every *.gitconfig file in the managed directory.
+    const removedAllFiles: string[] = [];
+    try {
+      const entries = await readdir(managedConfigDirectory);
+      for (const entry of entries) {
+        if (entry.endsWith('.gitconfig')) {
+          const filePath = path.join(managedConfigDirectory, entry);
+          await rm(filePath, { force: true });
+          removedAllFiles.push(filePath);
+        }
+      }
+    } catch {
+      // Managed directory does not exist — nothing to delete.
+    }
+
+    return {
+      managedAliasesPath,
+      globalGitConfigPath,
+      includeRemoved,
+      removedManagedFile: removedAllFiles.length > 0,
+      backupPath,
+      removedAllFiles,
+    };
+  }
+
   const globalConfigExists = await fileExists(globalGitConfigPath);
 
   let includeRemoved = false;
