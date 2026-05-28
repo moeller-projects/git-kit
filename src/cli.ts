@@ -27,8 +27,9 @@ async function run(): Promise<void> {
     .command('uninstall')
     .description('Remove the managed alias include.')
     .option('--profile <name>', 'Uninstall only a specific alias profile')
-    .action(async (options: { profile?: string }) => {
-      logger.info(await uninstallCommand(options.profile));
+    .option('--all', 'Remove ALL git-kit-managed includes and delete every managed file')
+    .action(async (options: { profile?: string; all?: boolean }) => {
+      logger.info(await uninstallCommand(options.profile, options.all));
     });
 
   program

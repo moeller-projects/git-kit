@@ -80,6 +80,108 @@ describe('installer', () => {
     expect(managedContent).toContain('[alias]');
   });
 
+  test('switching from full install to profile removes old include and its file', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-switch-'));
+    const aliasesFilePath = path.join(tempDirectory, 'aliases.yml');
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(aliasesFilePath, fixtureAliases, 'utf8');
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    // First: full install
+    const fullResult = await installAliases({ aliasesFilePath, managedConfigDirectory, globalGitConfigPath });
+    expect(fullResult.includeAdded).toBe(true);
+    expect(fullResult.managedAliasesPath).toContain('aliases.gitconfig');
+
+    // Second: switch to profile install
+    const profileResult = await installAliases({ profile: 'minimal', managedConfigDirectory, globalGitConfigPath });
+    expect(profileResult.includeAdded).toBe(true);
+    expect(profileResult.managedAliasesPath).toContain('minimal.gitconfig');
+
+    const globalConfigContent = await readFile(globalGitConfigPath, 'utf8');
+    // Only the profile include should remain
+    expect(globalConfigContent).toContain('minimal.gitconfig');
+    expect(globalConfigContent).not.toContain('aliases.gitconfig');
+    // The old managed file should have been deleted
+    const { existsSync } = await import('node:fs');
+    expect(existsSync(fullResult.managedAliasesPath)).toBe(false);
+  });
+
+  test('switching from one profile to another removes old include and its file', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-profile-switch-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    // Install minimal
+    const minimalResult = await installAliases({ profile: 'minimal', managedConfigDirectory, globalGitConfigPath });
+    expect(minimalResult.includeAdded).toBe(true);
+
+    // Switch to power
+    const powerResult = await installAliases({ profile: 'power', managedConfigDirectory, globalGitConfigPath });
+    expect(powerResult.includeAdded).toBe(true);
+
+    const globalConfigContent = await readFile(globalGitConfigPath, 'utf8');
+    // Only power include should remain
+    expect(globalConfigContent).toContain('power.gitconfig');
+    expect(globalConfigContent).not.toContain('minimal.gitconfig');
+    // Occurrence count — exactly one include for power
+    expect(globalConfigContent.match(/power\.gitconfig/g)?.length).toBe(1);
+    // Old managed file deleted
+    const { existsSync } = await import('node:fs');
+    expect(existsSync(minimalResult.managedAliasesPath)).toBe(false);
+  });
+
+  test('uninstall --all removes all managed includes and deletes all managed files', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-uninstall-all-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    // Install two different managed files to simulate a stale state
+    const minimalResult = await installAliases({ profile: 'minimal', managedConfigDirectory, globalGitConfigPath });
+    // Manually add a second stale include to simulate legacy state
+    const staleInclude = `\n[include]\n    path = ${managedConfigDirectory}/aliases.gitconfig\n`;
+    const currentContent = await readFile(globalGitConfigPath, 'utf8');
+    await writeFile(globalGitConfigPath, currentContent + staleInclude, 'utf8');
+    // Also create the stale file
+    await writeFile(path.join(managedConfigDirectory, 'aliases.gitconfig'), '[alias]\n', 'utf8');
+
+    const result = await uninstallAliases({ managedConfigDirectory, globalGitConfigPath, all: true });
+
+    expect(result.includeRemoved).toBe(true);
+    expect(result.removedManagedFile).toBe(true);
+    expect(result.removedAllFiles?.length).toBeGreaterThanOrEqual(2);
+
+    const globalConfigContent = await readFile(globalGitConfigPath, 'utf8');
+    expect(globalConfigContent).not.toContain('minimal.gitconfig');
+    expect(globalConfigContent).not.toContain('aliases.gitconfig');
+    expect(globalConfigContent).toContain('name = Example');
+
+    // Managed files are gone
+    const { existsSync } = await import('node:fs');
+    expect(existsSync(minimalResult.managedAliasesPath)).toBe(false);
+    expect(existsSync(path.join(managedConfigDirectory, 'aliases.gitconfig'))).toBe(false);
+  });
+
+  test('uninstall --all reports nothing to remove when there are no managed includes', async () => {
+    const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-uninstall-all-empty-'));
+    const managedConfigDirectory = path.join(tempDirectory, 'managed');
+    const globalGitConfigPath = path.join(tempDirectory, '.gitconfig');
+
+    await writeFile(globalGitConfigPath, '[user]\n    name = Example\n', 'utf8');
+
+    const result = await uninstallAliases({ managedConfigDirectory, globalGitConfigPath, all: true });
+
+    expect(result.includeRemoved).toBe(false);
+    expect(result.removedManagedFile).toBe(false);
+    expect(result.removedAllFiles).toEqual([]);
+  });
+
+
   test('rejects profile names with path traversal characters', async () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-security-'));
     const managedConfigDirectory = path.join(tempDirectory, 'managed');

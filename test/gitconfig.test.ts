@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { addIncludePath, removeIncludePath, renderAliasGitConfig } from '../src/core/gitconfig.js';
+import { addIncludePath, removeAllManagedIncludePaths, removeIncludePath, renderAliasGitConfig } from '../src/core/gitconfig.js';
 
 describe('gitconfig helpers', () => {
   test('renders alias gitconfig — simple commands are left unquoted', () => {
@@ -66,5 +66,40 @@ describe('gitconfig helpers', () => {
 
     expect(result.changed).toBe(true);
     expect(result.content).toBe('[user]\r\n    name = Example\r\n');
+  });
+
+  test('removeAllManagedIncludePaths removes all includes under managed dir', () => {
+    const managedDir = '/home/user/.config/git-kit';
+    const content = [
+      '[user]',
+      '    name = Example',
+      '[include]',
+      `    path = ${managedDir}/aliases.gitconfig`,
+      '[include]',
+      `    path = ${managedDir}/minimal.gitconfig`,
+      '[include]',
+      '    path = /tmp/keep.gitconfig',
+    ].join('\n') + '\n';
+
+    const result = removeAllManagedIncludePaths(content, managedDir);
+
+    expect(result.changed).toBe(true);
+    expect(result.removedPaths).toHaveLength(2);
+    expect(result.removedPaths).toContain(`${managedDir}/aliases.gitconfig`);
+    expect(result.removedPaths).toContain(`${managedDir}/minimal.gitconfig`);
+    expect(result.content).not.toContain('aliases.gitconfig');
+    expect(result.content).not.toContain('minimal.gitconfig');
+    expect(result.content).toContain('/tmp/keep.gitconfig');
+  });
+
+  test('removeAllManagedIncludePaths returns unchanged when no managed includes present', () => {
+    const managedDir = '/home/user/.config/git-kit';
+    const content = '[user]\n    name = Example\n[include]\n    path = /tmp/other.gitconfig\n';
+
+    const result = removeAllManagedIncludePaths(content, managedDir);
+
+    expect(result.changed).toBe(false);
+    expect(result.removedPaths).toHaveLength(0);
+    expect(result.content).toBe(content);
   });
 });
