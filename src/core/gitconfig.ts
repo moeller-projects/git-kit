@@ -174,7 +174,7 @@ export function removeAllManagedIncludePaths(
   platform: NodeJS.Platform = process.platform,
 ): { changed: boolean; content: string; removedPaths: string[] } {
   const dirForward = managedDirectory.replace(/\\/g, '/');
-  const dirNorm = (platform === 'win32' ? dirForward.toLowerCase() : dirForward).replace(/\/?$/, '/');
+  const dirNorm = (platform === 'win32' ? dirForward.toLowerCase() : dirForward).replace(/\/+$/, '') + '/';
 
   const newline = detectNewline(content);
   const hasTrailingNewline = content.endsWith('\r\n') || content.endsWith('\n');

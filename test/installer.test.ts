@@ -181,7 +181,6 @@ describe('installer', () => {
     expect(result.removedAllFiles).toEqual([]);
   });
 
-
   test('rejects profile names with path traversal characters', async () => {
     const tempDirectory = await mkdtemp(path.join(os.tmpdir(), 'git-kit-security-'));
     const managedConfigDirectory = path.join(tempDirectory, 'managed');
