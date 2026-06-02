@@ -8,3 +8,5 @@
     fixup = "!f() { TARGET=\"$(git rev-parse \"$1\")\"; git commit --fixup=\"$TARGET\" && GIT_EDITOR=true git rebase --interactive --autosquash \"$TARGET\"~; }; f"
     remote-ref = "!local_ref=\"$(git symbolic-ref HEAD)\"; local_name=\"${local_ref##refs/heads/}\"; remote=\"$(git config branch.\"$local_name\".remote || echo origin)\"; remote_ref=\"$(git config branch.\"$local_name\".merge)\"; remote_name=\"${remote_ref##refs/heads/}\"; echo \"remotes/$remote/$remote_name\" #"
     rebase-recent = "!git rebase --interactive \"$(git remote-ref)\""
+    reup = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git fetch origin \"$base\" && git rebase \"origin/$base\"; }; f"
+    fixupi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"fixupi needs fzf\" >&2; return 2; }; base=\"${1:-$(git topic-base-branch)}\"; sha=\"$(git log --oneline \"$base..HEAD\" | fzf --prompt=\"fixup into> \" --preview \"git show --color=always {1}\" | cut -d\" \" -f1)\"; [ -n \"$sha\" ] || return 0; git commit --fixup \"$sha\" && GIT_EDITOR=true git rebase --interactive --autosquash \"$sha~\"; }; f"

@@ -141,6 +141,7 @@ jobs:
           skip log-local   "requires upstream tracking branch"
           skip log-fetched "requires upstream tracking branch"
           skip showi    "requires interactive fzf"
+          ok   standup                  # shows commits since yesterday midnight
 
           # ── diff ────────────────────────────────────────────────────────────
           ok   dc                       # diff --cached (staged change present)
@@ -165,6 +166,16 @@ jobs:
           skip hew-remote      "requires a remote"
           skip hew-remote-dry-run "requires a remote"
           skip heads           "requires origin remote"
+          ok   branch-clean-dry-run     # feature/test-branch is merged into main
+          skip branch-clean    "destructive: deletes merged local branches"
+          skip branch-gone     "destructive: deletes gone-upstream branches"
+          skip branch-gone-dry-run "requires a remote (git fetch --prune)"
+          skip branch-rm       "requires interactive fzf"
+          ok   fork-point               # defaults to topic-base-branch (main)
+          ok   branch-log               # empty on main, exits 0
+          ok   branch-diff              # empty on main, exits 0
+          ok   branch-files             # empty on main, exits 0
+          skip tidy            "destructive: deletes branches"
 
           # ── core ────────────────────────────────────────────────────────────
           ok   root
@@ -177,6 +188,7 @@ jobs:
           skip au              "stages all updated files — would mutate the index"
           skip aa              "stages all files — keep index stable"
           skip ap              "interactive patch add"
+          skip addi            "requires interactive fzf"
 
           # ── commit ──────────────────────────────────────────────────────────
           skip ca    "amends last commit — modifies history"
@@ -239,15 +251,25 @@ jobs:
           # ── fetch ───────────────────────────────────────────────────────────
           skip fa    "requires a remote"
           skip fap   "requires a remote"
+          skip pr-fetch "requires a PR number and remote"
 
           # ── pull ────────────────────────────────────────────────────────────
           skip pf    "requires upstream tracking branch"
           skip pr    "requires upstream tracking branch"
 
+          # ── azure ───────────────────────────────────────────────────────────
+          skip ado-pr       "requires az CLI and Azure DevOps"
+          skip ado-prs      "requires az CLI and Azure DevOps"
+          skip ado-prs-mine "requires az CLI and Azure DevOps"
+          skip ado-prco     "requires az CLI and Azure DevOps"
+          skip ado-pr-open  "requires az CLI and Azure DevOps"
+          skip ado-pr-fetch "requires a PR id and remote"
+
           # ── checkout ────────────────────────────────────────────────────────
           skip co    "requires a target ref"
           skip swb   "requires a new branch name"
           skip swi   "requires fzf installed"
+          skip swr   "requires interactive fzf"
 
           # ── merge ───────────────────────────────────────────────────────────
           skip ma    "only valid during an in-progress merge"
@@ -255,6 +277,7 @@ jobs:
           skip rebase-branch       "interactive rebase"
           skip ours    "only valid during a merge conflict"
           skip theirs  "only valid during a merge conflict"
+          skip mgi   "requires interactive fzf"
 
           # ── rebase ──────────────────────────────────────────────────────────
           skip rb    "requires a target branch"
@@ -266,6 +289,8 @@ jobs:
           skip fixup "interactive rebase"
           skip remote-ref     "requires upstream tracking branch"
           skip rebase-recent  "requires upstream tracking branch"
+          skip reup      "requires a remote"
+          skip fixupi    "requires interactive fzf"
 
           # ── cherry-pick ─────────────────────────────────────────────────────
           skip cp    "requires a commit SHA argument"
@@ -286,6 +311,7 @@ jobs:
           skip restore-file        "destructive: discards working-tree changes to a file"
           skip expunge     "requires git-filter-repo; reads from /dev/tty"
           skip reset-hard-safe "reads from /dev/tty"
+          skip discardi    "requires interactive fzf"
 
           # ── worktree ────────────────────────────────────────────────────────
           ok   wt-path          main    # prints canonical path, exits 0
@@ -394,7 +420,7 @@ jobs:
           skip track-all-remote-branches "requires a remote"
           skip branch-commit-prev "alias removed"
           skip branch-commit-next "alias removed"
-          skip branch-clean    "requires interactive fzf"
+          skip branch-clean    "removed from experimental — now in branch section"
           skip add-alias       "modifies git config"
           skip move-alias      "modifies git config"
           skip assume-all      "side-effect on index"
