@@ -102,7 +102,7 @@ aliases:
     risk: medium
 
   commit-files:
-    command: 'show --name-only --pretty=format:'
+    command: "show --name-only --pretty=format:"
     description: Show files affected by a commit
     category: log
     risk: safe
@@ -136,3 +136,9 @@ aliases:
     description: Show full history of a single file including renames; usage git log-changed <path>
     category: log
     risk: safe
+
+  standup:
+    command: '!git log --all --author "$(git config user.email)" --since=yesterday.midnight --oneline --no-merges'
+    description: Show your commits across all branches since yesterday (daily standup)
+    category: log
+    risk: medium

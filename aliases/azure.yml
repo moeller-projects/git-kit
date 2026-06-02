@@ -1,0 +1,36 @@
+aliases:
+  ado-pr:
+    command: '!f() { command -v az >/dev/null 2>&1 || { echo "ado-pr needs az + the azure-devops extension" >&2; return 2; }; base="${1:-$(git topic-base-branch)}"; src="$(git current-branch)"; title="$(git log -1 --pretty=%s)"; wi="$(printf "%s" "$src" | grep -oE "[0-9]+" | head -1)"; git push --set-upstream origin "$src" || return 1; if [ -n "$wi" ]; then az repos pr create --detect true --source-branch "$src" --target-branch "$base" --title "$title" --work-items "$wi" --draft true --open; else az repos pr create --detect true --source-branch "$src" --target-branch "$base" --title "$title" --draft true --open; fi; }; f'
+    description: Push the current branch and open a draft Azure DevOps PR to the base, linking a work item parsed from the branch name (requires az)
+    category: azure
+    risk: medium
+
+  ado-prs:
+    command: '!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; az repos pr list --detect true --status active --output table; }; f'
+    description: List active Azure DevOps pull requests for the current repository (requires az)
+    category: azure
+    risk: medium
+
+  ado-prs-mine:
+    command: '!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; me="$(az account show --query user.name -o tsv 2>/dev/null)"; az repos pr list --detect true --status active --creator "$me" --output table; }; f'
+    description: List your active Azure DevOps pull requests for the current repository (requires az)
+    category: azure
+    risk: medium
+
+  ado-prco:
+    command: '!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; [ -n "$1" ] || { echo "usage: git ado-prco <pr-id>" >&2; return 2; }; az repos pr checkout --id "$1" --detect true; }; f'
+    description: Check out an Azure DevOps PR source branch locally by PR id (requires az)
+    category: azure
+    risk: medium
+
+  ado-pr-open:
+    command: '!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; if [ -n "$1" ]; then az repos pr show --id "$1" --detect true --open >/dev/null; else src="$(git current-branch)"; id="$(az repos pr list --detect true --status active --source-branch "$src" --query "[0].pullRequestId" -o tsv)"; [ -n "$id" ] && az repos pr show --id "$id" --detect true --open >/dev/null || echo "no active PR for $src"; fi; }; f'
+    description: Open an Azure DevOps PR in the browser by id, or the active PR for the current branch (requires az)
+    category: azure
+    risk: medium
+
+  ado-pr-fetch:
+    command: '!f() { [ -n "$1" ] || { echo "usage: git ado-pr-fetch <pr-id> [remote]" >&2; return 2; }; remote="${2:-origin}"; git fetch "$remote" "refs/pull/$1/merge" && git switch --create "pr-$1" FETCH_HEAD; }; f'
+    description: Fetch an Azure DevOps pull request by id into a local branch using its merge ref (no az required)
+    category: azure
+    risk: medium

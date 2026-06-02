@@ -46,3 +46,64 @@ aliases:
     description: List branches sorted by most recent commit date
     category: branch
     risk: safe
+
+  branch-clean:
+    command: '!f() { git branch-clean-dry-run "$@" | xargs -r git branch -D; }; f'
+    description: Delete all local branches already merged into the base branch (non-interactive; default base e.g. dev)
+    category: branch
+    risk: dangerous
+
+    branch-clean-dry-run:
+      command: '!f() { base="${1:-$(git topic-base-branch)}"; cur="$(git current-branch)"; def="$(git default-branch)"; git rev-parse --verify --quiet "refs/heads/$base" >/dev/null || { echo "branch-clean: base branch ${base:-<unset>} not found" >&2; return 1; }; git for-each-ref --format="%(refname:short)" refs/heads/ | while IFS= read -r b; do [ "$b" = "$base" ] && continue; [ "$b" = "$cur" ] && continue; [ "$b" = "$def" ] && continue; [ "$b" = main ] && continue; [ "$b" = master ] && continue; git merge-base --is-ancestor "$b" "$base" && printf "%s\n" "$b"; done; }; f'
+      description: Preview local branches fully merged into the base branch (default base; set init.topicBaseBranchName to dev)
+      category: branch
+      risk: medium
+
+    branch-gone:
+      command: "!f() { git branch-gone-dry-run | xargs -r git branch -D; }; f"
+      description: Delete local branches whose remote tracking branch is gone (handles squash/rebase-merged PRs)
+      category: branch
+      risk: dangerous
+
+    branch-gone-dry-run:
+      command: '!f() { git fetch --prune --quiet; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f'
+      description: Preview local branches whose upstream was deleted on the remote (e.g. squash-merged PRs)
+      category: branch
+      risk: medium
+
+    branch-rm:
+      command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | xargs -r git branch -D; }; f'
+      description: Interactively multi-select local branches to delete with preview (requires fzf)
+      category: branch
+      risk: dangerous
+
+    fork-point:
+      command: '!f() { base="${1:-$(git topic-base-branch)}"; git merge-base "$base" HEAD; }; f'
+      description: Show the commit where the current branch diverged from the base branch
+      category: branch
+      risk: medium
+
+    branch-log:
+      command: '!f() { base="${1:-$(git topic-base-branch)}"; git log --oneline "$base..HEAD"; }; f'
+      description: Show commits added on the current branch since it diverged from the base
+      category: branch
+      risk: medium
+
+    branch-diff:
+      command: '!f() { base="${1:-$(git topic-base-branch)}"; git diff "$base...HEAD"; }; f'
+      description: Show the cumulative PR-style diff of the current branch against the base
+      category: branch
+      risk: medium
+
+    branch-files:
+      command: '!f() { base="${1:-$(git topic-base-branch)}"; git diff --name-status "$base...HEAD"; }; f'
+      description: List files changed on the current branch against the base
+      category: branch
+      risk: medium
+
+    tidy:
+      command: "!git fetch --prune && git branch-gone && git branch-clean"
+      description: Fetch with prune, then delete gone and merged local branches (combines branch-gone and branch-clean)
+      category: branch
+      risk: dangerous
+      depends_on: [branch-gone, branch-clean]
