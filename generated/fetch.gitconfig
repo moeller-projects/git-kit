@@ -1,3 +1,4 @@
 [alias]
     fa = fetch --all
     fap = fetch --all --prune
+    pr-fetch = "!f() { [ -n \"$1\" ] || { echo \"usage: git pr-fetch <number> [remote]\" >&2; return 2; }; remote=\"${2:-origin}\"; git fetch \"$remote\" \"pull/$1/head:pr-$1\" && git switch \"pr-$1\"; }; f"

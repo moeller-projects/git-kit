@@ -22,3 +22,4 @@
     diverged = "!echo \"ahead: $(git ahead) | behind: $(git behind)\""
     showi = "!f() { commit=$(git log --oneline | fzf | cut -d\" \" -f1); [ -n \"$commit\" ] && git show \"$commit\"; }; f"
     log-changed = log --follow -p --
+    standup = "!git log --all --author \"$(git config user.email)\" --since=yesterday.midnight --oneline --no-merges"
