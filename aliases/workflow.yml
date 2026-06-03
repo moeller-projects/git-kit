@@ -25,19 +25,19 @@ aliases:
     since_version: "2.30"
 
   pushy-check:
-    command: '!git log @{upstream}.. && git push --force-with-lease'
+    command: "!git log @{upstream}.. && git push --force-with-lease"
     description: Show unreviewed commits ahead of upstream, then force-push with --force-with-lease
     category: workflow
     risk: dangerous
 
   get:
-    command: '!git fetch --prune && git pull --rebase && git submodule update --init --recursive'
+    command: "!git fetch --prune && git pull --rebase && git submodule update --init --recursive"
     description: Fetch, rebase pull, and update all submodules
     category: workflow
     risk: medium
 
   mainly:
-    command: "!f() { branch=\"$(git default-branch)\"; printf \"WARNING: This will hard-reset '%s' to 'origin/%s'. Continue? [y/N] \" \"$branch\" \"$branch\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git checkout \"$branch\" && git fetch origin --prune && git reset --hard \"origin/$branch\" ;; *) echo \"Aborted.\" ;; esac; }; f"
+    command: '!f() { branch="$(git default-branch)"; printf "WARNING: This will hard-reset ''%s'' to ''origin/%s''. Continue? [y/N] " "$branch" "$branch"; read -r ans </dev/tty; case "$ans" in [yY]*) git checkout "$branch" && git fetch origin --prune && git reset --hard "origin/$branch" ;; *) echo "Aborted." ;; esac; }; f'
     description: Reset local default branch to match its origin counterpart (prompts for confirmation before hard-reset)
     category: workflow
     risk: dangerous
@@ -67,7 +67,7 @@ aliases:
     risk: dangerous
 
   inbound:
-    command: '!git remote update --prune; git log ..@{upstream}'
+    command: "!git remote update --prune; git log ..@{upstream}"
     description: Show incoming commits from upstream
     category: workflow
     risk: medium
@@ -79,7 +79,7 @@ aliases:
     risk: safe
 
   pruner:
-    command: '!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all'
+    command: "!git prune --expire=now; git reflog expire --expire-unreachable=now --rewrite --all"
     description: Prune all unreachable objects immediately
     category: workflow
     risk: medium
@@ -91,7 +91,7 @@ aliases:
     risk: medium
 
   optimizer:
-    command: '!git pruner; git repacker; git prune-packed'
+    command: "!git pruner; git repacker; git prune-packed"
     description: Run pruner, repacker, and prune-packed to optimize the repo
     category: workflow
     risk: medium
@@ -117,13 +117,25 @@ aliases:
     risk: medium
 
   pr-ready:
-    command: '!git rebase-recent && git task-ready'
+    command: "!git rebase-recent && git task-ready"
     description: Interactively rebase unpushed commits then run pre-PR status checks
     category: workflow
     risk: medium
 
   task-ready:
-    command: '!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD'
+    command: "!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD"
     description: Show status, whitespace issues, and outgoing commits before creating a PR
+    category: workflow
+    risk: medium
+
+  continue:
+    command: '!f() { if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then git rebase --continue; elif [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then git merge --continue; elif [ -f "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ]; then git cherry-pick --continue; elif [ -f "$(git rev-parse --git-path REVERT_HEAD)" ]; then git revert --continue; else echo "nothing in progress"; fi; }; f'
+    description: Continue whichever operation is in progress (rebase, merge, cherry-pick, revert)
+    category: workflow
+    risk: medium
+
+  abort:
+    command: '!f() { if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then git rebase --abort; elif [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then git merge --abort; elif [ -f "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ]; then git cherry-pick --abort; elif [ -f "$(git rev-parse --git-path REVERT_HEAD)" ]; then git revert --abort; else echo "nothing in progress"; fi; }; f'
+    description: Abort whichever operation is in progress (rebase, merge, cherry-pick, revert)
     category: workflow
     risk: medium

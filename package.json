@@ -1,6 +1,6 @@
 {
     "name": "@lukasmoeller/git-kit",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "description": "A modular Git alias distribution toolkit.",
     "type": "module",
     "bin": {
@@ -23,11 +23,11 @@
         "validate": "bun src/cli.ts generate && git diff --exit-code generated docs"
     },
     "dependencies": {
-        "commander": "14.0.3",
-        "yaml": "2.8.3"
+        "commander": "15.0.0",
+        "yaml": "2.9.0"
     },
     "devDependencies": {
-        "@types/node": "25.6.0",
+        "@types/node": "25.9.1",
         "typescript": "6.0.3"
     },
     "license": "MIT"

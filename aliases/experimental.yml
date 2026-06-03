@@ -28,12 +28,6 @@ aliases:
     category: experimental
     risk: medium
 
-  branch-clean:
-    command: '!f() { git branch | grep -v "^\*" | fzf -m --prompt="delete branches> " | xargs -r git branch -d; }; f'
-    description: Interactively select and safely delete local branches using fzf (requires fzf)
-    category: experimental
-    risk: dangerous
-
   track-all-remote-branches:
     command: '!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f'
     description: Track all remote branches as local branches (use with caution in large repos)
@@ -137,7 +131,7 @@ aliases:
     risk: medium
 
   merge-span:
-    command: "!f() { echo \"$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f1)$1$(git log -1 \"$2\" --merges --pretty=format:%P | cut -d' ' -f2)\"; }; f"
+    command: '!f() { echo "$(git log -1 "$2" --merges --pretty=format:%P | cut -d'' '' -f1)$1$(git log -1 "$2" --merges --pretty=format:%P | cut -d'' '' -f2)"; }; f'
     description: Compute the commit range introduced by a merge commit (primitive for merge-span-log/diff)
     category: experimental
     risk: medium
@@ -164,7 +158,7 @@ aliases:
 
   # ── remote ────────────────────────────────────────────────────────────────
   remotes-push-dry-run:
-    command: '!git remote | xargs -I% -n1 git push % --dry-run'
+    command: "!git remote | xargs -I% -n1 git push % --dry-run"
     description: Dry-run push to every configured remote
     category: experimental
     risk: medium
@@ -196,25 +190,25 @@ aliases:
 
   # ── util ──────────────────────────────────────────────────────────────────
   add-alias:
-    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ -n \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' already exists, thus no change happened.\"; return 3; fi; git config \"$1\" alias.\"$2\" \"$3\" && return 0; echo \"Usage: git add-alias ( --local | --global ) <alias> <command>\"; echo \"Error: unknown failure.\"; return 1; }; f"
+    command: '!f() { if [ $# != 3 ]; then echo "Usage: git add-alias ( --local | --global ) <alias> <command>"; echo "Error: this command needs 3 arguments."; return 2; fi; if [ -n "$(git config "$1" --get alias."$2")" ]; then echo "Alias ''$2'' already exists, thus no change happened."; return 3; fi; git config "$1" alias."$2" "$3" && return 0; echo "Usage: git add-alias ( --local | --global ) <alias> <command>"; echo "Error: unknown failure."; return 1; }; f'
     description: Add a git alias to local or global config
     category: experimental
     risk: medium
 
   move-alias:
-    command: "!f() { if [ $# != 3 ]; then echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>\"; echo \"Error: this command needs 3 arguments.\"; return 2; fi; if [ \"$2\" = \"$3\" ]; then echo \"The alias names are identical, thus no change happened.\"; return 3; fi; if [ -z \"$(git config \"$1\" --get alias.\"$2\")\" ]; then echo \"Alias '$2' does not exist, thus no change happened.\"; return 4; fi; if [ -n \"$(git config \"$1\" --get alias.\"$3\")\" ]; then echo \"Alias '$3' already exists, thus no change happened.\"; return 5; fi; git config \"$1\" alias.\"$3\" \"$(git config \"$1\" --get alias.\"$2\")\" && git config \"$1\" --unset alias.\"$2\" && return 0; echo \"Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>\"; echo \"Error: unknown failure.\"; return 1; };f"
+    command: '!f() { if [ $# != 3 ]; then echo "Usage: git move-alias ( --local | --global ) <alias existing name> <new alias name>"; echo "Error: this command needs 3 arguments."; return 2; fi; if [ "$2" = "$3" ]; then echo "The alias names are identical, thus no change happened."; return 3; fi; if [ -z "$(git config "$1" --get alias."$2")" ]; then echo "Alias ''$2'' does not exist, thus no change happened."; return 4; fi; if [ -n "$(git config "$1" --get alias."$3")" ]; then echo "Alias ''$3'' already exists, thus no change happened."; return 5; fi; git config "$1" alias."$3" "$(git config "$1" --get alias."$2")" && git config "$1" --unset alias."$2" && return 0; echo "Usage: git move-alias ( --local | --global ) <alias existing name> <alias new name>"; echo "Error: unknown failure."; return 1; };f'
     description: Rename a git alias in local or global config
     category: experimental
     risk: medium
 
   rev-list-all-objects-by-size:
-    command: '!git rev-list --all --objects  | awk ''{print $1}''| git cat-file --batch-check | grep -F blob | sort -k3nr'
+    command: "!git rev-list --all --objects  | awk '{print $1}'| git cat-file --batch-check | grep -F blob | sort -k3nr"
     description: List all blobs in history sorted by size (without filenames; prefer rev-list-all-objects-by-size-and-name)
     category: experimental
     risk: medium
 
   assume-all:
-    command: '!git status --short | awk ''{ print $2 }'' | xargs -r git assume'
+    command: "!git status --short | awk '{ print $2 }' | xargs -r git assume"
     description: Mark all currently dirty files as assume-unchanged (silences all dirty-file warnings — use with care)
     category: experimental
     risk: medium
@@ -233,7 +227,7 @@ aliases:
     risk: medium
 
   put-dry-run:
-    command: '!git diff --cached --stat && git push --dry-run'
+    command: "!git diff --cached --stat && git push --dry-run"
     description: Preview staged changes and a push dry-run before committing and pushing
     category: experimental
     risk: medium

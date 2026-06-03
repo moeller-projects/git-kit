@@ -22,3 +22,9 @@ aliases:
     description: Open all unmerged files in the editor during a merge conflict
     category: add
     risk: medium
+
+  addi:
+    command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "addi needs fzf" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview "git diff --color=always -- {}" --prompt="stage> " | while IFS= read -r path; do git add -- "$path"; done; }; f'
+    description: Interactively multi-select changed/untracked files to stage with diff preview (requires fzf)
+    category: add
+    risk: medium

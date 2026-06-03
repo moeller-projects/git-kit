@@ -3,7 +3,6 @@
     edit-modified = "!f() { git ls-files --modified | while IFS= read -r f; do \"$(git var GIT_EDITOR)\" \"$f\"; done; }; f"
     branch-commit-first = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --reverse --pretty=%H \"$branch\" | head -\"$count\"; }; f"
     branch-commit-last = "!f() { branch=\"${1:-$(git current-branch)}\"; count=\"${2:-1}\"; git log --pretty=%H \"$branch\" | head -\"$count\"; }; f"
-    branch-clean = "!f() { git branch | grep -v \"^\\*\" | fzf -m --prompt=\"delete branches> \" | xargs -r git branch -d; }; f"
     track-all-remote-branches = "!f() { for x in $(git for-each-ref --format=\"%(refname:short)\" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track \"$x\"; done; }; f"
     cob = checkout -b
     cpn = cherry-pick --no-commit

@@ -10,6 +10,7 @@ Generated from `aliases/`.
 | `ap` | `add --patch` | Add files interactively by patch | medium |
 | `au` | `add --update` | Add only updated (already tracked) files | medium |
 | `edit-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all unmerged files in the editor during a merge conflict | medium |
+| `addi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "addi needs fzf" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview "git diff --color=always -- {}" --prompt="stage> " | while IFS= read -r path; do git add -- "$path"; done; }; f` | Interactively multi-select changed/untracked files to stage with diff preview (requires fzf) | medium |
 
 ## analytics
 
@@ -35,6 +36,17 @@ Generated from `aliases/`.
 | `whois` | `!sh -c 'git log --regexp-ignore-case -1 --pretty="format:%an <%ae>\n" --author="$1"' -` | Look up a contributor by name or email substring | medium |
 | `who` | `shortlog --summary --numbered --no-merges` | Show commit counts per contributor (contributor leaderboard) | safe |
 
+## azure
+
+| Alias | Command | Description | Risk |
+| --- | --- | --- | --- |
+| `ado-pr` | `!f() { command -v az >/dev/null 2>&1 || { echo "ado-pr needs az + the azure-devops extension" >&2; return 2; }; base="${1:-$(git topic-base-branch)}"; src="$(git current-branch)"; title="$(git log -1 --pretty=%s)"; wi="$(printf "%s" "$src" | grep -oE "[0-9]+" | head -1)"; git push --set-upstream origin "$src" || return 1; if [ -n "$wi" ]; then az repos pr create --detect true --source-branch "$src" --target-branch "$base" --title "$title" --work-items "$wi" --draft true --open; else az repos pr create --detect true --source-branch "$src" --target-branch "$base" --title "$title" --draft true --open; fi; }; f` | Push the current branch and open a draft Azure DevOps PR to the base, linking a work item parsed from the branch name (requires az) | medium |
+| `ado-prs` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; az repos pr list --detect true --status active --output table; }; f` | List active Azure DevOps pull requests for the current repository (requires az) | medium |
+| `ado-prs-mine` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; me="$(az account show --query user.name -o tsv 2>/dev/null)"; az repos pr list --detect true --status active --creator "$me" --output table; }; f` | List your active Azure DevOps pull requests for the current repository (requires az) | medium |
+| `ado-prco` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; [ -n "$1" ] || { echo "usage: git ado-prco <pr-id>" >&2; return 2; }; az repos pr checkout --id "$1" --detect true; }; f` | Check out an Azure DevOps PR source branch locally by PR id (requires az) | medium |
+| `ado-pr-open` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; if [ -n "$1" ]; then az repos pr show --id "$1" --detect true --open >/dev/null; else src="$(git current-branch)"; id="$(az repos pr list --detect true --status active --source-branch "$src" --query "[0].pullRequestId" -o tsv)"; [ -n "$id" ] && az repos pr show --id "$id" --detect true --open >/dev/null || echo "no active PR for $src"; fi; }; f` | Open an Azure DevOps PR in the browser by id, or the active PR for the current branch (requires az) | medium |
+| `ado-pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git ado-pr-fetch <pr-id> [remote]" >&2; return 2; }; remote="${2:-origin}"; git fetch "$remote" "refs/pull/$1/merge" && git switch -C "pr-$1" FETCH_HEAD; }; f` | Fetch an Azure DevOps pull request by id into a local branch using its merge ref (no az required) | medium |
+
 ## branch
 
 | Alias | Command | Description | Risk |
@@ -47,6 +59,16 @@ Generated from `aliases/`.
 | `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f` | Delete all remotely merged branches | dangerous |
 | `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "HEAD" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
 | `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
+| `branch-clean` | `!f() { git branch-clean-dry-run "$@" | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Delete all local branches already merged into the base branch (non-interactive; default base e.g. dev) | dangerous |
+| `branch-clean-dry-run` | `!f() { base="${1:-$(git topic-base-branch)}"; cur="$(git current-branch)"; def="$(git default-branch)"; git rev-parse --verify --quiet "refs/heads/$base" >/dev/null || { echo "branch-clean: base branch ${base:-<unset>} not found" >&2; return 1; }; git for-each-ref --format="%(refname:short)" refs/heads/ | while IFS= read -r b; do [ "$b" = "$base" ] && continue; [ "$b" = "$cur" ] && continue; [ "$b" = "$def" ] && continue; [ "$b" = main ] && continue; [ "$b" = master ] && continue; git merge-base --is-ancestor "$b" "$base" && printf "%s\n" "$b"; done; }; f` | Preview local branches fully merged into the base branch (default base; set init.topicBaseBranchName to dev) | medium |
+| `branch-gone` | `!f() { git branch-gone-dry-run | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Delete local branches whose remote tracking branch is gone (handles squash/rebase-merged PRs) | dangerous |
+| `branch-gone-dry-run` | `!f() { git fetch --prune --quiet || return 1; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f` | Preview local branches whose upstream was deleted on the remote (e.g. squash-merged PRs) | medium |
+| `branch-rm` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Interactively multi-select local branches to delete with preview (requires fzf) | dangerous |
+| `fork-point` | `!f() { base="${1:-$(git topic-base-branch)}"; git merge-base "$base" HEAD; }; f` | Show the commit where the current branch diverged from the base branch | medium |
+| `branch-log` | `!f() { base="${1:-$(git topic-base-branch)}"; git log --oneline "$base..HEAD"; }; f` | Show commits added on the current branch since it diverged from the base | medium |
+| `branch-diff` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff "$base...HEAD"; }; f` | Show the cumulative PR-style diff of the current branch against the base | medium |
+| `branch-files` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff --name-status "$base...HEAD"; }; f` | List files changed on the current branch against the base | medium |
+| `tidy` | `!git fetch --prune && git branch-gone && git branch-clean` | Fetch with prune, then delete gone and merged local branches (combines branch-gone and branch-clean) | dangerous |
 
 ## checkout
 
@@ -54,7 +76,8 @@ Generated from `aliases/`.
 | --- | --- | --- | --- |
 | `co` | `checkout` | Checkout a branch or path | medium |
 | `swb` | `switch --create` | Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23) | medium |
-| `swi` | `!f() { branch=$(git branch --format='%(refname:short)' | fzf); [ -z "$branch" ] && return; if git switch "$branch"; then echo "Switched to '$branch'."; fi; }; f` | Interactively switch branches using fzf (requires fzf) | medium |
+| `swi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "swi needs fzf (use: git switch <branch>)" >&2; return 2; }; b="$(git for-each-ref --format="%(refname:short)" refs/heads/ refs/remotes/origin/ | grep -v "^origin/HEAD$" | fzf --preview "git log --oneline --color=always -20 {}" --prompt="switch> ")"; [ -n "$b" ] || return 0; git switch "$(echo "$b" | sed "s#^origin/##")"; }; f` | Interactively switch to a local or remote branch with commit preview (requires fzf) | medium |
+| `swr` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "swr needs fzf" >&2; return 2; }; b="$(git for-each-ref --sort=-committerdate --count=20 --format="%(refname:short)" refs/heads/ | fzf --preview "git log --oneline --color=always -20 {}" --prompt="recent> ")"; [ -n "$b" ] || return 0; git switch "$b"; }; f` | Interactively switch among the 20 most recently committed local branches (requires fzf) | medium |
 
 ## cherry-pick
 
@@ -107,7 +130,6 @@ Generated from `aliases/`.
 | `edit-modified` | `!f() { git ls-files --modified | while IFS= read -r f; do "$(git var GIT_EDITOR)" "$f"; done; }; f` | Open all modified files in the editor | medium |
 | `branch-commit-first` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --reverse --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's first commit hash | medium |
 | `branch-commit-last` | `!f() { branch="${1:-$(git current-branch)}"; count="${2:-1}"; git log --pretty=%H "$branch" | head -"$count"; }; f` | Show a branch's last commit hash | medium |
-| `branch-clean` | `!f() { git branch | grep -v "^\*" | fzf -m --prompt="delete branches> " | xargs -r git branch -d; }; f` | Interactively select and safely delete local branches using fzf (requires fzf) | dangerous |
 | `track-all-remote-branches` | `!f() { for x in $(git for-each-ref --format="%(refname:short)" --no-merged=origin/HEAD refs/remotes/origin); do git switch --track "$x"; done; }; f` | Track all remote branches as local branches (use with caution in large repos) | medium |
 | `cob` | `checkout -b` | Create and checkout a new branch (legacy; prefer swb with git >= 2.23) | medium |
 | `cpn` | `cherry-pick --no-commit` | Cherry-pick without committing — stages changes only | medium |
@@ -148,6 +170,7 @@ Generated from `aliases/`.
 | --- | --- | --- | --- |
 | `fa` | `fetch --all` | Fetch from all remotes | safe |
 | `fap` | `fetch --all --prune` | Fetch from all remotes and prune deleted branches | safe |
+| `pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git pr-fetch <number> [remote]" >&2; return 2; }; remote="${2:-origin}"; branch="pr-$1"; if [ "$(git current-branch)" = "$branch" ]; then git fetch "$remote" "pull/$1/head" && git merge --ff-only FETCH_HEAD; else git fetch "$remote" "pull/$1/head:$branch" && git switch "$branch"; fi; }; f` | Fetch a GitHub pull request by number into a local branch and switch to it | medium |
 
 ## grep
 
@@ -183,6 +206,7 @@ Generated from `aliases/`.
 | `diverged` | `!echo "ahead: $(git ahead) | behind: $(git behind)"` | Show divergence from upstream | medium |
 | `showi` | `!f() { commit=$(git log --oneline | fzf | cut -d" " -f1); [ -n "$commit" ] && git show "$commit"; }; f` | Interactively select and show a commit | medium |
 | `log-changed` | `log --follow -p --` | Show full history of a single file including renames; usage git log-changed <path> | safe |
+| `standup` | `!git log --all --author "$(git config user.email)" --since=yesterday.midnight --oneline --no-merges` | Show your commits across all branches since yesterday (daily standup) | medium |
 
 ## ls
 
@@ -201,6 +225,7 @@ Generated from `aliases/`.
 | `rebase-branch` | `!f() { git rebase --interactive "$(git merge-base "$(git default-branch)" HEAD)"; }; f` | Interactively rebase all commits on the current branch | medium |
 | `ours` | `!f() { git checkout --ours   "$@" && git add "$@"; }; f` | During a merge conflict, take our version of a file | medium |
 | `theirs` | `!f() { git checkout --theirs "$@" && git add "$@"; }; f` | During a merge conflict, take their version of a file | medium |
+| `mgi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "mgi needs fzf" >&2; return 2; }; b="$(git for-each-ref --format="%(refname:short)" refs/heads/ refs/remotes/origin/ | grep -v "^origin/HEAD$" | fzf --preview "git log --oneline --color=always -20 {}" --prompt="merge> ")"; [ -n "$b" ] || return 0; git merge "$b"; }; f` | Interactively pick a branch to merge into the current one (requires fzf) | medium |
 
 ## pull
 
@@ -222,6 +247,8 @@ Generated from `aliases/`.
 | `fixup` | `!f() { TARGET="$(git rev-parse "$1")"; git commit --fixup="$TARGET" && GIT_EDITOR=true git rebase --interactive --autosquash "$TARGET"~; }; f` | Create a fixup commit and immediately rebase-autosquash it | medium |
 | `remote-ref` | `!local_ref="$(git symbolic-ref HEAD)"; local_name="${local_ref##refs/heads/}"; remote="$(git config branch."$local_name".remote || echo origin)"; remote_ref="$(git config branch."$local_name".merge)"; remote_name="${remote_ref##refs/heads/}"; echo "remotes/$remote/$remote_name" #` | Print the remote-tracking ref for the current branch | medium |
 | `rebase-recent` | `!git rebase --interactive "$(git remote-ref)"` | Interactively rebase commits not yet pushed | medium |
+| `reup` | `!f() { base="${1:-$(git topic-base-branch)}"; git fetch origin "$base" && git rebase "origin/$base"; }; f` | Fetch the base branch and rebase the current topic branch onto it | medium |
+| `fixupi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "fixupi needs fzf" >&2; return 2; }; base="${1:-$(git topic-base-branch)}"; sha="$(git log --oneline "$base..HEAD" | fzf --prompt="fixup into> " --preview "git show --color=always {1}" | cut -d" " -f1)"; [ -n "$sha" ] || return 0; git commit --fixup "$sha" && GIT_EDITOR=true git rebase --interactive --autosquash "$sha~"; }; f` | Interactively pick a commit on the current branch to fixup staged changes into (requires fzf) | medium |
 
 ## reflog
 
@@ -248,6 +275,7 @@ Generated from `aliases/`.
 | `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `clean-dry` | `clean -dffn` | Preview what would be deleted by clean | safe |
 | `reset-hard-safe` | `!f() { printf "Reset HARD to %s? [y/N] " "${1:-HEAD}"; read -r ans </dev/tty; case "$ans" in [yY]*) git reset --hard "${1:-HEAD}" ;; *) echo "Aborted." ;; esac; }; f` | Confirmed hard reset | dangerous |
+| `discardi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "discardi needs fzf" >&2; return 2; }; git diff --name-only | fzf -m --preview "git diff --color=always -- {}" --prompt="discard> " | while IFS= read -r path; do git restore -- "$path"; done; }; f` | Interactively multi-select modified files to discard working-tree changes (requires fzf) | medium |
 
 ## revert
 
@@ -353,6 +381,8 @@ Generated from `aliases/`.
 | `sync` | `!f() { branch="${1:-$(git default-branch)}"; git switch "$branch" && git pull --ff-only; }; f` | Switch to a branch and fast-forward it; defaults to the configured default branch | medium |
 | `pr-ready` | `!git rebase-recent && git task-ready` | Interactively rebase unpushed commits then run pre-PR status checks | medium |
 | `task-ready` | `!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD` | Show status, whitespace issues, and outgoing commits before creating a PR | medium |
+| `continue` | `!f() { if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then git rebase --continue; elif [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then git merge --continue; elif [ -f "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ]; then git cherry-pick --continue; elif [ -f "$(git rev-parse --git-path REVERT_HEAD)" ]; then git revert --continue; else echo "nothing in progress"; fi; }; f` | Continue whichever operation is in progress (rebase, merge, cherry-pick, revert) | medium |
+| `abort` | `!f() { if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then git rebase --abort; elif [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then git merge --abort; elif [ -f "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ]; then git cherry-pick --abort; elif [ -f "$(git rev-parse --git-path REVERT_HEAD)" ]; then git revert --abort; else echo "nothing in progress"; fi; }; f` | Abort whichever operation is in progress (rebase, merge, cherry-pick, revert) | medium |
 
 ## worktree
 
