@@ -3,7 +3,7 @@
     ap = add --patch
     au = add --update
     edit-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
-    addi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"addi needs fzf\" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"stage> \" | while IFS= read -r path; do git add -- \"$path\"; done; }; f"
+    addi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"addi needs fzf\" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"stage> \" | xargs -r git add; }; f"
     log-of-format-and-count = "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort; }; f"
     log-of-count-and-format = "!f() { format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" | awk '{a[$0]++}END{for(i in a){print a[i], int((a[i]/NR)*100) \"%\", i}}' | sort -nr; }; f"
     log-of-format-and-count-with-date = "!f() { format=\"$1\"; shift; date_format=\"$1\"; shift; git log \"$@\" --format=oneline --format=\"$format\" --date=format:\"$date_format\" | awk '{a[$0]++}END{for(i in a){print i, a[i], int((a[i]/NR)*100) \"%\"}}' | sort -r; }; f"
@@ -28,7 +28,7 @@
     ado-prs-mine = "!f() { command -v az >/dev/null 2>&1 || { echo \"needs az + azure-devops extension\" >&2; return 2; }; me=\"$(az account show --query user.name -o tsv 2>/dev/null)\"; az repos pr list --detect true --status active --creator \"$me\" --output table; }; f"
     ado-prco = "!f() { command -v az >/dev/null 2>&1 || { echo \"needs az + azure-devops extension\" >&2; return 2; }; [ -n \"$1\" ] || { echo \"usage: git ado-prco <pr-id>\" >&2; return 2; }; az repos pr checkout --id \"$1\" --detect true; }; f"
     ado-pr-open = "!f() { command -v az >/dev/null 2>&1 || { echo \"needs az + azure-devops extension\" >&2; return 2; }; if [ -n \"$1\" ]; then az repos pr show --id \"$1\" --detect true --open >/dev/null; else src=\"$(git current-branch)\"; id=\"$(az repos pr list --detect true --status active --source-branch \"$src\" --query \"[0].pullRequestId\" -o tsv)\"; [ -n \"$id\" ] && az repos pr show --id \"$id\" --detect true --open >/dev/null || echo \"no active PR for $src\"; fi; }; f"
-    ado-pr-fetch = "!f() { [ -n \"$1\" ] || { echo \"usage: git ado-pr-fetch <pr-id> [remote]\" >&2; return 2; }; remote=\"${2:-origin}\"; git fetch \"$remote\" \"refs/pull/$1/merge\" && git switch -C \"pr-$1\" FETCH_HEAD; }; f"
+    ado-pr-fetch = "!f() { [ -n \"$1\" ] || { echo \"usage: git ado-pr-fetch <pr-id> [remote]\" >&2; return 2; }; remote=\"${2:-origin}\"; git fetch \"$remote\" \"refs/pull/$1/merge\" && git switch --create \"pr-$1\" FETCH_HEAD; }; f"
     heads = "!git log \"origin/$(git default-branch)\".. --format='%Cred%h%Creset;%C(yellow)%an%Creset;%H;%Cblue%f%Creset' | git name-rev --stdin --always --name-only | column -t -s';'"
     hew = "!git hew-local \"$@\" && git hew-remote \"$@\" #"
     hew-dry-run = "!git hew-local-dry-run \"$@\" && git hew-remote-dry-run \"$@\" #"
@@ -37,16 +37,7 @@
     hew-remote = "!f() { git hew-remote-dry-run \"$@\" | xargs -I% git push origin :% 2>&1 ; }; f"
     hew-remote-dry-run = "!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged \"$commit\" | grep -v \"HEAD\" | grep -v \"^[[:space:]]*origin/$commit$\" | sed 's#[[:space:]]*origin/##' ; }; f"
     recent = branch --sort=-committerdate
-    branch-clean = "!f() { git branch-clean-dry-run \"$@\" | while IFS= read -r branch; do git branch -D -- \"$branch\"; done; }; f"
-    branch-clean-dry-run = "!f() { base=\"${1:-$(git topic-base-branch)}\"; cur=\"$(git current-branch)\"; def=\"$(git default-branch)\"; git rev-parse --verify --quiet \"refs/heads/$base\" >/dev/null || { echo \"branch-clean: base branch ${base:-<unset>} not found\" >&2; return 1; }; git for-each-ref --format=\"%(refname:short)\" refs/heads/ | while IFS= read -r b; do [ \"$b\" = \"$base\" ] && continue; [ \"$b\" = \"$cur\" ] && continue; [ \"$b\" = \"$def\" ] && continue; [ \"$b\" = main ] && continue; [ \"$b\" = master ] && continue; git merge-base --is-ancestor \"$b\" \"$base\" && printf \"%s\\n\" \"$b\"; done; }; f"
-    branch-gone = "!f() { git branch-gone-dry-run | while IFS= read -r branch; do git branch -D -- \"$branch\"; done; }; f"
-    branch-gone-dry-run = "!f() { git fetch --prune --quiet || return 1; git for-each-ref --format=\"%(refname:short) %(upstream:track)\" refs/heads/ | grep \" \\[gone\\]$\" | cut -d\" \" -f1; }; f"
-    branch-rm = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"branch-rm needs fzf\" >&2; return 2; }; git for-each-ref --format=\"%(refname:short)\" refs/heads/ | fzf -m --preview \"git log --oneline --color=always -20 {}\" --prompt=\"delete branches (TAB to multi-select)> \" | while IFS= read -r branch; do git branch -D -- \"$branch\"; done; }; f"
-    fork-point = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git merge-base \"$base\" HEAD; }; f"
-    branch-log = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git log --oneline \"$base..HEAD\"; }; f"
-    branch-diff = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git diff \"$base...HEAD\"; }; f"
-    branch-files = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git diff --name-status \"$base...HEAD\"; }; f"
-    tidy = !git fetch --prune && git branch-gone && git branch-clean
+    branch-clean = "!f() { git branch-clean-dry-run \"$@\" | xargs -r git branch -D; }; f"
     co = checkout
     swb = switch --create
     swi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"swi needs fzf (use: git switch <branch>)\" >&2; return 2; }; b=\"$(git for-each-ref --format=\"%(refname:short)\" refs/heads/ refs/remotes/origin/ | grep -v \"^origin/HEAD$\" | fzf --preview \"git log --oneline --color=always -20 {}\" --prompt=\"switch> \")\"; [ -n \"$b\" ] || return 0; git switch \"$(echo \"$b\" | sed \"s#^origin/##\")\"; }; f"
@@ -113,7 +104,7 @@
     reincarnate = "!f() { [ $# -gt 0 ] || return 1; branch=\"$1\"; remote=\"${2:-origin}\"; git checkout \"$branch\" && git push \"$remote\" :\"$branch\" && git checkout \"$(git symbolic-ref --short refs/remotes/\"$remote\"/HEAD 2>/dev/null | sed \"s#$remote/##\" || echo main)\" && git branch --delete --force \"$branch\" && git checkout -b \"$branch\" && git push --set-upstream \"$remote\" \"$branch\"; }; f"
     fa = fetch --all
     fap = fetch --all --prune
-    pr-fetch = "!f() { [ -n \"$1\" ] || { echo \"usage: git pr-fetch <number> [remote]\" >&2; return 2; }; remote=\"${2:-origin}\"; branch=\"pr-$1\"; if [ \"$(git current-branch)\" = \"$branch\" ]; then git fetch \"$remote\" \"pull/$1/head\" && git merge --ff-only FETCH_HEAD; else git fetch \"$remote\" \"pull/$1/head:$branch\" && git switch \"$branch\"; fi; }; f"
+    pr-fetch = "!f() { [ -n \"$1\" ] || { echo \"usage: git pr-fetch <number> [remote]\" >&2; return 2; }; remote=\"${2:-origin}\"; git fetch \"$remote\" \"pull/$1/head:pr-$1\" && git switch \"pr-$1\"; }; f"
     grep-all = "!f() { git rev-list --all | xargs git grep \"$@\"; }; f"
     grep-group = grep --break --heading --line-number --color
     lg = log --graph
@@ -173,7 +164,7 @@
     expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     clean-dry = clean -dffn
     reset-hard-safe = "!f() { printf \"Reset HARD to %s? [y/N] \" \"${1:-HEAD}\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git reset --hard \"${1:-HEAD}\" ;; *) echo \"Aborted.\" ;; esac; }; f"
-    discardi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"discardi needs fzf\" >&2; return 2; }; git diff --name-only | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"discard> \" | while IFS= read -r path; do git restore -- \"$path\"; done; }; f"
+    discardi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"discardi needs fzf\" >&2; return 2; }; git diff --name-only | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"discard> \" | xargs -r git restore --; }; f"
     rv = revert
     rvnc = revert --no-commit
     sw = switch

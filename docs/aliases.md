@@ -59,16 +59,6 @@ Generated from `aliases/`.
 | `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f` | Delete all remotely merged branches | dangerous |
 | `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "HEAD" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
 | `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
-| `branch-clean` | `!f() { git branch-clean-dry-run "$@" | xargs -r git branch -D; }; f` | Delete all local branches already merged into the base branch (non-interactive; default base e.g. dev) | dangerous |
-| `branch-clean-dry-run` | `!f() { base="${1:-$(git topic-base-branch)}"; cur="$(git current-branch)"; def="$(git default-branch)"; git rev-parse --verify --quiet "refs/heads/$base" >/dev/null || { echo "branch-clean: base branch ${base:-<unset>} not found" >&2; return 1; }; git for-each-ref --format="%(refname:short)" refs/heads/ | while IFS= read -r b; do [ "$b" = "$base" ] && continue; [ "$b" = "$cur" ] && continue; [ "$b" = "$def" ] && continue; [ "$b" = main ] && continue; [ "$b" = master ] && continue; git merge-base --is-ancestor "$b" "$base" && printf "%s\n" "$b"; done; }; f` | Preview local branches fully merged into the base branch (default base; set init.topicBaseBranchName to dev) | medium |
-| `branch-gone` | `!f() { git branch-gone-dry-run | xargs -r git branch -D; }; f` | Delete local branches whose remote tracking branch is gone (handles squash/rebase-merged PRs) | dangerous |
-| `branch-gone-dry-run` | `!f() { git fetch --prune --quiet; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f` | Preview local branches whose upstream was deleted on the remote (e.g. squash-merged PRs) | medium |
-| `branch-rm` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | xargs -r git branch -D; }; f` | Interactively multi-select local branches to delete with preview (requires fzf) | dangerous |
-| `fork-point` | `!f() { base="${1:-$(git topic-base-branch)}"; git merge-base "$base" HEAD; }; f` | Show the commit where the current branch diverged from the base branch | medium |
-| `branch-log` | `!f() { base="${1:-$(git topic-base-branch)}"; git log --oneline "$base..HEAD"; }; f` | Show commits added on the current branch since it diverged from the base | medium |
-| `branch-diff` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff "$base...HEAD"; }; f` | Show the cumulative PR-style diff of the current branch against the base | medium |
-| `branch-files` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff --name-status "$base...HEAD"; }; f` | List files changed on the current branch against the base | medium |
-| `tidy` | `!git fetch --prune && git branch-gone && git branch-clean` | Fetch with prune, then delete gone and merged local branches (combines branch-gone and branch-clean) | dangerous |
 
 ## checkout
 

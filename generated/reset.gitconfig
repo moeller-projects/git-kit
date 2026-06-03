@@ -8,4 +8,4 @@
     expunge = "!f() { printf \"WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\\nContinue? [y/N] \" \"$1\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git filter-repo --path \"$1\" --invert-paths --force ;; *) echo \"Aborted.\" ;; esac; }; f"
     clean-dry = clean -dffn
     reset-hard-safe = "!f() { printf \"Reset HARD to %s? [y/N] \" \"${1:-HEAD}\"; read -r ans </dev/tty; case \"$ans\" in [yY]*) git reset --hard \"${1:-HEAD}\" ;; *) echo \"Aborted.\" ;; esac; }; f"
-    discardi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"discardi needs fzf\" >&2; return 2; }; git diff --name-only | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"discard> \" | while IFS= read -r path; do git restore -- \"$path\"; done; }; f"
+    discardi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"discardi needs fzf\" >&2; return 2; }; git diff --name-only | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"discard> \" | xargs -r git restore --; }; f"
