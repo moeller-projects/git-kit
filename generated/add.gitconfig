@@ -3,4 +3,4 @@
     ap = add --patch
     au = add --update
     edit-unmerged = "!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z \"$files\" ] || $(git var GIT_EDITOR) $files; }; f"
-    addi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"addi needs fzf\" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"stage> \" | xargs -r git add; }; f"
+    addi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"addi needs fzf\" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview \"git diff --color=always -- {}\" --prompt=\"stage> \" | while IFS= read -r path; do git add -- \"$path\"; done; }; f"

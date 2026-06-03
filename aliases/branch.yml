@@ -48,7 +48,7 @@ aliases:
     risk: safe
 
   branch-clean:
-    command: '!f() { git branch-clean-dry-run "$@" | xargs -r git branch -D; }; f'
+    command: '!f() { git branch-clean-dry-run "$@" | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f'
     description: Delete all local branches already merged into the base branch (non-interactive; default base e.g. dev)
     category: branch
     risk: dangerous
@@ -60,19 +60,19 @@ aliases:
     risk: medium
 
   branch-gone:
-    command: '!f() { git branch-gone-dry-run | xargs -r git branch -D; }; f'
+    command: '!f() { git branch-gone-dry-run | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f'
     description: Delete local branches whose remote tracking branch is gone (handles squash/rebase-merged PRs)
     category: branch
     risk: dangerous
 
   branch-gone-dry-run:
-    command: '!f() { git fetch --prune --quiet; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f'
+    command: '!f() { git fetch --prune --quiet || return 1; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f'
     description: Preview local branches whose upstream was deleted on the remote (e.g. squash-merged PRs)
     category: branch
     risk: medium
 
   branch-rm:
-    command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | xargs -r git branch -D; }; f'
+    command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f'
     description: Interactively multi-select local branches to delete with preview (requires fzf)
     category: branch
     risk: dangerous

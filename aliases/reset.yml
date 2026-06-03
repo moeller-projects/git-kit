@@ -55,7 +55,7 @@ aliases:
     risk: dangerous
 
   discardi:
-    command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "discardi needs fzf" >&2; return 2; }; git diff --name-only | fzf -m --preview "git diff --color=always -- {}" --prompt="discard> " | xargs -r git restore --; }; f'
+    command: '!f() { command -v fzf >/dev/null 2>&1 || { echo "discardi needs fzf" >&2; return 2; }; git diff --name-only | fzf -m --preview "git diff --color=always -- {}" --prompt="discard> " | while IFS= read -r path; do git restore -- "$path"; done; }; f'
     description: Interactively multi-select modified files to discard working-tree changes (requires fzf)
     category: reset
     risk: medium
