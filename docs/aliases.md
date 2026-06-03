@@ -10,7 +10,7 @@ Generated from `aliases/`.
 | `ap` | `add --patch` | Add files interactively by patch | medium |
 | `au` | `add --update` | Add only updated (already tracked) files | medium |
 | `edit-unmerged` | `!f() { files=$(git ls-files --unmerged | cut -f2 | sort -u); [ -z "$files" ] || $(git var GIT_EDITOR) $files; }; f` | Open all unmerged files in the editor during a merge conflict | medium |
-| `addi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "addi needs fzf" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview "git diff --color=always -- {}" --prompt="stage> " | xargs -r git add; }; f` | Interactively multi-select changed/untracked files to stage with diff preview (requires fzf) | medium |
+| `addi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "addi needs fzf" >&2; return 2; }; { git ls-files --modified --others --exclude-standard; git diff --name-only; } | sort -u | fzf -m --preview "git diff --color=always -- {}" --prompt="stage> " | while IFS= read -r path; do git add -- "$path"; done; }; f` | Interactively multi-select changed/untracked files to stage with diff preview (requires fzf) | medium |
 
 ## analytics
 
@@ -45,7 +45,7 @@ Generated from `aliases/`.
 | `ado-prs-mine` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; me="$(az account show --query user.name -o tsv 2>/dev/null)"; az repos pr list --detect true --status active --creator "$me" --output table; }; f` | List your active Azure DevOps pull requests for the current repository (requires az) | medium |
 | `ado-prco` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; [ -n "$1" ] || { echo "usage: git ado-prco <pr-id>" >&2; return 2; }; az repos pr checkout --id "$1" --detect true; }; f` | Check out an Azure DevOps PR source branch locally by PR id (requires az) | medium |
 | `ado-pr-open` | `!f() { command -v az >/dev/null 2>&1 || { echo "needs az + azure-devops extension" >&2; return 2; }; if [ -n "$1" ]; then az repos pr show --id "$1" --detect true --open >/dev/null; else src="$(git current-branch)"; id="$(az repos pr list --detect true --status active --source-branch "$src" --query "[0].pullRequestId" -o tsv)"; [ -n "$id" ] && az repos pr show --id "$id" --detect true --open >/dev/null || echo "no active PR for $src"; fi; }; f` | Open an Azure DevOps PR in the browser by id, or the active PR for the current branch (requires az) | medium |
-| `ado-pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git ado-pr-fetch <pr-id> [remote]" >&2; return 2; }; remote="${2:-origin}"; git fetch "$remote" "refs/pull/$1/merge" && git switch --create "pr-$1" FETCH_HEAD; }; f` | Fetch an Azure DevOps pull request by id into a local branch using its merge ref (no az required) | medium |
+| `ado-pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git ado-pr-fetch <pr-id> [remote]" >&2; return 2; }; remote="${2:-origin}"; git fetch "$remote" "refs/pull/$1/merge" && git switch -C "pr-$1" FETCH_HEAD; }; f` | Fetch an Azure DevOps pull request by id into a local branch using its merge ref (no az required) | medium |
 
 ## branch
 
@@ -59,6 +59,16 @@ Generated from `aliases/`.
 | `hew-remote` | `!f() { git hew-remote-dry-run "$@" | xargs -I% git push origin :% 2>&1 ; }; f` | Delete all remotely merged branches | dangerous |
 | `hew-remote-dry-run` | `!f() { commit=${1:-$(git upstream-branch)}; git branch --remotes --merged "$commit" | grep -v "HEAD" | grep -v "^[[:space:]]*origin/$commit$" | sed 's#[[:space:]]*origin/##' ; }; f` | Preview remotely merged branches to be deleted | medium |
 | `recent` | `branch --sort=-committerdate` | List branches sorted by most recent commit date | safe |
+| `branch-clean` | `!f() { git branch-clean-dry-run "$@" | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Delete all local branches already merged into the base branch (non-interactive; default base e.g. dev) | dangerous |
+| `branch-clean-dry-run` | `!f() { base="${1:-$(git topic-base-branch)}"; cur="$(git current-branch)"; def="$(git default-branch)"; git rev-parse --verify --quiet "refs/heads/$base" >/dev/null || { echo "branch-clean: base branch ${base:-<unset>} not found" >&2; return 1; }; git for-each-ref --format="%(refname:short)" refs/heads/ | while IFS= read -r b; do [ "$b" = "$base" ] && continue; [ "$b" = "$cur" ] && continue; [ "$b" = "$def" ] && continue; [ "$b" = main ] && continue; [ "$b" = master ] && continue; git merge-base --is-ancestor "$b" "$base" && printf "%s\n" "$b"; done; }; f` | Preview local branches fully merged into the base branch (default base; set init.topicBaseBranchName to dev) | medium |
+| `branch-gone` | `!f() { git branch-gone-dry-run | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Delete local branches whose remote tracking branch is gone (handles squash/rebase-merged PRs) | dangerous |
+| `branch-gone-dry-run` | `!f() { git fetch --prune --quiet || return 1; git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep " \[gone\]$" | cut -d" " -f1; }; f` | Preview local branches whose upstream was deleted on the remote (e.g. squash-merged PRs) | medium |
+| `branch-rm` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "branch-rm needs fzf" >&2; return 2; }; git for-each-ref --format="%(refname:short)" refs/heads/ | fzf -m --preview "git log --oneline --color=always -20 {}" --prompt="delete branches (TAB to multi-select)> " | while IFS= read -r branch; do git branch -D -- "$branch"; done; }; f` | Interactively multi-select local branches to delete with preview (requires fzf) | dangerous |
+| `fork-point` | `!f() { base="${1:-$(git topic-base-branch)}"; git merge-base "$base" HEAD; }; f` | Show the commit where the current branch diverged from the base branch | medium |
+| `branch-log` | `!f() { base="${1:-$(git topic-base-branch)}"; git log --oneline "$base..HEAD"; }; f` | Show commits added on the current branch since it diverged from the base | medium |
+| `branch-diff` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff "$base...HEAD"; }; f` | Show the cumulative PR-style diff of the current branch against the base | medium |
+| `branch-files` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff --name-status "$base...HEAD"; }; f` | List files changed on the current branch against the base | medium |
+| `tidy` | `!git fetch --prune && git branch-gone && git branch-clean` | Fetch with prune, then delete gone and merged local branches (combines branch-gone and branch-clean) | dangerous |
 
 ## checkout
 
@@ -160,7 +170,7 @@ Generated from `aliases/`.
 | --- | --- | --- | --- |
 | `fa` | `fetch --all` | Fetch from all remotes | safe |
 | `fap` | `fetch --all --prune` | Fetch from all remotes and prune deleted branches | safe |
-| `pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git pr-fetch <number> [remote]" >&2; return 2; }; remote="${2:-origin}"; git fetch "$remote" "pull/$1/head:pr-$1" && git switch "pr-$1"; }; f` | Fetch a GitHub pull request by number into a local branch and switch to it | medium |
+| `pr-fetch` | `!f() { [ -n "$1" ] || { echo "usage: git pr-fetch <number> [remote]" >&2; return 2; }; remote="${2:-origin}"; branch="pr-$1"; if [ "$(git current-branch)" = "$branch" ]; then git fetch "$remote" "pull/$1/head" && git merge --ff-only FETCH_HEAD; else git fetch "$remote" "pull/$1/head:$branch" && git switch "$branch"; fi; }; f` | Fetch a GitHub pull request by number into a local branch and switch to it | medium |
 
 ## grep
 
@@ -265,7 +275,7 @@ Generated from `aliases/`.
 | `expunge` | `!f() { printf "WARNING: This permanently rewrites all history to remove '%s'. This cannot be undone.\nContinue? [y/N] " "$1"; read -r ans </dev/tty; case "$ans" in [yY]*) git filter-repo --path "$1" --invert-paths --force ;; *) echo "Aborted." ;; esac; }; f` | Permanently remove a file from all history with confirmation prompt (requires git-filter-repo) | dangerous |
 | `clean-dry` | `clean -dffn` | Preview what would be deleted by clean | safe |
 | `reset-hard-safe` | `!f() { printf "Reset HARD to %s? [y/N] " "${1:-HEAD}"; read -r ans </dev/tty; case "$ans" in [yY]*) git reset --hard "${1:-HEAD}" ;; *) echo "Aborted." ;; esac; }; f` | Confirmed hard reset | dangerous |
-| `discardi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "discardi needs fzf" >&2; return 2; }; git diff --name-only | fzf -m --preview "git diff --color=always -- {}" --prompt="discard> " | xargs -r git restore --; }; f` | Interactively multi-select modified files to discard working-tree changes (requires fzf) | medium |
+| `discardi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "discardi needs fzf" >&2; return 2; }; git diff --name-only | fzf -m --preview "git diff --color=always -- {}" --prompt="discard> " | while IFS= read -r path; do git restore -- "$path"; done; }; f` | Interactively multi-select modified files to discard working-tree changes (requires fzf) | medium |
 
 ## revert
 
