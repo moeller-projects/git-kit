@@ -116,6 +116,20 @@ aliases:
     category: workflow
     risk: medium
 
+  catchup:
+    command: '!git tidy && git pf'
+    description: Tidy stale branches, then fast-forward the current branch
+    category: workflow
+    risk: dangerous
+    depends_on: [tidy, pf]
+
+  prepush:
+    command: '!git log-local && git ahead && git status --short --branch'
+    description: Show outgoing commits, ahead-count, and working-tree status before pushing
+    category: workflow
+    risk: medium
+    depends_on: [log-local, ahead]
+
   pr-ready:
     command: "!git rebase-recent && git task-ready"
     description: Interactively rebase unpushed commits then run pre-PR status checks

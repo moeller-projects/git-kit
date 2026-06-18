@@ -69,6 +69,8 @@ Generated from `aliases/`.
 | `branch-diff` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff "$base...HEAD"; }; f` | Show the cumulative PR-style diff of the current branch against the base | medium |
 | `branch-files` | `!f() { base="${1:-$(git topic-base-branch)}"; git diff --name-status "$base...HEAD"; }; f` | List files changed on the current branch against the base | medium |
 | `tidy` | `!git fetch --prune && git branch-gone && git branch-clean` | Fetch with prune, then delete gone and merged local branches (combines branch-gone and branch-clean) | dangerous |
+| `sweep` | `!git fetch --prune && git branch-gone && git branch-clean && git hew-local && git hew-remote-dry-run` | Aggressive cleanup — fetch+prune, delete local gone/merged branches, and preview remote-merged branches | dangerous |
+| `diverged-list` | `!git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep -E "(ahead|behind) [1-9]" | cut -d" " -f1` | List local branches that are ahead or behind their upstream by at least 1 commit | medium |
 
 ## checkout
 
@@ -78,6 +80,7 @@ Generated from `aliases/`.
 | `swb` | `switch --create` | Create and switch to a new branch (modern alternative to checkout -b, requires git >= 2.23) | medium |
 | `swi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "swi needs fzf (use: git switch <branch>)" >&2; return 2; }; b="$(git for-each-ref --format="%(refname:short)" refs/heads/ refs/remotes/origin/ | grep -v "^origin/HEAD$" | fzf --preview "git log --oneline --color=always -20 {}" --prompt="switch> ")"; [ -n "$b" ] || return 0; git switch "$(echo "$b" | sed "s#^origin/##")"; }; f` | Interactively switch to a local or remote branch with commit preview (requires fzf) | medium |
 | `swr` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "swr needs fzf" >&2; return 2; }; b="$(git for-each-ref --sort=-committerdate --count=20 --format="%(refname:short)" refs/heads/ | fzf --preview "git log --oneline --color=always -20 {}" --prompt="recent> ")"; [ -n "$b" ] || return 0; git switch "$b"; }; f` | Interactively switch among the 20 most recently committed local branches (requires fzf) | medium |
+| `sw-` | `switch -` | Switch back to the previously checked-out branch (requires git >= 2.23) | safe |
 
 ## cherry-pick
 
@@ -226,6 +229,10 @@ Generated from `aliases/`.
 | `ours` | `!f() { git checkout --ours   "$@" && git add "$@"; }; f` | During a merge conflict, take our version of a file | medium |
 | `theirs` | `!f() { git checkout --theirs "$@" && git add "$@"; }; f` | During a merge conflict, take their version of a file | medium |
 | `mgi` | `!f() { command -v fzf >/dev/null 2>&1 || { echo "mgi needs fzf" >&2; return 2; }; b="$(git for-each-ref --format="%(refname:short)" refs/heads/ refs/remotes/origin/ | grep -v "^origin/HEAD$" | fzf --preview "git log --oneline --color=always -20 {}" --prompt="merge> ")"; [ -n "$b" ] || return 0; git merge "$b"; }; f` | Interactively pick a branch to merge into the current one (requires fzf) | medium |
+| `bump` | `!f() { base="${1:-$(git topic-base-branch)}"; git fetch origin "$base" && git merge "origin/$base" --no-ff -m "merge origin/$base into $(git current-branch)"; }; f` | Fetch the base branch and merge it into the current topic branch (no rebase) | medium |
+| `conflict-show` | `!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do echo "=== $f ==="; awk '/^<<<<<<< /,/^>>>>>>> /' "$f"; done; }; f` | Show all conflict hunks across all unmerged files | medium |
+| `conflict-mine` | `!f() { files=$(git diff --name-only --diff-filter=U); [ -n "$files" ] || { echo "no unmerged files" >&2; return 1; }; echo "$files" | xargs git checkout --ours -- && echo "$files" | xargs git add --; }; f` | Resolve all current conflicts by taking the local (ours) version of every unmerged file | medium |
+| `conflict-theirs` | `!f() { files=$(git diff --name-only --diff-filter=U); [ -n "$files" ] || { echo "no unmerged files" >&2; return 1; }; echo "$files" | xargs git checkout --theirs -- && echo "$files" | xargs git add --; }; f` | Resolve all current conflicts by taking the remote (theirs) version of every unmerged file | medium |
 
 ## pull
 
@@ -303,6 +310,8 @@ Generated from `aliases/`.
 | `spu` | `stash push --include-untracked` | Stash including untracked files | medium |
 | `spp` | `stash push --patch` | Interactively stash changes | medium |
 | `sli` | `!git stash list | fzf` | Interactively browse stash entries | medium |
+| `spn` | `!f() { name="${1:?usage: git spn <name> [paths...]}"; shift; git stash push --message "$name" -- "$@"; }; f` | Stash changes with a custom name; usage: git spn <name> [paths...] | medium |
+| `spr` | `!f() { name="$1"; ref="$(git stash list | grep -E ": ${name}$" | head -1 | sed -E "s/:.*//")"; [ -n "$ref" ] || { printf "no stash matching %s\n" "$name" >&2; return 1; }; git stash pop "$ref"; }; f` | Pop a stash entry by its -m name; usage: git spr <name> | medium |
 
 ## status
 
@@ -326,6 +335,7 @@ Generated from `aliases/`.
 | `last-tag` | `describe --tags --abbrev=0` | Show the last tag on the current branch | safe |
 | `last-tagged` | `!git describe --tags "$(git rev-list --tags --max-count=1)"` | Show the last annotated tag across all branches | medium |
 | `tags` | `tag -n1 --list` | List all tags with their messages | safe |
+| `tag-push` | `!f() { tag="${1:-$(date +%Y.%m.%d)}"; git tag -a "$tag" -m "release $tag" && git push origin "$tag"; }; f` | Create an annotated tag and push it to origin; usage: git tag-push [tagname] | medium |
 
 ## topic
 
@@ -379,6 +389,8 @@ Generated from `aliases/`.
 | `sparse-init` | `sparse-checkout init` | Enable sparse-checkout and initialize it for the repository (requires git >= 2.25) | medium |
 | `sparse-set` | `sparse-checkout set` | Set the sparse-checkout path patterns (requires git >= 2.25) | medium |
 | `sync` | `!f() { branch="${1:-$(git default-branch)}"; git switch "$branch" && git pull --ff-only; }; f` | Switch to a branch and fast-forward it; defaults to the configured default branch | medium |
+| `catchup` | `!git tidy && git pf` | Tidy stale branches, then fast-forward the current branch | dangerous |
+| `prepush` | `!git log-local && git ahead && git status --short --branch` | Show outgoing commits, ahead-count, and working-tree status before pushing | medium |
 | `pr-ready` | `!git rebase-recent && git task-ready` | Interactively rebase unpushed commits then run pre-PR status checks | medium |
 | `task-ready` | `!git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD` | Show status, whitespace issues, and outgoing commits before creating a PR | medium |
 | `continue` | `!f() { if [ -d "$(git rev-parse --git-path rebase-merge)" ] || [ -d "$(git rev-parse --git-path rebase-apply)" ]; then git rebase --continue; elif [ -f "$(git rev-parse --git-path MERGE_HEAD)" ]; then git merge --continue; elif [ -f "$(git rev-parse --git-path CHERRY_PICK_HEAD)" ]; then git cherry-pick --continue; elif [ -f "$(git rev-parse --git-path REVERT_HEAD)" ]; then git revert --continue; else echo "nothing in progress"; fi; }; f` | Continue whichever operation is in progress (rebase, merge, cherry-pick, revert) | medium |
@@ -397,6 +409,7 @@ Generated from `aliases/`.
 | `wt-done-force` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-done-force <branch>"; return 2; }; git worktree remove --force "$(git wt-path "$branch")" && git branch --delete --force "$branch"; }; f` | Force-remove a worktree and force-delete its local branch | dangerous |
 | `wt-list` | `worktree list` | List all worktrees for this repository | safe |
 | `wt-prune` | `worktree prune` | Prune stale worktree references | medium |
+| `wt-clean` | `!git worktree prune --verbose && git worktree list` | Prune stale worktree references and list the remaining worktrees | medium |
 | `wt-sync` | `!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-sync <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git -C "$target" pull --ff-only; }; f` | Fast-forward sync a named worktree from outside it by branch name | medium |
 | `wt-feature` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-feature <ado-id-short-title> [base]"; return 2; }; branch="feature/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow feature worktree for an Azure DevOps task | medium |
 | `wt-bugfix` | `!f() { name="$1"; base="${2:-origin/$(git default-branch)}"; test -n "$name" || { echo "usage: git wt-bugfix <ado-id-short-title> [base]"; return 2; }; branch="bugfix/$name"; git wt-new "$branch" "$base" && git wt-path "$branch"; }; f` | Create a Git-flow bugfix worktree for an Azure DevOps task | medium |

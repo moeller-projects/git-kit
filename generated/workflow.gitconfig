@@ -18,6 +18,8 @@
     sparse-init = sparse-checkout init
     sparse-set = sparse-checkout set
     sync = "!f() { branch=\"${1:-$(git default-branch)}\"; git switch \"$branch\" && git pull --ff-only; }; f"
+    catchup = !git tidy && git pf
+    prepush = !git log-local && git ahead && git status --short --branch
     pr-ready = !git rebase-recent && git task-ready
     task-ready = !git status --short --branch && git diff --check && git log --oneline @{upstream}..HEAD
     continue = "!f() { if [ -d \"$(git rev-parse --git-path rebase-merge)\" ] || [ -d \"$(git rev-parse --git-path rebase-apply)\" ]; then git rebase --continue; elif [ -f \"$(git rev-parse --git-path MERGE_HEAD)\" ]; then git merge --continue; elif [ -f \"$(git rev-parse --git-path CHERRY_PICK_HEAD)\" ]; then git cherry-pick --continue; elif [ -f \"$(git rev-parse --git-path REVERT_HEAD)\" ]; then git revert --continue; else echo \"nothing in progress\"; fi; }; f"

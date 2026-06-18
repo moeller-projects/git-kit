@@ -59,6 +59,12 @@ aliases:
     category: worktree
     risk: medium
 
+  wt-clean:
+    command: '!git worktree prune --verbose && git worktree list'
+    description: Prune stale worktree references and list the remaining worktrees
+    category: worktree
+    risk: medium
+
   wt-sync:
     command: '!f() { branch="$1"; test -n "$branch" || { echo "usage: git wt-sync <branch>"; return 2; }; target="$(git wt-path "$branch")" || return; git -C "$target" pull --ff-only; }; f'
     description: Fast-forward sync a named worktree from outside it by branch name

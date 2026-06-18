@@ -176,6 +176,8 @@ jobs:
           ok   branch-diff              # empty on main, exits 0
           ok   branch-files             # empty on main, exits 0
           skip tidy            "destructive: deletes branches"
+          skip sweep           "destructive: deletes local gone/merged branches and requires a remote (fetch --prune)"
+          ok   diverged-list           # no upstream tracking in test env — empty output, exits 0
 
           # ── core ────────────────────────────────────────────────────────────
           ok   root
@@ -210,11 +212,14 @@ jobs:
           skip spu      "modifies stash stack"
           skip spp      "interactive patch stash"
           skip sli      "requires interactive fzf"
+          skip spn      "modifies stash stack"
+          skip spr      "pops a named stash — destructive for test state"
 
           # ── tag ─────────────────────────────────────────────────────────────
           ok   tags
           ok   last-tag
           ok   last-tagged
+          skip tag-push        "push — requires a remote"
 
           # ── ls ──────────────────────────────────────────────────────────────
           ok   untracked            # ls-files --others (no untracked files — exits 0)
@@ -270,6 +275,8 @@ jobs:
           skip swb   "requires a new branch name"
           skip swi   "requires fzf installed"
           skip swr   "requires interactive fzf"
+          ok   sw-            || true      # reflog-dependent; setup creates multiple HEAD changes
+          git checkout main   || true      # restore branch after sw-
 
           # ── merge ───────────────────────────────────────────────────────────
           skip ma    "only valid during an in-progress merge"
@@ -278,6 +285,10 @@ jobs:
           skip ours    "only valid during a merge conflict"
           skip theirs  "only valid during a merge conflict"
           skip mgi   "requires interactive fzf"
+          skip bump             "requires a remote (fetch origin \$base)"
+          skip conflict-mine    "only valid during a merge conflict"
+          skip conflict-theirs  "only valid during a merge conflict"
+          ok   conflict-show            # no unmerged files — empty output, exits 0
 
           # ── rebase ──────────────────────────────────────────────────────────
           skip rb    "requires a target branch"
@@ -317,6 +328,7 @@ jobs:
           ok   wt-path          main    # prints canonical path, exits 0
           ok   wt-list
           ok   wt-prune
+          ok   wt-clean                 # no worktrees — prune is a no-op, list exits 0
           skip wt-new          "creates a worktree — requires filesystem side-effects"
           skip wt-open         "creates a worktree (filesystem side effect); may require interactive fzf when no branch is given"
           skip wt-open-cd      "creates a worktree — filesystem side effect"
@@ -354,6 +366,8 @@ jobs:
           skip clone-lean      "requires a URL argument"
           skip mainly          "interactive — reads from /dev/tty"
           skip sync            "requires upstream tracking branch"
+          skip prepush         "requires upstream tracking branch (log-local / ahead fail without upstream)"
+          skip catchup         "destructive + requires a remote (tidy + pf)"
           skip sparse-init     "changes sparse-checkout mode"
           skip sparse-set      "requires sparse-checkout path arguments"
           skip task-ready      "requires upstream tracking branch"
@@ -667,3 +681,39 @@ jobs:
           git hew-remote-dry-run main | grep -q "merged-remote"
           git hew-remote main
           assert_remote_branch_missing "merged-remote"
+
+          # workflow aliases: prepush
+          git checkout -b prepush-case main
+          git push -u origin prepush-case
+          echo "prepush local commit" > prepush.txt
+          git add prepush.txt
+          git commit -m "feat: prepush local commit"
+          git prepush | grep -q "prepush local commit"
+
+          # workflow aliases: tag-push (uses current branch prepush-case)
+          git tag-push v0.0.1-prepush-test
+          assert_remote_branch_exists "v0.0.1-prepush-test"
+          # tag-push creates an annotated tag, so assert via refs/tags/
+          git ls-remote --exit-code origin "refs/tags/v0.0.1-prepush-test" >/dev/null
+
+          # workflow aliases: bump (pulls the latest base into the current topic branch)
+          cd "$PEER"
+          git checkout main
+          echo "peer main change for bump" > peer-bump.txt
+          git add peer-bump.txt
+          git commit -m "feat: peer main change for bump"
+          git push origin main
+
+          cd "$REPO"
+          git checkout prepush-case
+          git bump main
+          # After bump, all of origin/main should be an ancestor of HEAD.
+          [ "$(git rev-list --count HEAD..origin/main)" -eq 0 ] || {
+            echo "expected origin/main to be merged into HEAD by bump"
+            exit 1
+          }
+
+          # Cleanup the new branches and tag
+          git push origin --delete prepush-case
+          git branch -D prepush-case
+          git push origin --delete v0.0.1-prepush-test

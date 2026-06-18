@@ -16,3 +16,9 @@ aliases:
     description: List all tags with their messages
     category: tag
     risk: safe
+
+  tag-push:
+    command: '!f() { tag="${1:-$(date +%Y.%m.%d)}"; git tag -a "$tag" -m "release $tag" && git push origin "$tag"; }; f'
+    description: "Create an annotated tag and push it to origin; usage: git tag-push [tagname]"
+    category: tag
+    risk: medium

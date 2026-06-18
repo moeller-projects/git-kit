@@ -17,3 +17,5 @@
     branch-diff = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git diff \"$base...HEAD\"; }; f"
     branch-files = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git diff --name-status \"$base...HEAD\"; }; f"
     tidy = !git fetch --prune && git branch-gone && git branch-clean
+    sweep = !git fetch --prune && git branch-gone && git branch-clean && git hew-local && git hew-remote-dry-run
+    diverged-list = "!git for-each-ref --format=\"%(refname:short) %(upstream:track)\" refs/heads/ | grep -E \"(ahead|behind) [1-9]\" | cut -d\" \" -f1"

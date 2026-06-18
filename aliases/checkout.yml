@@ -25,3 +25,10 @@ aliases:
     category: checkout
     risk: medium
     since_version: "2.23"
+
+  sw-:
+    command: switch -
+    description: Switch back to the previously checked-out branch (requires git >= 2.23)
+    category: checkout
+    risk: safe
+    since_version: "2.23"

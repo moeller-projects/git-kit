@@ -8,3 +8,5 @@
     spu = stash push --include-untracked
     spp = stash push --patch
     sli = !git stash list | fzf
+    spn = "!f() { name=\"${1:?usage: git spn <name> [paths...]}\"; shift; git stash push --message \"$name\" -- \"$@\"; }; f"
+    spr = "!f() { name=\"$1\"; ref=\"$(git stash list | grep -E \": ${name}$\" | head -1 | sed -E \"s/:.*//\")\"; [ -n \"$ref\" ] || { printf \"no stash matching %s\\n\" \"$name\" >&2; return 1; }; git stash pop \"$ref\"; }; f"

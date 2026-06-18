@@ -107,3 +107,16 @@ aliases:
     category: branch
     risk: dangerous
     depends_on: [branch-gone, branch-clean]
+
+  sweep:
+    command: '!git fetch --prune && git branch-gone && git branch-clean && git hew-local && git hew-remote-dry-run'
+    description: Aggressive cleanup — fetch+prune, delete local gone/merged branches, and preview remote-merged branches
+    category: branch
+    risk: dangerous
+    depends_on: [branch-gone, branch-clean, hew-local, hew-remote-dry-run]
+
+  diverged-list:
+    command: '!git for-each-ref --format="%(refname:short) %(upstream:track)" refs/heads/ | grep -E "(ahead|behind) [1-9]" | cut -d" " -f1'
+    description: List local branches that are ahead or behind their upstream by at least 1 commit
+    category: branch
+    risk: medium

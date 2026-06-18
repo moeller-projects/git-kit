@@ -52,3 +52,15 @@ aliases:
     description: Interactively browse stash entries
     category: stash
     risk: medium
+
+  spn:
+    command: '!f() { name="${1:?usage: git spn <name> [paths...]}"; shift; git stash push --message "$name" -- "$@"; }; f'
+    description: "Stash changes with a custom name; usage: git spn <name> [paths...]"
+    category: stash
+    risk: medium
+
+  spr:
+    command: '!f() { name="$1"; ref="$(git stash list | grep -E ": ${name}$" | head -1 | sed -E "s/:.*//")"; [ -n "$ref" ] || { printf "no stash matching %s\n" "$name" >&2; return 1; }; git stash pop "$ref"; }; f'
+    description: "Pop a stash entry by its -m name; usage: git spr <name>"
+    category: stash
+    risk: medium

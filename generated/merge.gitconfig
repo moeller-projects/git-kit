@@ -5,3 +5,7 @@
     ours = "!f() { git checkout --ours   \"$@\" && git add \"$@\"; }; f"
     theirs = "!f() { git checkout --theirs \"$@\" && git add \"$@\"; }; f"
     mgi = "!f() { command -v fzf >/dev/null 2>&1 || { echo \"mgi needs fzf\" >&2; return 2; }; b=\"$(git for-each-ref --format=\"%(refname:short)\" refs/heads/ refs/remotes/origin/ | grep -v \"^origin/HEAD$\" | fzf --preview \"git log --oneline --color=always -20 {}\" --prompt=\"merge> \")\"; [ -n \"$b\" ] || return 0; git merge \"$b\"; }; f"
+    bump = "!f() { base=\"${1:-$(git topic-base-branch)}\"; git fetch origin \"$base\" && git merge \"origin/$base\" --no-ff -m \"merge origin/$base into $(git current-branch)\"; }; f"
+    conflict-show = "!f() { git diff --name-only --diff-filter=U | while IFS= read -r f; do echo \"=== $f ===\"; awk '/^<<<<<<< /,/^>>>>>>> /' \"$f\"; done; }; f"
+    conflict-mine = "!f() { files=$(git diff --name-only --diff-filter=U); [ -n \"$files\" ] || { echo \"no unmerged files\" >&2; return 1; }; echo \"$files\" | xargs git checkout --ours -- && echo \"$files\" | xargs git add --; }; f"
+    conflict-theirs = "!f() { files=$(git diff --name-only --diff-filter=U); [ -n \"$files\" ] || { echo \"no unmerged files\" >&2; return 1; }; echo \"$files\" | xargs git checkout --theirs -- && echo \"$files\" | xargs git add --; }; f"
