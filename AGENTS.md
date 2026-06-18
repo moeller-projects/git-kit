@@ -56,6 +56,12 @@ There is no dedicated lint or type-check script. `bun test` and `bun run build` 
 - Keep functions small and single-purpose. Shared logic belongs in `src/core/`; CLI wiring belongs in `src/commands/`.
 - No linter is configured — follow the style of the surrounding code.
 
+## Line Endings
+
+All tracked text files use LF, pinned by `.gitattributes` (`* text=auto eol=lf`) and `.editorconfig` (`end_of_line = lf`).
+
+Contributors on Windows should set `git config --global core.autocrlf input` to prevent the working tree from being rewritten to CRLF on checkout. If `git diff` shows whitespace-only churn, fix the local Git config first, then run `git restore .`; do not commit CRLF-only diffs.
+
 ## Alias Authoring Conventions
 
 Aliases are defined in `aliases/<category>.yml`. Each entry must include all four required fields:
