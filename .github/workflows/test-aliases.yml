@@ -688,11 +688,11 @@ jobs:
           echo "prepush local commit" > prepush.txt
           git add prepush.txt
           git commit -m "feat: prepush local commit"
-          git prepush | grep -q "prepush local commit"
+          prepush_output="$(git prepush)"
+          grep -q "prepush local commit" <<< "$prepush_output"
 
           # workflow aliases: tag-push (uses current branch prepush-case)
           git tag-push v0.0.1-prepush-test
-          assert_remote_branch_exists "v0.0.1-prepush-test"
           # tag-push creates an annotated tag, so assert via refs/tags/
           git ls-remote --exit-code origin "refs/tags/v0.0.1-prepush-test" >/dev/null
 
@@ -716,4 +716,4 @@ jobs:
           # Cleanup the new branches and tag
           git push origin --delete prepush-case
           git branch -D prepush-case
-          git push origin --delete v0.0.1-prepush-test
+          git push origin --delete refs/tags/v0.0.1-prepush-test
