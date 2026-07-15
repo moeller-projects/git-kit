@@ -699,6 +699,7 @@ jobs:
           # workflow aliases: bump (pulls the latest base into the current topic branch)
           cd "$PEER"
           git checkout main
+          git pull --ff-only origin main
           echo "peer main change for bump" > peer-bump.txt
           git add peer-bump.txt
           git commit -m "feat: peer main change for bump"
