@@ -716,5 +716,6 @@ jobs:
 
           # Cleanup the new branches and tag
           git push origin --delete prepush-case
+          git checkout main
           git branch -D prepush-case
           git push origin --delete refs/tags/v0.0.1-prepush-test
